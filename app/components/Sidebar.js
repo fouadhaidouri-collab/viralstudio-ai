@@ -23,7 +23,7 @@ function SidebarContent() {
   const handleNav = () => setMobileOpen(false);
 
   return (
-    <aside className="fixed ltr:left-0 rtl:right-0 top-0 h-full w-64 bg-surface ltr:border-r rtl:border-l border-surface-border/80 z-50 flex flex-col p-4" style={{ boxShadow: '4px 0 32px rgba(0,0,0,0.4)' }}>
+    <aside className="fixed ltr:left-0 rtl:right-0 top-0 h-full w-64 bg-surface ltr:border-r rtl:border-l border-surface-border/80 z-50 flex flex-col p-4 overflow-hidden" style={{ boxShadow: '4px 0 32px rgba(0,0,0,0.4)' }}>
       <Link href="/" onClick={handleNav} className="mb-5 px-2 flex items-center gap-3 group relative">
         <div className="relative">
           <div className="absolute inset-0 rounded-xl blur-xl bg-primary/40 animate-pulse-glow" />
