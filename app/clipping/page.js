@@ -4,6 +4,8 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
+import LanguageToggle from "../components/LanguageToggle";
+import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 
 const REEL_COUNTS = [10, 20, 30, 40, 50];
@@ -30,6 +32,7 @@ function Toggle({ checked, onChange }) {
 
 export default function ClippingPage() {
   const router = useRouter();
+  const t = useTranslate();
   const { setMobileOpen } = useSidebar();
   const [file, setFile] = useState(null);
   const [url, setUrl] = useState("");
@@ -166,7 +169,7 @@ export default function ClippingPage() {
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
       <Sidebar />
-      <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-40 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 h-14 md:h-16" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+      <header className="fixed top-0 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] z-40 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 h-14 md:h-16" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
         <div className="md:hidden">
           <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
             <span className="material-symbols-outlined text-white text-xl">menu</span>
@@ -174,7 +177,7 @@ export default function ClippingPage() {
         </div>
         <div className="hidden md:flex items-center gap-4 bg-surface-container-low px-4 py-1.5 rounded-full border border-surface-border/60 w-96">
           <span className="material-symbols-outlined text-on-surface-variant text-sm">search</span>
-          <input className="bg-transparent border-none focus:ring-0 text-sm w-full text-on-surface placeholder:text-on-surface-variant/50" placeholder="Search project assets..." type="text" />
+          <input className="bg-transparent border-none focus:ring-0 text-sm w-full text-on-surface placeholder:text-on-surface-variant/50" placeholder={t("Search project assets...")} type="text" />
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
@@ -184,17 +187,18 @@ export default function ClippingPage() {
               <span className="material-symbols-outlined text-[10px] text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
             </button>
           </div>
+          <LanguageToggle />
           <ProfileDropdown />
         </div>
       </header>
 
-      <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+      <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="min-h-full p-4 md:p-5 lg:p-6 flex flex-col xl:grid xl:grid-cols-[420px_1fr] gap-5">
           {/* LEFT PANEL */}
           <div className="flex flex-col gap-4">
             <div>
-              <h2 className="text-2xl font-semibold" style={{ fontFamily: "Geist, sans-serif" }}>AI Clipping Engine</h2>
-              <p className="text-sm text-on-surface-variant mt-0.5">Upload a long video and get 10–50 viral reels automatically</p>
+              <h2 className="text-2xl font-semibold" style={{ fontFamily: "Geist, sans-serif" }}>{t("AI Clipping Engine")}</h2>
+              <p className="text-sm text-on-surface-variant mt-0.5">{t("Upload a long video and get 10–50 viral reels automatically")}</p>
             </div>
 
             {/* Upload Zone */}
@@ -224,9 +228,9 @@ export default function ClippingPage() {
                   <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                     <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>cloud_upload</span>
                   </div>
-                  <h3 className="text-base font-semibold" style={{ fontFamily: "Geist, sans-serif" }}>Upload Video</h3>
+                  <h3 className="text-base font-semibold" style={{ fontFamily: "Geist, sans-serif" }}>{t("Upload Video")}</h3>
                   <p className="text-xs text-on-surface-variant mt-1 mb-3">MP4, MOV, AVI — Max 500MB</p>
-                  <button onClick={() => fileInputRef.current.click()} className="px-5 py-2 bg-surface-container-low border border-surface-border/60 rounded-xl text-xs font-medium hover:bg-surface-container hover:border-primary/30 transition-all duration-200 active:scale-95">Browse Files</button>
+                  <button onClick={() => fileInputRef.current.click()} className="px-5 py-2 bg-surface-container-low border border-surface-border/60 rounded-xl text-xs font-medium hover:bg-surface-container hover:border-primary/30 transition-all duration-200 active:scale-95">{t("Browse Files")}</button>
                   <input ref={fileInputRef} type="file" accept="video/mp4,video/quicktime,video/x-msvideo" onChange={handleFileDrop} className="hidden" />
                   <div className="flex items-center gap-3 w-full mt-4">
                     <div className="flex-1 h-px bg-surface-border" />
@@ -234,8 +238,8 @@ export default function ClippingPage() {
                     <div className="flex-1 h-px bg-surface-border" />
                   </div>
                   <div className="flex gap-2 mt-3 w-full">
-                    <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="YouTube URL..." className="flex-1 bg-surface-container-low border border-surface-border/60 rounded-xl px-3 py-2 text-xs focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all duration-200 placeholder:text-on-surface-variant/40" />
-                    <button onClick={handleUrlSubmit} className="px-4 py-2 primary-gradient text-white rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 shadow-lg shadow-primary/20">Import</button>
+                    <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t("YouTube URL...")} className="flex-1 bg-surface-container-low border border-surface-border/60 rounded-xl px-3 py-2 text-xs focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all duration-200 placeholder:text-on-surface-variant/40" />
+                    <button onClick={handleUrlSubmit} className="px-4 py-2 primary-gradient text-white rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 shadow-lg shadow-primary/20">{t("Import")}</button>
                   </div>
                 </>
               )}
@@ -245,7 +249,7 @@ export default function ClippingPage() {
             <div className="glass-card rounded-2xl p-4 border border-white/5 space-y-4 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
               {/* Reels Count */}
               <div>
-                <label className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">Number of Reels</label>
+                <label className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">{t("Number of Reels")}</label>
                 <div className="flex gap-1.5 mt-1.5">
                   {REEL_COUNTS.map((n) => (
                     <button key={n} onClick={() => setReelsCount(n)}
@@ -256,7 +260,7 @@ export default function ClippingPage() {
 
               {/* Clip Length */}
               <div>
-                <label className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">Clip Length</label>
+                <label className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">{t("Clip Length")}</label>
                 <div className="flex gap-1 mt-1.5">
                   {CLIP_LENGTHS.map((l) => (
                     <button key={l} onClick={() => setClipLength(l)}
@@ -267,7 +271,7 @@ export default function ClippingPage() {
 
               {/* Aspect Ratio */}
               <div>
-                <label className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">Aspect Ratio</label>
+                <label className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">{t("Aspect Ratio")}</label>
                 <div className="flex gap-1 mt-1.5">
                   {ASPECT_RATIOS.map((a) => (
                     <button key={a.label} onClick={() => setAspectRatio(a)}
@@ -286,9 +290,9 @@ export default function ClippingPage() {
               className="w-full primary-gradient text-white font-semibold py-3 rounded-2xl shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.97] hover:translate-y-[-1px] disabled:opacity-60 disabled:cursor-not-allowed text-sm"
             >
               {generating ? (
-                <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Processing...</>
+                <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> {t("Processing...")}</>
               ) : (
-                <><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>content_cut</span> {`Generate ${reelsCount} Reels`}</>
+                <><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>content_cut</span> {t("Generate {reelsCount} Reels").replace("{reelsCount}", reelsCount)}</>
               )}
             </button>
           </div>
@@ -300,8 +304,8 @@ export default function ClippingPage() {
                 <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <span className="material-symbols-outlined text-primary text-5xl">content_cut</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-1" style={{ fontFamily: "Geist, sans-serif" }}>AI Clipping Engine</h3>
-                <p className="text-sm text-on-surface-variant max-w-md mx-auto">Upload a video and configure settings to auto-generate viral reels with AI-powered hook detection, caption styling, and scoring.</p>
+                <h3 className="text-xl font-semibold mb-1" style={{ fontFamily: "Geist, sans-serif" }}>{t("AI Clipping Engine")}</h3>
+                <p className="text-sm text-on-surface-variant max-w-md mx-auto">{t("Upload a video and configure settings to auto-generate viral reels with AI-powered hook detection, caption styling, and scoring.")}</p>
               </div>
             ) : generating || progress > 0 || progressStage === "failed" ? (
               /* Processing Status */
@@ -311,10 +315,10 @@ export default function ClippingPage() {
                     <div className="w-12 h-12 rounded-full bg-error/20 flex items-center justify-center mx-auto mb-3">
                       <span className="material-symbols-outlined text-error text-2xl">error</span>
                     </div>
-                    <h4 className="text-sm font-bold text-error">Processing Failed</h4>
-                    <p className="text-[10px] text-on-surface-variant mt-1">Check your video format/connection and try again.</p>
+                    <h4 className="text-sm font-bold text-error">{t("Processing Failed")}</h4>
+                    <p className="text-[10px] text-on-surface-variant mt-1">{t("Check your video format/connection and try again.")}</p>
                     <button onClick={() => { setProgressStage(""); setProgress(0); }}
-                      className="mt-3 px-4 py-1.5 border border-surface-border rounded-lg text-xs font-medium hover:bg-surface-container transition-colors">Dismiss</button>
+                      className="mt-3 px-4 py-1.5 border border-surface-border rounded-lg text-xs font-medium hover:bg-surface-container transition-colors">{t("Dismiss")}</button>
                   </div>
                 ) : (
                   <>
@@ -355,11 +359,11 @@ export default function ClippingPage() {
                 {/* Analytics Summary */}
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {[
-                    { label: "Total Reels", value: reels.length, icon: "content_cut", color: "text-primary" },
-                    { label: "Avg. Score", value: `${avgScore}%`, icon: "analytics", color: avgScore > 75 ? "text-accent-green" : avgScore > 60 ? "text-accent-orange" : "text-on-surface-variant" },
-                    { label: "Best Reel", value: topReel ? `#${topReel.number}` : "-", icon: "emoji_events", color: "text-accent-orange" },
-                    { label: "Duration", value: `${reels.length * parseInt(clipLength)}s`, icon: "timer", color: "text-on-surface-variant" },
-                    { label: "Processing", value: "~2 min", icon: "bolt", color: "text-primary" },
+                    { label: t("Total Reels"), value: reels.length, icon: "content_cut", color: "text-primary" },
+                    { label: t("Avg. Score"), value: `${avgScore}%`, icon: "analytics", color: avgScore > 75 ? "text-accent-green" : avgScore > 60 ? "text-accent-orange" : "text-on-surface-variant" },
+                    { label: t("Best Reel"), value: topReel ? `#${topReel.number}` : "-", icon: "emoji_events", color: "text-accent-orange" },
+                    { label: t("Duration"), value: `${reels.length * parseInt(clipLength)}s`, icon: "timer", color: "text-on-surface-variant" },
+                    { label: t("Processing"), value: "~2 min", icon: "bolt", color: "text-primary" },
                   ].map((stat) => (
                     <div key={stat.label} className="glass-card rounded-2xl p-3 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                       <span className={`material-symbols-outlined text-lg ${stat.color}`} style={{ fontVariationSettings: "'FILL' 1" }}>{stat.icon}</span>
@@ -372,8 +376,8 @@ export default function ClippingPage() {
                 {/* Reels Grid */}
                 <div className="flex-1 min-h-0">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold" style={{ fontFamily: "Geist, sans-serif" }}>Generated Reels</h3>
-                    <span className="text-[10px] text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">{`${reels.length} reels`}</span>
+                    <h3 className="text-sm font-semibold" style={{ fontFamily: "Geist, sans-serif" }}>{t("Generated Reels")}</h3>
+                    <span className="text-[10px] text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">{t("{count} reels").replace("{count}", reels.length)}</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pr-1">
                     {reels.map((reel) => (
@@ -382,13 +386,13 @@ export default function ClippingPage() {
                           <img src={reel.thumbnail} alt={reel.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                           <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
-                            {reel.overallScore > 85 && <span className="bg-accent-orange text-white px-1.5 py-0.5 rounded text-[8px] font-bold">HOT</span>}
-                            {reel.viralScore > 80 && <span className="bg-primary text-on-primary px-1.5 py-0.5 rounded text-[8px] font-bold">VIRAL</span>}
+                            {reel.overallScore > 85 && <span className="bg-accent-orange text-white px-1.5 py-0.5 rounded text-[8px] font-bold">{t("HOT")}</span>}
+                            {reel.viralScore > 80 && <span className="bg-primary text-on-primary px-1.5 py-0.5 rounded text-[8px] font-bold">{t("VIRAL")}</span>}
                           </div>
                           <div className="absolute bottom-2 left-2 right-2">
                             <div className="flex gap-1.5">
-                              <button className="flex-1 py-1.5 bg-white/10 backdrop-blur-md rounded-md text-[9px] font-semibold text-white hover:bg-white/20 transition-colors flex items-center justify-center gap-1"><span className="material-symbols-outlined text-[10px]">play_arrow</span> Preview</button>
-                              <button className="flex-1 py-1.5 bg-white/10 backdrop-blur-md rounded-md text-[9px] font-semibold text-white hover:bg-white/20 transition-colors flex items-center justify-center gap-1"><span className="material-symbols-outlined text-[10px]">download</span> Download</button>
+                              <button className="flex-1 py-1.5 bg-white/10 backdrop-blur-md rounded-md text-[9px] font-semibold text-white hover:bg-white/20 transition-colors flex items-center justify-center gap-1"><span className="material-symbols-outlined text-[10px]">play_arrow</span> {t("Preview")}</button>
+                              <button className="flex-1 py-1.5 bg-white/10 backdrop-blur-md rounded-md text-[9px] font-semibold text-white hover:bg-white/20 transition-colors flex items-center justify-center gap-1"><span className="material-symbols-outlined text-[10px]">download</span> {t("Download")}</button>
                               <button className="py-1.5 px-2 bg-white/10 backdrop-blur-md rounded-md text-white hover:bg-white/20 transition-colors"><span className="material-symbols-outlined text-[10px]">edit</span></button>
                               <button className="py-1.5 px-2 bg-white/10 backdrop-blur-md rounded-md text-white hover:bg-white/20 transition-colors"><span className="material-symbols-outlined text-[10px]">refresh</span></button>
                             </div>
@@ -422,7 +426,7 @@ export default function ClippingPage() {
                 {/* Export */}
                 <button className="w-full py-3 glass-card rounded-2xl font-bold text-sm text-primary hover:bg-primary/10 transition-all duration-200 flex items-center justify-center gap-2 border border-primary/20 hover:border-primary/40 active:scale-[0.97]" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.05), transparent)' }}>
                   <span className="material-symbols-outlined text-base">download</span>
-                  {`Export All Reels (${reels.length} clips)`}
+                  {t("Export All Reels ({count} clips)").replace("{count}", reels.length)}
                 </button>
               </>
             )}

@@ -6,7 +6,7 @@ import Link from "next/link";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import { SidebarProvider } from "./components/SidebarContext";
-
+import { useTranslate } from "./components/LanguageProvider";
 
 const templates = Array.from({ length: 11 }, (_, i) => ({
   video: `/templates/template${i + 1}.mp4`,
@@ -29,52 +29,53 @@ const features = [
   {
     href: "/ai-video",
     title: "AI Video",
-    desc: "Generate high-quality cinematic clips from simple text prompts or storyboard data.",
+    descKey: "AI Video desc",
     icon: "movie",
     color: "text-primary",
     bg: "bg-primary-container/20",
-    btn: "Launch Video Lab",
+    btnKey: "Launch Video Lab",
   },
   {
     href: "/ai-image",
     title: "AI Images",
-    desc: "Ultra-realistic 8K image generation for thumbnails, covers, and conceptual art.",
+    descKey: "AI Images desc",
     icon: "image",
     color: "text-secondary",
     bg: "bg-secondary/20",
-    btn: "Open Image Lab",
+    btnKey: "Open Image Lab",
   },
   {
     href: "/ugc-engine",
     title: "UGC Engine",
-    desc: "Create realistic AI avatars and voiceovers for authentic-feeling user content.",
+    descKey: "UGC Engine desc",
     icon: "record_voice_over",
     color: "text-tertiary",
     bg: "bg-tertiary/20",
-    btn: "Design Avatar",
+    btnKey: "Design Avatar",
   },
   {
     href: "/hook-gen",
     title: "Hook Gen",
-    desc: "Optimize your video intros with AI hooks designed for maximum retention.",
+    descKey: "Hook Gen desc",
     icon: "auto_awesome",
     color: "text-primary",
     bg: "bg-primary/20",
-    btn: "Optimize Script",
+    btnKey: "Optimize Script",
   },
   {
     href: "/clipping",
     title: "Clipping",
-    desc: "Automatically extract high-engagement vertical clips from long-form content.",
+    descKey: "Clipping desc",
     icon: "content_cut",
     color: "text-accent-orange",
     bg: "bg-accent-orange/20",
-    btn: "Process Video",
+    btnKey: "Process Video",
   },
 ];
 
 export default function Dashboard() {
   const router = useRouter();
+  const t = useTranslate();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function Dashboard() {
       <SidebarProvider>
         <Sidebar />
         <TopBar />
-        <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+        <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6">
           <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[300px] md:min-h-[540px] flex items-end" style={{ background: 'transparent' }}>
             {templates.map((t, i) => (
@@ -108,10 +109,10 @@ export default function Dashboard() {
             ))}
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-background/60 z-10"></div>
             <div className="relative z-20 p-6 md:p-10 pb-16 md:pb-28 w-full max-w-4xl">
-              <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight tracking-tight text-white" style={{ fontFamily: 'Geist, sans-serif' }}>Create Viral Content With AI</h2>
+              <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight tracking-tight text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Create Viral Content With AI")}</h2>
               <Link href="/ai-video" className="inline-flex items-center gap-3 primary-gradient text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl font-medium hover:scale-105 active:scale-[1.02] transition-all duration-200 shadow-xl shadow-primary/30 animate-pulse-glow tap-target">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
-                Generate Content
+                {t("Generate Content")}
               </Link>
             </div>
           </section>
@@ -143,16 +144,16 @@ export default function Dashboard() {
                   <span className="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-all duration-300 text-primary -translate-x-2 group-hover:translate-x-0">north_east</span>
                 </div>
                 <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{f.title}</h3>
-                <p className="text-sm text-on-surface-variant flex-1">{f.desc}</p>
+                <p className="text-sm text-on-surface-variant flex-1">{t(f.descKey)}</p>
                 <div className={`mt-auto pt-3 ${f.color} text-sm font-medium flex items-center gap-2 group-hover:gap-3 transition-all duration-200`} style={{ fontFamily: 'Geist, sans-serif' }}>
-                  {f.btn} <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  {t(f.btnKey)} <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </div>
               </Link>
             ))}
             <div className="glass-card p-5 rounded-2xl border border-surface-border/60 relative overflow-hidden flex flex-col justify-center items-center text-center min-h-[200px]" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.05), rgba(6,182,212,0.03))' }}>
               <div className="shimmer-border absolute inset-0 opacity-20"></div>
-              <p className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Geist, sans-serif' }}>New Feature Incoming</p>
-              <p className="text-sm text-on-surface-variant mb-4">Live Streaming AI is coming soon to your dashboard.</p>
+              <p className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{t("New Feature Incoming")}</p>
+              <p className="text-sm text-on-surface-variant mb-4">{t("Live Streaming AI is coming soon to your dashboard.")}</p>
               <button className="border border-primary/30 px-6 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/15 active:scale-95" style={{ fontFamily: 'Geist, sans-serif' }}>Join Waitlist</button>
             </div>
           </div>
@@ -160,7 +161,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
                 <span className="material-symbols-outlined text-primary text-base" style={{ fontVariationSettings: "'FILL' 1" }}>history</span>
-                Featured Templates
+                {t("Featured Templates")}
               </h3>
               <Link href="/ai-video" className="text-xs text-primary hover:text-primary/80 font-medium hover:underline underline-offset-4 transition-all">View all</Link>
             </div>

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import { SidebarProvider } from "../components/SidebarContext";
-
+import { useTranslate } from "../components/LanguageProvider";
 
 const stats = [
   { label: "Videos Created", value: "128", icon: "movie", color: "text-primary" },
@@ -68,6 +68,7 @@ const accountSettings = [
 ];
 
 export default function ProfilePage() {
+  const t = useTranslate();
   const router = useRouter();
 
   return (
@@ -75,7 +76,7 @@ export default function ProfilePage() {
       <SidebarProvider>
       <Sidebar />
       <TopBar />
-      <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+      <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 space-y-5">
 
           {/* Profile Header */}
@@ -117,7 +118,7 @@ export default function ProfilePage() {
               <div key={stat.label} className="glass-card rounded-2xl p-4 border border-white/5 flex flex-col items-center text-center card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <span className={`material-symbols-outlined text-2xl ${stat.color} mb-2`} style={{ fontVariationSettings: "'FILL' 1" }}>{stat.icon}</span>
                 <p className="text-xl font-bold text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{stat.value}</p>
-                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">{stat.label}</p>
+                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">{t(stat.label)}</p>
               </div>
             ))}
           </div>

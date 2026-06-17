@@ -1,4 +1,5 @@
 import "./globals.css";
+import LanguageProvider from "./components/LanguageProvider";
 
 export const metadata = {
   title: "ViralStudio AI | Premium Suite",
@@ -19,7 +20,7 @@ export default function RootLayout({ children }) {
         <style dangerouslySetInnerHTML={{__html:'*,*::before,*::after{border-width:0;border-style:solid;border-color:currentColor}hr{border-top-width:1px}*{scrollbar-width:thin;scrollbar-color:#222 transparent}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#222;border-radius:10px}'}} />
       </head>
       <body className="h-full overflow-hidden">
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );

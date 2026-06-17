@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme inline {
@@ -82,6 +83,52 @@ body::before {
               radial-gradient(ellipse at 70% 80%, rgba(6, 182, 212, 0.02) 0%, transparent 50%);
   pointer-events: none;
   z-index: -1;
+}
+
+/* === Arabic / RTL Font Enhancement === */
+[dir="rtl"] {
+  font-family: 'Inter', 'Tajawal', 'Noto Sans Arabic', sans-serif;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em;
+}
+
+[dir="rtl"] [style*="font-family"]:not(.material-symbols-outlined) {
+  font-weight: 800 !important;
+}
+
+[dir="rtl"] .font-medium {
+  font-weight: 800 !important;
+}
+
+[dir="rtl"] .font-semibold {
+  font-weight: 900 !important;
+}
+
+[dir="rtl"] .font-bold {
+  font-weight: 900 !important;
+}
+
+[dir="rtl"] p,
+[dir="rtl"] li,
+[dir="rtl"] label,
+[dir="rtl"] input,
+[dir="rtl"] button {
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+[dir="rtl"] .text-xs,
+[dir="rtl"] .text-sm,
+[dir="rtl"] .text-base {
+  font-weight: 800;
+}
+
+[dir="rtl"] .text-lg,
+[dir="rtl"] .text-xl,
+[dir="rtl"] .text-2xl,
+[dir="rtl"] .text-3xl,
+[dir="rtl"] .text-4xl {
+  font-weight: 900;
 }
 
 /* === Premium Glassmorphism === */

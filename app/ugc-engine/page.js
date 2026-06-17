@@ -4,10 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
+import LanguageToggle from "../components/LanguageToggle";
+import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 
 export default function UGCFEnginePage() {
   const router = useRouter();
+  const t = useTranslate();
   const { setMobileOpen } = useSidebar();
   const [generating, setGenerating] = useState(false);
 
@@ -22,7 +25,7 @@ export default function UGCFEnginePage() {
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
       <Sidebar />
-      <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 z-40" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+      <header className="fixed top-0 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 z-40" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
         <div className="md:hidden">
           <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
             <span className="material-symbols-outlined text-white text-xl">menu</span>
@@ -30,6 +33,7 @@ export default function UGCFEnginePage() {
         </div>
         <div className="flex items-center gap-4 flex-1 hidden md:flex"></div>
         <div className="flex items-center gap-3 md:gap-6">
+          <LanguageToggle />
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
               <span className="material-symbols-outlined text-sm text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
@@ -43,21 +47,21 @@ export default function UGCFEnginePage() {
           <ProfileDropdown />
         </div>
       </header>
-      <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 p-4 md:p-5 lg:p-6 overflow-y-auto smooth-scroll">
+      <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 p-4 md:p-5 lg:p-6 overflow-y-auto smooth-scroll">
         <div className="w-full grid grid-cols-12 gap-4 md:gap-5">
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
             <header>
-              <h2 className="text-2xl font-semibold text-on-surface mb-1" style={{ fontFamily: 'Geist, sans-serif' }}>UGC Generation Engine</h2>
-              <p className="text-sm text-on-surface-variant max-w-xl">Configure your high-conversion AI creator. Our engine handles facial micro-expressions and contextual gestures for maximum realism.</p>
+              <h2 className="text-2xl font-semibold text-on-surface mb-1" style={{ fontFamily: 'Geist, sans-serif' }}>{t("UGC Engine title")}</h2>
+              <p className="text-sm text-on-surface-variant max-w-xl">{t("UGC Engine desc")}</p>
             </header>
             <div className="glass-card p-5 rounded-2xl flex flex-col gap-4 flex-1 card-glow border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-medium text-on-surface-variant uppercase tracking-widest" style={{ fontFamily: 'Geist, sans-serif' }}>Product Name</label>
-                  <input className="bg-surface-container-low border border-surface-border/60 rounded-xl px-3.5 py-2.5 text-sm text-on-surface focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 outline-none placeholder:text-on-surface-variant/40" placeholder="e.g. Lumos Hydrate" type="text" />
+                  <label className="text-xs font-medium text-on-surface-variant uppercase tracking-widest" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Product Name")}</label>
+                  <input className="bg-surface-container-low border border-surface-border/60 rounded-xl px-3.5 py-2.5 text-sm text-on-surface focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 outline-none placeholder:text-on-surface-variant/40" placeholder={t("e.g. Lumos Hydrate")} type="text" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-medium text-on-surface-variant uppercase tracking-widest" style={{ fontFamily: 'Geist, sans-serif' }}>Target Audience</label>
+                  <label className="text-xs font-medium text-on-surface-variant uppercase tracking-widest" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Target Audience")}</label>
                   <select className="bg-surface-container-low border border-surface-border/60 rounded-xl px-3.5 py-2.5 text-sm text-on-surface focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 outline-none">
                     <option>Gen-Z Wellness</option>
                     <option>Millennial Tech</option>

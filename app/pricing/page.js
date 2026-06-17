@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
+import LanguageToggle from "../components/LanguageToggle";
+import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 
 const DISCOUNT = 0.30;
@@ -105,6 +107,7 @@ const cryptoOptions = [
 
 export default function PricingPage() {
   const router = useRouter();
+  const t = useTranslate();
   const { setMobileOpen } = useSidebar();
   const [annual, setAnnual] = useState(true);
 
@@ -116,12 +119,13 @@ export default function PricingPage() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/10 rounded-full blur-[100px]" />
       </div>
       <Sidebar />
-      <div className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+      <div className="fixed top-0 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 relative z-10">
           <div className="flex justify-between md:justify-end items-center gap-4 mb-6">
             <button onClick={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
               <span className="material-symbols-outlined text-white text-xl">menu</span>
             </button>
+            <LanguageToggle />
             <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
               <span className="material-symbols-outlined text-sm text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
               <span className="text-sm font-bold text-yellow-400">0</span>
@@ -135,22 +139,22 @@ export default function PricingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 mb-4">
               <span className="material-symbols-outlined text-[12px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-              <span className="text-[11px] text-primary font-semibold tracking-wide">Annual pricing (save up to 40%)</span>
+              <span className="text-[11px] text-primary font-semibold tracking-wide">{t("Annual pricing (save up to 40%)")}</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-              Create Professional Videos
+              {t("Create Professional Videos")}
             </h1>
             <p className="text-on-surface-variant text-sm max-w-lg mx-auto leading-relaxed">
-              Faster, easier, and cheaper with our flexible plans
+              {t("Faster, easier, and cheaper with our flexible plans")}
             </p>
 
             <div className="flex items-center justify-center gap-1 mt-8 p-1 bg-surface-container-low border border-surface-border/60 rounded-xl w-fit mx-auto">
               <button onClick={() => setAnnual(false)} className={`px-6 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 ${!annual ? "primary-gradient text-white shadow-lg shadow-primary/30" : "text-on-surface-variant hover:text-white"}`}>
-                Monthly
+                {t("Monthly")}
               </button>
               <button onClick={() => setAnnual(true)} className={`px-6 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 flex items-center gap-1.5 ${annual ? "primary-gradient text-white shadow-lg shadow-primary/30" : "text-on-surface-variant hover:text-white"}`}>
-                Years
-                {annual && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-md">Save 30%</span>}
+                {t("Years")}
+                {annual && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-md">{t("Save 30%")}</span>}
               </button>
             </div>
           </div>
@@ -209,7 +213,7 @@ export default function PricingPage() {
                         )}
                       </>
                     ) : (
-                      <span className="text-4xl font-extrabold text-white tracking-tight">Custom</span>
+                      <span className="text-4xl font-extrabold text-white tracking-tight">{t("Custom")}</span>
                     )}
                   </div>
 
@@ -227,7 +231,7 @@ export default function PricingPage() {
                         : "btn-subtle text-white hover:bg-primary/10 hover:border-primary/30"
                     }`}
                   >
-                    {plan.cta === "Let's Talk" ? "Contact Sales" : plan.cta}
+                    {plan.cta === "Let's Talk" ? "Contact Sales" : t(plan.cta)}
                   </button>
 
                   <div className="space-y-2.5 flex-1">
