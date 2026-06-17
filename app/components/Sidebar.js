@@ -23,7 +23,7 @@ function SidebarContent() {
   const handleNav = () => setMobileOpen(false);
 
   return (
-    <aside className="fixed ltr:left-0 rtl:right-0 top-0 h-full w-64 bg-surface ltr:border-r rtl:border-l border-surface-border/80 z-50 flex flex-col p-4" style={{ boxShadow: '4px 0 32px rgba(0,0,0,0.4)' }}>
+    <aside className="fixed ltr:left-0 rtl:right-0 top-0 h-full w-64 bg-surface ltr:border-r rtl:border-l border-surface-border/80 z-50 flex flex-col p-4 overflow-y-auto" style={{ boxShadow: '4px 0 32px rgba(0,0,0,0.4)' }}>
       <Link href="/" onClick={handleNav} className="mb-6 px-2 flex items-center gap-3 group relative">
         <div className="relative">
           <div className="absolute inset-0 rounded-xl blur-xl bg-primary/40 animate-pulse-glow" />
@@ -39,7 +39,7 @@ function SidebarContent() {
           </div>
         </div>
       </Link>
-      <nav className="flex-1 space-y-1 overflow-hidden">
+      <nav className="flex-1 space-y-1">
         <Link
           key={homeItem.href}
           href={homeItem.href}
@@ -53,10 +53,10 @@ function SidebarContent() {
           <span className="material-symbols-outlined shrink-0" style={{ fontVariationSettings: pathname === homeItem.href ? "'FILL' 1, 'wght' 300" : "'FILL' 0, 'wght' 300", fontSize: '20px' }}>
             {homeItem.icon}
           </span>
-          <span className="font-bold text-sm truncate" style={{ fontFamily: 'Geist, sans-serif' }}>{t(homeItem.label)}</span>
+          <span className="sidebar-link-text">{t(homeItem.label)}</span>
         </Link>
         <div className="pt-4 pb-1 px-4">
-          <span className="text-[10px] text-on-surface-variant font-bold uppercase tracking-[0.2em] opacity-60 truncate block">{t("AI Tools")}</span>
+          <span className="sidebar-heading-text">{t("AI Tools")}</span>
         </div>
         {toolItems.map((item) => {
           const isActive = pathname === item.href;
@@ -74,17 +74,17 @@ function SidebarContent() {
               <span className="material-symbols-outlined shrink-0" style={{ fontVariationSettings: isActive ? "'FILL' 1, 'wght' 300" : "'FILL' 0, 'wght' 300", fontSize: '20px' }}>
                 {item.icon}
               </span>
-              <span className="font-bold text-sm truncate" style={{ fontFamily: 'Geist, sans-serif' }}>{t(item.label)}</span>
+              <span className="sidebar-link-text">{t(item.label)}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="mt-auto pt-4 border-t border-surface-border/40 px-2 overflow-hidden">
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-surface-container-low border border-surface-border/40 min-w-0" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
+      <div className="mt-auto pt-4 border-t border-surface-border/40 px-2">
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-surface-container-low border border-surface-border/40" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-accent-cyan to-primary flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-white text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
           </div>
-          <span className="text-[11px] text-on-surface-variant font-medium truncate">{t("AI Credits")}: <span className="text-yellow-400 font-bold">0</span></span>
+          <span className="sidebar-credits-text">{t("AI Credits")}: <span className="text-yellow-400 font-bold">0</span></span>
         </div>
       </div>
     </aside>
@@ -113,6 +113,36 @@ export default function Sidebar() {
       )}
 
       <style jsx global>{`
+        .sidebar-link-text {
+          font-size: 14px;
+          font-weight: 700;
+          font-family: Geist, sans-serif;
+          white-space: nowrap;
+        }
+        .sidebar-heading-text {
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          color: var(--color-on-surface-variant);
+          opacity: 0.6;
+          display: block;
+        }
+        .sidebar-credits-text {
+          font-size: 11px;
+          font-weight: 500;
+          color: var(--color-on-surface-variant);
+        }
+        [dir="rtl"] .sidebar-link-text {
+          font-size: 13px;
+          font-weight: 600;
+          font-family: Tajawal, sans-serif;
+          white-space: nowrap;
+        }
+        [dir="rtl"] .sidebar-heading-text {
+          letter-spacing: 0;
+          font-weight: 600;
+        }
         @keyframes slide-in-left {
           from { transform: translateX(-100%); }
           to { transform: translateX(0); }
