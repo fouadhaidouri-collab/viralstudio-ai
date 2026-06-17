@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
+import LanguageToggle from "../components/LanguageToggle";
 import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 
@@ -32,6 +33,7 @@ export default function UGCFEnginePage() {
         </div>
         <div className="flex items-center gap-4 flex-1 hidden md:flex"></div>
         <div className="flex items-center gap-3 md:gap-6">
+          <LanguageToggle />
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
               <span className="material-symbols-outlined text-sm text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>

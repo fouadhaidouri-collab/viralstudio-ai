@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import ProfileDropdown from "./ProfileDropdown";
+import LanguageToggle from "./LanguageToggle";
 import { useSidebar } from "./SidebarContext";
 
 export default function TopBar() {
@@ -27,6 +28,7 @@ export default function TopBar() {
             <span className="material-symbols-outlined text-[10px] text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
           </button>
         </div>
+          <LanguageToggle />
         <div className="h-6 md:h-8 w-px bg-surface-border/30"></div>
         <ProfileDropdown />
       </div>

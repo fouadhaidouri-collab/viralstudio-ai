@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
+import LanguageToggle from "../components/LanguageToggle";
 import { SidebarProvider } from "../components/SidebarContext";
 import { useTranslate } from "../components/LanguageProvider";
 import { useSidebar } from "../components/SidebarContext";
@@ -343,6 +344,7 @@ export default function AIVideoPage() {
               <span className="material-symbols-outlined text-[10px] text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
             </button>
           </div>
+          <LanguageToggle />
           <div className="h-8 w-px bg-surface-border"></div>
           <ProfileDropdown />
         </div>
