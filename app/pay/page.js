@@ -55,7 +55,7 @@ export default function PayPage() {
         <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[120px]" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 md:py-10 min-h-screen flex flex-col">
+      <div className="w-full px-3 md:px-5 lg:px-6 py-6 md:py-10 min-h-screen flex flex-col">
         {/* ===== HEADER ===== */}
         <header className="flex items-center justify-between mb-6 md:mb-10">
           <div className="flex items-center gap-2.5">
@@ -317,7 +317,7 @@ export default function PayPage() {
         </div>
 
         {/* ===== PROOF OF PAYMENT ===== */}
-        <section className="mt-8 max-w-2xl mx-auto w-full">
+        <section className="mt-8 w-full">
           <div className="glass-card rounded-2xl p-6 border border-white/5 text-center card-glow" style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.04), transparent)" }}>
             <h2 className="text-lg font-bold mb-1">Need Help?</h2>
             <p className="text-xs text-on-surface-variant/70 mb-4">Send your payment confirmation or transaction ID to activate instantly</p>

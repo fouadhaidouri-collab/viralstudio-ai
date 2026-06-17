@@ -77,7 +77,7 @@ export default function ProfilePage() {
       <Sidebar />
       <TopBar />
       <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
-        <div className="p-4 md:p-6 lg:p-8 space-y-6">
+        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 space-y-5">
 
           {/* Profile Header */}
           <section className="hero-glow relative rounded-2xl overflow-hidden border border-primary/20" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(6,182,212,0.05) 50%, transparent 100%)' }}>

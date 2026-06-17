@@ -95,7 +95,7 @@ export default function Dashboard() {
         <Sidebar />
         <TopBar />
         <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
-        <div className="p-4 md:p-6 lg:p-8">
+        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6">
           <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[300px] md:min-h-[540px] flex items-end" style={{ background: 'transparent' }}>
             {templates.map((t, i) => (
               <video
@@ -108,7 +108,7 @@ export default function Dashboard() {
               />
             ))}
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-background/60 z-10"></div>
-            <div className="relative z-20 p-6 md:p-12 pb-16 md:pb-32 max-w-2xl">
+            <div className="relative z-20 p-6 md:p-10 pb-16 md:pb-28 w-full max-w-4xl">
               <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight tracking-tight text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Create Viral Content With AI")}</h2>
               <Link href="/ai-video" className="inline-flex items-center gap-3 primary-gradient text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl font-medium hover:scale-105 active:scale-[1.02] transition-all duration-200 shadow-xl shadow-primary/30 animate-pulse-glow tap-target">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>

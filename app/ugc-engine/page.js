@@ -48,7 +48,7 @@ export default function UGCFEnginePage() {
         </div>
       </header>
       <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 p-4 md:p-5 lg:p-6 overflow-y-auto smooth-scroll">
-        <div className="max-w-7xl mx-auto grid grid-cols-12 gap-5">
+        <div className="w-full grid grid-cols-12 gap-4 md:gap-5">
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
             <header>
               <h2 className="text-2xl font-semibold text-on-surface mb-1" style={{ fontFamily: 'Geist, sans-serif' }}>{t("UGC Engine title")}</h2>

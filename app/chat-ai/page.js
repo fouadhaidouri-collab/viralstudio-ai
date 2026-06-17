@@ -417,7 +417,7 @@ export default function ChatAIPage() {
 
             {/* Input */}
             <div className="shrink-0 px-6 lg:px-8 py-4 border-t border-surface-border/40">
-              <div className="flex items-end gap-2 max-w-4xl mx-auto">
+              <div className="flex items-end gap-2 max-w-5xl mx-auto">
                 <div className="flex-1">
                   {attachedImages.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
