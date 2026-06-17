@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "./components/Sidebar";
@@ -77,7 +77,6 @@ export default function Dashboard() {
   const router = useRouter();
   const t = useTranslate();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
-  const bgVideoRef = useRef(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -85,13 +84,6 @@ export default function Dashboard() {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (bgVideoRef.current) {
-      bgVideoRef.current.load();
-      bgVideoRef.current.play().catch(() => {});
-    }
-  }, [bgVideoIdx]);
   const handleTemplateClick = (prompt) => {
     const params = new URLSearchParams();
     params.set("prompt", prompt);
@@ -105,7 +97,16 @@ export default function Dashboard() {
         <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="p-4 md:p-6 lg:p-8">
           <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[300px] md:min-h-[540px] flex items-end" style={{ background: 'transparent' }}>
-            <video ref={bgVideoRef} src={templates[bgVideoIdx].video} muted autoPlay playsInline className="absolute inset-0 w-full h-full object-fill opacity-60" />
+            {templates.map((t, i) => (
+              <video
+                key={t.video}
+                src={t.video}
+                muted autoPlay loop playsInline
+                className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${
+                  i === bgVideoIdx ? "opacity-60" : "opacity-0"
+                }`}
+              />
+            ))}
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-background/60 z-10"></div>
             <div className="relative z-20 p-6 md:p-12 pb-16 md:pb-32 max-w-2xl">
               <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight tracking-tight text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Create Viral Content With AI")}</h2>

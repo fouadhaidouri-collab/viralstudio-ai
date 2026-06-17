@@ -200,7 +200,6 @@ export default function AIVideoPage() {
   const [neededCredits, setNeededCredits] = useState(0);
   const fileInputRef = useRef();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
-  const bgVideoRef = useRef(null);
   const { setMobileOpen } = useSidebar();
 
   useEffect(() => {
@@ -209,13 +208,6 @@ export default function AIVideoPage() {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (bgVideoRef.current) {
-      bgVideoRef.current.load();
-      bgVideoRef.current.play().catch(() => {});
-    }
-  }, [bgVideoIdx]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -328,7 +320,16 @@ export default function AIVideoPage() {
       <SidebarProvider>
       <Sidebar />
       <div className="fixed inset-0 overflow-hidden z-0">
-        <video ref={bgVideoRef} src={TEMPLATE_VIDEOS[bgVideoIdx]} muted autoPlay playsInline className="w-full h-full object-fill opacity-70" />
+        {TEMPLATE_VIDEOS.map((src, i) => (
+          <video
+            key={src}
+            src={src}
+            muted autoPlay loop playsInline
+            className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${
+              i === bgVideoIdx ? "opacity-70" : "opacity-0"
+            }`}
+          />
+        ))}
         <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-background/10 to-background/30"></div>
       </div>
       <header className="fixed top-0 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 z-40 flex items-center justify-between md:justify-end px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
