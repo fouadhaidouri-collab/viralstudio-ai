@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import LanguageToggle from "../components/LanguageToggle";
 import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 
@@ -37,7 +36,6 @@ export default function HookGenPage() {
         </div>
         <div className="flex items-center flex-1 max-w-xl hidden md:flex"></div>
         <div className="flex items-center gap-4">
-          <LanguageToggle />
           <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
             <span className="material-symbols-outlined text-sm text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
             <span className="text-sm font-bold text-yellow-400">0</span>

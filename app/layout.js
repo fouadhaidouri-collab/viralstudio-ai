@@ -1,5 +1,4 @@
 import "./globals.css";
-import LanguageProvider from "./components/LanguageProvider";
 
 export const metadata = {
   title: "ViralStudio AI | Premium Suite",
@@ -19,7 +18,7 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0&display=swap" rel="stylesheet" />
       </head>
       <body className="h-full overflow-hidden">
-        <LanguageProvider>{children}</LanguageProvider>
+        {children}
       </body>
     </html>
   );

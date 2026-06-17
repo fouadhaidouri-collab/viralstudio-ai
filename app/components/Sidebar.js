@@ -117,13 +117,6 @@ export default function Sidebar() {
           from { transform: translateX(-100%); }
           to { transform: translateX(0); }
         }
-        [dir="rtl"] .animate-slide-in-left {
-          animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes slide-in-right {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
         .animate-slide-in-left {
           animation: slide-in-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }

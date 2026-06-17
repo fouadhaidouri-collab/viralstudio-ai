@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import LanguageToggle from "../components/LanguageToggle";
-import { useTranslate, useLanguage } from "../components/LanguageProvider";
+import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 
@@ -263,7 +262,6 @@ export default function AIImagePage() {
               <span className="material-symbols-outlined text-[10px] text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
             </button>
           </div>
-          <LanguageToggle />
           <div className="h-8 w-px bg-surface-border"></div>
           <ProfileDropdown />
         </div>
