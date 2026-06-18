@@ -95,7 +95,7 @@ export default function Dashboard() {
         <div className="flex flex-col flex-1 min-w-0">
         <TopBar />
         <main className="flex-1 overflow-y-auto smooth-scroll">
-        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6">
+        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 min-h-full">
           <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[300px] md:min-h-[540px] flex items-end" style={{ background: 'transparent' }}>
             {templates.map((t, i) => (
               <video

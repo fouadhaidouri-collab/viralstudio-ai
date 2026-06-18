@@ -77,7 +77,7 @@ export default function ProfilePage() {
       <div className="flex flex-col flex-1 min-w-0">
       <TopBar />
       <main className="flex-1 overflow-y-auto smooth-scroll">
-        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 space-y-5">
+        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 space-y-5 min-h-full">
 
           {/* Profile Header */}
           <section className="hero-glow relative rounded-2xl overflow-hidden border border-primary/20" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(6,182,212,0.05) 50%, transparent 100%)' }}>
