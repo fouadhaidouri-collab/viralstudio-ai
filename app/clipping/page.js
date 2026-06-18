@@ -150,7 +150,7 @@ export default function ClippingPage() {
     } catch (err) {
       setProgressStage("failed");
       setProgress(0);
-      console.error(err);
+      /* err */
     } finally {
       setGenerating(false);
     }

@@ -155,12 +155,16 @@ export default function AIImagePage() {
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
   const fileInputRef = useRef();
-  const [bgVideoIdx, setBgVideoIdx] = useState(0);
+  const bgIdxRef = useRef(0);
+  const [bgIdxA, setBgIdxA] = useState(0);
+  const [bgIdxB, setBgIdxB] = useState(-1);
   const { setMobileOpen } = useSidebar();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBgVideoIdx((prev) => (prev + 1) % TEMPLATE_VIDEOS.length);
+      bgIdxRef.current = (bgIdxRef.current + 1) % TEMPLATE_VIDEOS.length;
+      setBgIdxA(bgIdxRef.current);
+      setBgIdxB((bgIdxRef.current - 1 + TEMPLATE_VIDEOS.length) % TEMPLATE_VIDEOS.length);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -238,16 +242,19 @@ export default function AIImagePage() {
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0 relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        {TEMPLATE_VIDEOS.map((src, i) => (
-          <video
-            key={src}
-            src={src}
-            muted autoPlay loop playsInline
-            className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${
-              i === bgVideoIdx ? "opacity-60" : "opacity-0"
-            }`}
-          />
-        ))}
+        {TEMPLATE_VIDEOS.map((src, i) => {
+          if (i !== bgIdxA && i !== bgIdxB) return null;
+          return (
+            <video
+              key={src}
+              src={src}
+              muted autoPlay loop playsInline
+              className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${
+                i === bgIdxA ? "opacity-60" : "opacity-0"
+              }`}
+            />
+          );
+        })}
         <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-background/10 to-background/30"></div>
       </div>
       <header className="shrink-0 w-full h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 z-10 flex items-center justify-between md:justify-end px-4 md:px-8 relative" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>

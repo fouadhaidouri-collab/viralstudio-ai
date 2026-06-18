@@ -6,21 +6,8 @@ export default function AppInit({ children }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-
-    async function boot() {
-      if (document.fonts) {
-        await Promise.race([
-          document.fonts.ready,
-          new Promise((r) => setTimeout(r, 4000)),
-        ]);
-      }
-      await new Promise((r) => setTimeout(r, 80));
-      if (mounted) setReady(true);
-    }
-
-    boot();
-    return () => { mounted = false; };
+    const timer = setTimeout(() => setReady(true), 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "./components/Sidebar";
@@ -23,6 +23,33 @@ const templates = Array.from({ length: 11 }, (_, i) => ({
     "Drone following a surfer catching a wave at sunset, ocean spray, epic cinematic",
   ][i],
 }));
+
+function LazyTemplateVideo({ src, prompt, onClick }) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } }, { rootMargin: "300px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <button ref={ref} onClick={onClick} className="card-glow group rounded-xl overflow-hidden border border-surface-border/60 text-left hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
+      <div className="relative aspect-[3/4] bg-surface-container-highest">
+        {inView ? (
+          <video src={src} muted autoPlay loop playsInline className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+          <div className="w-full h-full bg-surface-container-highest" />
+        )}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+        <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+          <p className="text-[8px] text-white/80 line-clamp-1 leading-tight">{prompt}</p>
+        </div>
+      </div>
+    </button>
+  );
+}
 
 const features = [
   {
@@ -81,11 +108,15 @@ const quickActions = [
 
 export default function Dashboard() {
   const router = useRouter();
-  const [bgVideoIdx, setBgVideoIdx] = useState(0);
+  const bgIdxRef = useRef(0);
+  const [bgIdxA, setBgIdxA] = useState(0);
+  const [bgIdxB, setBgIdxB] = useState(-1);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBgVideoIdx((prev) => (prev + 1) % templates.length);
+      bgIdxRef.current = (bgIdxRef.current + 1) % templates.length;
+      setBgIdxA(bgIdxRef.current);
+      setBgIdxB((bgIdxRef.current - 1 + templates.length) % templates.length);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -104,16 +135,19 @@ export default function Dashboard() {
         <main className="flex-1 overflow-y-auto smooth-scroll">
         <div className="flex flex-col min-h-full">
           <section className="hero-glow relative overflow-hidden border-b border-primary/20 min-h-[260px] md:min-h-[400px] flex items-end" style={{ background: 'transparent' }}>
-            {templates.map((t, i) => (
-              <video
-                key={t.video}
-                src={t.video}
-                muted autoPlay loop playsInline
-                className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${
-                  i === bgVideoIdx ? "opacity-60" : "opacity-0"
-                }`}
-              />
-            ))}
+            {templates.map((t, i) => {
+              if (i !== bgIdxA && i !== bgIdxB) return null;
+              return (
+                <video
+                  key={t.video}
+                  src={t.video}
+                  muted autoPlay loop playsInline
+                  className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${
+                    i === bgIdxA ? "opacity-60" : "opacity-0"
+                  }`}
+                />
+              );
+            })}
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-background/60 z-10"></div>
             <div className="relative z-20 p-5 md:p-8 pb-10 md:pb-16 w-full">
               <h2 className="text-xl md:text-3xl font-bold mb-2 leading-tight tracking-tight text-white" style={{ fontFamily: 'Geist, sans-serif' }}>Create Viral Content With AI</h2>
@@ -211,15 +245,7 @@ export default function Dashboard() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                 {templates.map((t, i) => (
-                  <button key={i} onClick={() => handleTemplateClick(t.prompt)} className="card-glow group rounded-xl overflow-hidden border border-surface-border/60 text-left hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                    <div className="relative aspect-[3/4] bg-surface-container-highest">
-                      <video src={t.video} muted autoPlay loop playsInline className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
-                      <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-                        <p className="text-[8px] text-white/80 line-clamp-1 leading-tight">{t.prompt}</p>
-                      </div>
-                    </div>
-                  </button>
+                  <LazyTemplateVideo key={i} src={t.video} prompt={t.prompt} onClick={() => handleTemplateClick(t.prompt)} />
                 ))}
               </div>
             </div>
