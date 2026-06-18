@@ -1,5 +1,6 @@
 import "./globals.css";
 import AppInit from "./components/AppInit";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
   title: "ViralStudio AI | Premium Suite",
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
         <AppInit>
           {children}
         </AppInit>
+        <SpeedInsights />
       </body>
     </html>
   );
