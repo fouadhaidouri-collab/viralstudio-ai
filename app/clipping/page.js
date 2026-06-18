@@ -150,7 +150,7 @@ export default function ClippingPage() {
     } catch (err) {
       setProgressStage("failed");
       setProgress(0);
-      console.error(err);
+      /* err */
     } finally {
       setGenerating(false);
     }
@@ -163,10 +163,12 @@ export default function ClippingPage() {
   const topReel = reels.length ? reels[0] : null;
 
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+      <div className="h-screen flex">
       <Sidebar />
-      <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-40 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 h-14 md:h-16" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+      <div className="flex flex-col flex-1 min-w-0">
+      <header className="shrink-0 w-full bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 h-14 md:h-16" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
         <div className="md:hidden">
           <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
             <span className="material-symbols-outlined text-white text-xl">menu</span>
@@ -188,7 +190,7 @@ export default function ClippingPage() {
         </div>
       </header>
 
-      <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+      <main className="flex-1 overflow-y-auto smooth-scroll">
         <div className="min-h-full p-4 md:p-5 lg:p-6 flex flex-col xl:grid xl:grid-cols-[420px_1fr] gap-5">
           {/* LEFT PANEL */}
           <div className="flex flex-col gap-4">
@@ -429,6 +431,8 @@ export default function ClippingPage() {
           </div>
         </div>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
     </div>
   );

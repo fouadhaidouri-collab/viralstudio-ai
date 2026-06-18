@@ -10,10 +10,10 @@ export default function HookGenPage() {
   const router = useRouter();
   const { setMobileOpen } = useSidebar();
   const frameworks = [
-    { icon: "psychology", title: "Dopamine Gap", desc: "Focuses on creating curiosity that must be satisfied.", color: "text-primary", bg: "bg-primary/10" },
-    { icon: "trending_up", title: "Trend Surfer", desc: "Anchors your content to currently viral topics or sounds.", color: "text-secondary", bg: "bg-secondary/10" },
-    { icon: "warning", title: "Loss Aversion", desc: "Triggers engagement by highlighting what they're losing.", color: "text-tertiary", bg: "bg-tertiary/10" },
-    { icon: "groups", title: "Social Proof", desc: "Uses validation from others to hook the viewer.", color: "text-primary", bg: "bg-primary/10" },
+    { icon: "psychology", title: "Dopamine Gap", desc: "Create curiosity gaps that keep viewers watching until the end", color: "text-primary", bg: "bg-primary/10" },
+    { icon: "trending_up", title: "Trend Surfer", desc: "Ride trending topics for instant viral relevance", color: "text-secondary", bg: "bg-secondary/10" },
+    { icon: "warning", title: "Loss Aversion", desc: "Leverage fear of missing out for higher conversions", color: "text-tertiary", bg: "bg-tertiary/10" },
+    { icon: "groups", title: "Social Proof", desc: "Showcase popularity to trigger bandwagon effect", color: "text-primary", bg: "bg-primary/10" },
   ];
   const [generating, setGenerating] = useState(false);
 
@@ -23,10 +23,12 @@ export default function HookGenPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+      <div className="h-screen flex">
       <Sidebar />
-      <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-40 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 h-14 md:h-16 flex justify-between items-center px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+      <div className="flex flex-col flex-1 min-w-0">
+      <header className="shrink-0 w-full bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 h-14 md:h-16 flex justify-between items-center px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
         <div className="md:hidden">
           <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
             <span className="material-symbols-outlined text-white text-xl">menu</span>
@@ -44,7 +46,7 @@ export default function HookGenPage() {
           <ProfileDropdown />
         </div>
       </header>
-      <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 p-4 md:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-5 overflow-y-auto smooth-scroll">
+      <main className="flex-1 overflow-y-auto smooth-scroll p-4 md:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-5">
         <section className="lg:w-80 flex flex-col gap-4 shrink-0">
           <div className="glass-card p-5 rounded-2xl border border-white/5 flex flex-col card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
             <h2 className="text-xl font-semibold mb-4 text-white flex items-center gap-2" style={{ fontFamily: 'Geist, sans-serif' }}>
@@ -152,6 +154,8 @@ export default function HookGenPage() {
           </section>
         </section>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
     </div>
   );

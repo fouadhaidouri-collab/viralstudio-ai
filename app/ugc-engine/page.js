@@ -19,10 +19,12 @@ export default function UGCFEnginePage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+      <div className="h-screen flex">
       <Sidebar />
-      <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 z-40" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+      <div className="flex flex-col flex-1 min-w-0">
+      <header className="shrink-0 w-full h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
         <div className="md:hidden">
           <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
             <span className="material-symbols-outlined text-white text-xl">menu</span>
@@ -43,12 +45,12 @@ export default function UGCFEnginePage() {
           <ProfileDropdown />
         </div>
       </header>
-      <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 p-4 md:p-5 lg:p-6 overflow-y-auto smooth-scroll">
-        <div className="w-full grid grid-cols-12 gap-4 md:gap-5">
+      <main className="flex-1 overflow-y-auto smooth-scroll p-4 md:p-5 lg:p-6">
+        <div className="w-full min-h-full grid grid-cols-12 gap-4 md:gap-5">
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
             <header>
-              <h2 className="text-2xl font-semibold text-on-surface mb-1" style={{ fontFamily: 'Geist, sans-serif' }}>UGC Generation Engine</h2>
-              <p className="text-sm text-on-surface-variant max-w-xl">Configure your high-conversion AI creator. Our engine handles facial micro-expressions and contextual gestures for maximum realism.</p>
+              <h2 className="text-2xl font-semibold text-on-surface mb-1" style={{ fontFamily: 'Geist, sans-serif' }}>UGC Engine</h2>
+              <p className="text-sm text-on-surface-variant max-w-xl">Generate authentic UGC ads with AI-powered avatars</p>
             </header>
             <div className="glass-card p-5 rounded-2xl flex flex-col gap-4 flex-1 card-glow border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
               <div className="grid grid-cols-2 gap-3">
@@ -211,6 +213,8 @@ export default function UGCFEnginePage() {
           </div>
         </div>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
     </div>
   );

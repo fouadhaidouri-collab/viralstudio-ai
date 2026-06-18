@@ -5,7 +5,6 @@ import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import { SidebarProvider } from "../components/SidebarContext";
 
-
 const stats = [
   { label: "Videos Created", value: "128", icon: "movie", color: "text-primary" },
   { label: "Images Generated", value: "3,452", icon: "image", color: "text-secondary" },
@@ -71,12 +70,14 @@ export default function ProfilePage() {
   const router = useRouter();
 
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+      <div className="h-screen flex">
       <Sidebar />
+      <div className="flex flex-col flex-1 min-w-0">
       <TopBar />
-      <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
-        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 space-y-5">
+      <main className="flex-1 overflow-y-auto smooth-scroll">
+        <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 space-y-5 min-h-full">
 
           {/* Profile Header */}
           <section className="hero-glow relative rounded-2xl overflow-hidden border border-primary/20" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(6,182,212,0.05) 50%, transparent 100%)' }}>
@@ -240,6 +241,8 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
     </div>
   );

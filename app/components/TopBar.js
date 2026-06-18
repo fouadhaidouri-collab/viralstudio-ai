@@ -9,7 +9,7 @@ export default function TopBar() {
   const { setMobileOpen } = useSidebar();
 
   return (
-    <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/60 backdrop-blur-2xl border-b border-surface-border/40 z-40 flex justify-between items-center px-4 md:px-8" style={{ boxShadow: '0 1px 24px rgba(0,0,0,0.3)' }}>
+    <header className="shrink-0 w-full h-14 md:h-16 bg-surface/60 backdrop-blur-2xl border-b border-surface-border/40 flex justify-between items-center px-4 md:px-8" style={{ boxShadow: '0 1px 24px rgba(0,0,0,0.3)' }}>
       <div className="flex items-center gap-3">
         {/* Mobile hamburger */}
         <button onClick={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">

@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+
 export default function InsufficientCreditsModal({ needed, current, onClose }) {
   const router = useRouter();
   return (
