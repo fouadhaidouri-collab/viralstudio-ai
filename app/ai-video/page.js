@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import LanguageToggle from "../components/LanguageToggle";
-import { SidebarProvider } from "../components/SidebarContext";
-import { useTranslate } from "../components/LanguageProvider";
-import { useSidebar } from "../components/SidebarContext";
+import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 
 const USD_TO_CREDIT = 1000 / 29;
@@ -183,7 +180,6 @@ function Dropdown({ label, value, options, onChange, compact }) {
 
 export default function AIVideoPage() {
   const router = useRouter();
-  const t = useTranslate();
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(aiModels[0]);
   const [aspectRatio, setAspectRatio] = useState(aspectRatios[0]);
@@ -346,7 +342,6 @@ export default function AIVideoPage() {
               <span className="material-symbols-outlined text-[10px] text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
             </button>
           </div>
-          <LanguageToggle />
           <div className="h-8 w-px bg-surface-border"></div>
           <ProfileDropdown />
         </div>
@@ -361,7 +356,7 @@ export default function AIVideoPage() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="w-full flex-1 bg-surface-container-lowest border border-surface-border rounded-xl p-4 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none transition-all placeholder:text-on-surface-variant/40"
-                placeholder={t("AI Video Tab desc")}
+                placeholder="Describe the video you want to generate..."
               ></textarea>
 
               <div className="flex flex-wrap gap-2 mt-4 shrink-0">
@@ -388,9 +383,9 @@ export default function AIVideoPage() {
                 <ModelDropdown label="AI Model" value={model} options={aiModels} onChange={setModel} compact pricingMap={pricing} duration={duration} resolution={resolution} />
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <Dropdown label="Aspect Ratio" value={aspectRatio.label} options={aspectRatios} onChange={(v) => setAspectRatio(v)} compact />
-                  <Dropdown label={t("Resolution")} value={resolution} options={resolutions} onChange={setResolution} compact />
-                  <Dropdown label={t("Duration")} value={duration} options={durations} onChange={setDuration} compact />
-                  <Dropdown label={t("Quantity")} value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} compact />
+                  <Dropdown label="Resolution" value={resolution} options={resolutions} onChange={setResolution} compact />
+                  <Dropdown label="Duration" value={duration} options={durations} onChange={setDuration} compact />
+                  <Dropdown label="Quantity" value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} compact />
                 </div>
                 <button
                   onClick={handleGenerate}
@@ -399,9 +394,9 @@ export default function AIVideoPage() {
                   style={{ fontFamily: 'Geist, sans-serif' }}
                 >
                   {generating ? (
-                    <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> {t("Generating...")}</>
+                    <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
-                    <><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_videocam</span> {t("Generate Video")} {(() => {
+                    <><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_videocam</span> Generate Video {(() => {
                       const p = pricing?.[model.label];
                       const price = p ? p.unitPrice : model.fallbackPrice;
                       return price ? <span className="text-yellow-300/90">({(price * videoCount * durationMultiplier(duration) * resolutionMultiplier(resolution) * USD_TO_CREDIT).toFixed(0)} credits)</span> : null;
@@ -475,13 +470,13 @@ export default function AIVideoPage() {
 
             <div className="flex items-center gap-3">
               <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97]" style={{ fontFamily: 'Geist, sans-serif' }}>
-                <span className="material-symbols-outlined text-base">download</span> {t("Download")}
+                <span className="material-symbols-outlined text-base">download</span> Download
               </button>
               <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97]" style={{ fontFamily: 'Geist, sans-serif' }}>
-                <span className="material-symbols-outlined text-base">share</span> {t("Share")}
+                <span className="material-symbols-outlined text-base">share</span> Share
               </button>
               <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97]" style={{ fontFamily: 'Geist, sans-serif' }}>
-                <span className="material-symbols-outlined text-base">replay</span> {t("Regenerate")}
+                <span className="material-symbols-outlined text-base">replay</span> Regenerate
               </button>
             </div>
 

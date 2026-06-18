@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslate } from "./LanguageProvider";
 import { useSidebar } from "./SidebarContext";
 
 const homeItem = { href: "/", label: "Dashboard", icon: "dashboard" };
@@ -17,7 +16,6 @@ const toolItems = [
 
 function SidebarContent() {
   const pathname = usePathname();
-  const t = useTranslate();
   const { setMobileOpen } = useSidebar();
 
   const handleNav = () => setMobileOpen(false);
@@ -35,7 +33,7 @@ function SidebarContent() {
           <h1 className="font-extrabold tracking-tight leading-none" style={{ background: 'linear-gradient(135deg, #fff 30%, #a855f7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '20px', fontFamily: 'Geist, sans-serif' }}>ViralStudio AI</h1>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="w-1 h-1 rounded-full bg-primary" />
-            <span className="text-[9px] text-on-surface-variant font-bold uppercase tracking-[0.15em]">{t("Premium Suite")}</span>
+            <span className="text-[9px] text-on-surface-variant font-bold uppercase tracking-[0.15em]">Premium Suite</span>
           </div>
         </div>
       </Link>
@@ -53,10 +51,10 @@ function SidebarContent() {
           <span className="material-symbols-outlined shrink-0" style={{ fontVariationSettings: pathname === homeItem.href ? "'FILL' 1, 'wght' 300" : "'FILL' 0, 'wght' 300", fontSize: '20px' }}>
             {homeItem.icon}
           </span>
-          <span className="sidebar-link-text flex-1">{t(homeItem.label)}</span>
+          <span className="sidebar-link-text flex-1">{homeItem.label}</span>
         </Link>
         <div className="pt-3 pb-1 px-4">
-          <span className="sidebar-heading-text">{t("AI Tools")}</span>
+          <span className="sidebar-heading-text">AI Tools</span>
         </div>
         {toolItems.map((item) => {
           const isActive = pathname === item.href;
@@ -74,7 +72,7 @@ function SidebarContent() {
               <span className="material-symbols-outlined shrink-0" style={{ fontVariationSettings: isActive ? "'FILL' 1, 'wght' 300" : "'FILL' 0, 'wght' 300", fontSize: '20px' }}>
                 {item.icon}
               </span>
-              <span className="sidebar-link-text flex-1">{t(item.label)}</span>
+              <span className="sidebar-link-text flex-1">{item.label}</span>
             </Link>
           );
         })}
@@ -84,7 +82,7 @@ function SidebarContent() {
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-accent-cyan to-primary flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-white text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
           </div>
-          <span className="sidebar-credits-text">{t("AI Credits")}: <span className="text-yellow-400 font-bold">0</span></span>
+          <span className="sidebar-credits-text">AI Credits: <span className="text-yellow-400 font-bold">0</span></span>
         </div>
       </div>
     </aside>
@@ -97,7 +95,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop sidebar - always visible */}
-      <div className="hidden md:block w-64 shrink-0">
+      <div className="hidden md:block w-64 shrink-0 h-screen">
         <SidebarContent />
       </div>
 
@@ -136,26 +134,8 @@ export default function Sidebar() {
           font-weight: 500;
           color: var(--color-on-surface-variant);
         }
-        [dir="rtl"] .sidebar-link-text {
-          font-size: 13px;
-          font-weight: 600;
-          font-family: Tajawal, sans-serif;
-          white-space: nowrap;
-          text-align: left;
-        }
-        [dir="rtl"] .sidebar-heading-text {
-          letter-spacing: 0;
-          font-weight: 600;
-        }
         @keyframes slide-in-left {
           from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-        [dir="rtl"] .animate-slide-in-left {
-          animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes slide-in-right {
-          from { transform: translateX(100%); }
           to { transform: translateX(0); }
         }
         .animate-slide-in-left {

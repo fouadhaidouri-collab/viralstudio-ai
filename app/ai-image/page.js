@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import LanguageToggle from "../components/LanguageToggle";
-import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 
@@ -143,7 +141,6 @@ function Dropdown({ label, value, options, onChange, compact }) {
 
 export default function AIImagePage() {
   const router = useRouter();
-  const t = useTranslate();
   const [selectedModel, setSelectedModel] = useState(imageModels[3]);
   const [prompt, setPrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState(aspectRatios[0]);
@@ -265,7 +262,6 @@ export default function AIImagePage() {
               <span className="material-symbols-outlined text-[10px] text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
             </button>
           </div>
-          <LanguageToggle />
           <div className="h-8 w-px bg-surface-border"></div>
           <ProfileDropdown />
         </div>
@@ -279,7 +275,7 @@ export default function AIImagePage() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="w-full flex-1 bg-surface-container-lowest border border-surface-border rounded-xl p-4 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none transition-all placeholder:text-on-surface-variant/40"
-                placeholder={t("AI Image Tab desc")}
+                placeholder="Describe the image you want to generate..."
               ></textarea>
 
               <div className="flex flex-wrap gap-2 mt-4 shrink-0">
@@ -309,9 +305,9 @@ export default function AIImagePage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  <Dropdown label={t("Aspect Ratio")} value={aspectRatio.label} options={aspectRatios} onChange={(v) => setAspectRatio(v)} compact />
-                  <Dropdown label={t("Resolution")} value={resolution} options={["720p", "1080p"]} onChange={setResolution} compact />
-                  <Dropdown label={t("Quantity")} value={String(imageCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setImageCount(Number(v))} compact />
+                  <Dropdown label="Aspect Ratio" value={aspectRatio.label} options={aspectRatios} onChange={(v) => setAspectRatio(v)} compact />
+                  <Dropdown label="Resolution" value={resolution} options={["720p", "1080p"]} onChange={setResolution} compact />
+                  <Dropdown label="Quantity" value={String(imageCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setImageCount(Number(v))} compact />
                 </div>
 
                 <button
@@ -321,9 +317,9 @@ export default function AIImagePage() {
                   style={{ fontFamily: 'Geist, sans-serif' }}
                 >
                   {generating ? (
-                    <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> {t("Generating...")}</>
+                    <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
-                    <><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span> {t("Generate Image")} {(() => {
+                    <><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span> Generate Image {(() => {
                       const total = selectedModel.credits * imageCount;
                       return <span className="text-yellow-300/90">({total} credits)</span>;
                     })()}</>

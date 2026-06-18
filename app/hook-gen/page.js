@@ -4,19 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import LanguageToggle from "../components/LanguageToggle";
-import { useTranslate } from "../components/LanguageProvider";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 
 export default function HookGenPage() {
   const router = useRouter();
-  const t = useTranslate();
   const { setMobileOpen } = useSidebar();
   const frameworks = [
-    { icon: "psychology", title: t("Dopamine Gap"), desc: t("Dopamine Gap desc"), color: "text-primary", bg: "bg-primary/10" },
-    { icon: "trending_up", title: t("Trend Surfer"), desc: t("Trend Surfer desc"), color: "text-secondary", bg: "bg-secondary/10" },
-    { icon: "warning", title: t("Loss Aversion"), desc: t("Loss Aversion desc"), color: "text-tertiary", bg: "bg-tertiary/10" },
-    { icon: "groups", title: t("Social Proof"), desc: t("Social Proof desc"), color: "text-primary", bg: "bg-primary/10" },
+    { icon: "psychology", title: "Dopamine Gap", desc: "Create curiosity gaps that keep viewers watching until the end", color: "text-primary", bg: "bg-primary/10" },
+    { icon: "trending_up", title: "Trend Surfer", desc: "Ride trending topics for instant viral relevance", color: "text-secondary", bg: "bg-secondary/10" },
+    { icon: "warning", title: "Loss Aversion", desc: "Leverage fear of missing out for higher conversions", color: "text-tertiary", bg: "bg-tertiary/10" },
+    { icon: "groups", title: "Social Proof", desc: "Showcase popularity to trigger bandwagon effect", color: "text-primary", bg: "bg-primary/10" },
   ];
   const [generating, setGenerating] = useState(false);
 
@@ -39,7 +36,6 @@ export default function HookGenPage() {
         </div>
         <div className="flex items-center flex-1 max-w-xl hidden md:flex"></div>
         <div className="flex items-center gap-4">
-          <LanguageToggle />
           <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
             <span className="material-symbols-outlined text-sm text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
             <span className="text-sm font-bold text-yellow-400">0</span>
@@ -54,19 +50,19 @@ export default function HookGenPage() {
         <section className="lg:w-80 flex flex-col gap-4 shrink-0">
           <div className="glass-card p-5 rounded-2xl border border-white/5 flex flex-col card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
             <h2 className="text-xl font-semibold mb-4 text-white flex items-center gap-2" style={{ fontFamily: 'Geist, sans-serif' }}>
-              <span className="material-symbols-outlined text-primary">settings_input_component</span> {t("Generator")}
+              <span className="material-symbols-outlined text-primary">settings_input_component</span> Generator
             </h2>
             <div className="space-y-3 flex-1 flex flex-col">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-on-surface-variant" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Business/Niche")}</label>
-                <input className="w-full bg-surface-container-low border border-surface-border/60 rounded-xl px-3.5 py-2.5 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all duration-200 placeholder:text-on-surface-variant/50" placeholder={t("e.g., AI SaaS, Skincare")} type="text" />
+                <label className="text-xs font-medium text-on-surface-variant" style={{ fontFamily: 'Geist, sans-serif' }}>Business/Niche</label>
+                <input className="w-full bg-surface-container-low border border-surface-border/60 rounded-xl px-3.5 py-2.5 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all duration-200 placeholder:text-on-surface-variant/50" placeholder="e.g., AI SaaS, Skincare" type="text" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-on-surface-variant" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Target Market")}</label>
+                <label className="text-xs font-medium text-on-surface-variant" style={{ fontFamily: 'Geist, sans-serif' }}>Target Market</label>
                 <input className="w-full bg-surface-container-low border border-surface-border/60 rounded-xl px-3.5 py-2.5 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all duration-200 placeholder:text-on-surface-variant/50" placeholder="e.g., Solopreneurs, Gen Z" type="text" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-on-surface-variant" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Language")}</label>
+                <label className="text-xs font-medium text-on-surface-variant" style={{ fontFamily: 'Geist, sans-serif' }}>Language</label>
                 <select className="w-full bg-surface-container-low border border-surface-border/60 rounded-xl px-3.5 py-2.5 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none appearance-none transition-all duration-200">
                   <option>English (US)</option>
                   <option>Spanish</option>
@@ -91,7 +87,7 @@ export default function HookGenPage() {
                 {generating ? (
                   <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                 ) : (
-                  <>{t("Generate Hook")} <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span></>
+                  <>Generate Hook <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span></>
                 )}
               </button>
             </div>
@@ -139,7 +135,7 @@ export default function HookGenPage() {
           </div>
           <section>
             <h2 className="text-lg font-semibold text-on-surface mb-3 flex items-center gap-2" style={{ fontFamily: 'Geist, sans-serif' }}>
-              {t("Hook Frameworks")}
+              Hook Frameworks
               <span className="px-2 py-0.5 rounded bg-primary-container text-[10px] font-bold text-white uppercase tracking-tighter">Pro</span>
             </h2>
             <div className="flex gap-3 overflow-x-auto pb-2">

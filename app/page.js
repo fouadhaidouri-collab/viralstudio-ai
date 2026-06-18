@@ -6,7 +6,6 @@ import Link from "next/link";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import { SidebarProvider } from "./components/SidebarContext";
-import { useTranslate } from "./components/LanguageProvider";
 
 const templates = Array.from({ length: 11 }, (_, i) => ({
   video: `/templates/template${i + 1}.mp4`,
@@ -29,53 +28,52 @@ const features = [
   {
     href: "/ai-video",
     title: "AI Video",
-    descKey: "AI Video desc",
+    desc: "Generate stunning AI-powered videos with cinematic quality",
     icon: "movie",
     color: "text-primary",
     bg: "bg-primary-container/20",
-    btnKey: "Launch Video Lab",
+    btn: "Launch Video Lab",
   },
   {
     href: "/ai-image",
     title: "AI Images",
-    descKey: "AI Images desc",
+    desc: "Create breathtaking images with AI image generation",
     icon: "image",
     color: "text-secondary",
     bg: "bg-secondary/20",
-    btnKey: "Open Image Lab",
+    btn: "Open Image Lab",
   },
   {
     href: "/ugc-engine",
     title: "UGC Engine",
-    descKey: "UGC Engine desc",
+    desc: "Design AI avatars and generate UGC content at scale",
     icon: "record_voice_over",
     color: "text-tertiary",
     bg: "bg-tertiary/20",
-    btnKey: "Design Avatar",
+    btn: "Design Avatar",
   },
   {
     href: "/hook-gen",
     title: "Hook Gen",
-    descKey: "Hook Gen desc",
+    desc: "Generate viral hooks and optimize your scripts with AI",
     icon: "auto_awesome",
     color: "text-primary",
     bg: "bg-primary/20",
-    btnKey: "Optimize Script",
+    btn: "Optimize Script",
   },
   {
     href: "/clipping",
     title: "Clipping",
-    descKey: "Clipping desc",
+    desc: "Auto-clip long videos into viral shorts with AI detection",
     icon: "content_cut",
     color: "text-accent-orange",
     bg: "bg-accent-orange/20",
-    btnKey: "Process Video",
+    btn: "Process Video",
   },
 ];
 
 export default function Dashboard() {
   const router = useRouter();
-  const t = useTranslate();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
 
   useEffect(() => {
@@ -111,10 +109,10 @@ export default function Dashboard() {
             ))}
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-background/60 z-10"></div>
             <div className="relative z-20 p-6 md:p-10 pb-16 md:pb-28 w-full max-w-4xl">
-              <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight tracking-tight text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Create Viral Content With AI")}</h2>
+              <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight tracking-tight text-white" style={{ fontFamily: 'Geist, sans-serif' }}>Create Viral Content With AI</h2>
               <Link href="/ai-video" className="inline-flex items-center gap-3 primary-gradient text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl font-medium hover:scale-105 active:scale-[1.02] transition-all duration-200 shadow-xl shadow-primary/30 animate-pulse-glow tap-target">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
-                {t("Generate Content")}
+                Generate Content
               </Link>
             </div>
           </section>
@@ -146,16 +144,16 @@ export default function Dashboard() {
                   <span className="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-all duration-300 text-primary -translate-x-2 group-hover:translate-x-0">north_east</span>
                 </div>
                 <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{f.title}</h3>
-                <p className="text-sm text-on-surface-variant flex-1">{t(f.descKey)}</p>
+                <p className="text-sm text-on-surface-variant flex-1">{f.desc}</p>
                 <div className={`mt-auto pt-3 ${f.color} text-sm font-medium flex items-center gap-2 group-hover:gap-3 transition-all duration-200`} style={{ fontFamily: 'Geist, sans-serif' }}>
-                  {t(f.btnKey)} <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  {f.btn} <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </div>
               </Link>
             ))}
             <div className="glass-card p-5 rounded-2xl border border-surface-border/60 relative overflow-hidden flex flex-col justify-center items-center text-center min-h-[200px]" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.05), rgba(6,182,212,0.03))' }}>
               <div className="shimmer-border absolute inset-0 opacity-20"></div>
-              <p className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{t("New Feature Incoming")}</p>
-              <p className="text-sm text-on-surface-variant mb-4">{t("Live Streaming AI is coming soon to your dashboard.")}</p>
+              <p className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Geist, sans-serif' }}>New Feature Incoming</p>
+              <p className="text-sm text-on-surface-variant mb-4">Live Streaming AI is coming soon to your dashboard.</p>
               <button className="border border-primary/30 px-6 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/15 active:scale-95" style={{ fontFamily: 'Geist, sans-serif' }}>Join Waitlist</button>
             </div>
           </div>
@@ -163,7 +161,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
                 <span className="material-symbols-outlined text-primary text-base" style={{ fontVariationSettings: "'FILL' 1" }}>history</span>
-                {t("Featured Templates")}
+                Featured Templates
               </h3>
               <Link href="/ai-video" className="text-xs text-primary hover:text-primary/80 font-medium hover:underline underline-offset-4 transition-all">View all</Link>
             </div>

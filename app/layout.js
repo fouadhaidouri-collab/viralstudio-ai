@@ -1,5 +1,4 @@
 import "./globals.css";
-import LanguageProvider from "./components/LanguageProvider";
 import AppInit from "./components/AppInit";
 
 export const metadata = {
@@ -39,7 +38,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="h-full overflow-hidden">
         <AppInit>
-          <LanguageProvider>{children}</LanguageProvider>
+          {children}
         </AppInit>
       </body>
     </html>

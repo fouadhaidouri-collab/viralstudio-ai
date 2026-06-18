@@ -6,7 +6,6 @@ import remarkGfm from "remark-gfm";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import { SidebarProvider } from "../components/SidebarContext";
-import { useTranslate } from "../components/LanguageProvider";
 
 const MODEL_OPTIONS = [
   { label: "Auto (recommended)", value: "openrouter/free", desc: "Best free model available" },
@@ -74,7 +73,6 @@ function buildAPIMessages(msgList) {
 let imgIdCounter = 0;
 
 export default function ChatAIPage() {
-  const t = useTranslate();
   const [messages, setMessages] = useState([
     { role: "system", content: SYSTEM_PROMPT },
     { role: "assistant", content: "Hi! I'm your AI creative assistant. Ask me to help craft video prompts, optimize scripts, or plan content strategies." },
@@ -307,7 +305,7 @@ export default function ChatAIPage() {
       <div className="flex flex-col flex-1 min-w-0">
       <TopBar />
       {toast && (
-        <div className="fixed top-20 ltr:right-4 md:ltr:right-8 rtl:left-4 md:rtl:left-8 z-[999] px-4 py-2 bg-surface-container-high border border-surface-border/60 rounded-xl shadow-xl text-xs text-white animate-dropdown-open">
+        <div className="fixed top-20 right-4 md:right-8 z-[999] px-4 py-2 bg-surface-container-high border border-surface-border/60 rounded-xl shadow-xl text-xs text-white animate-dropdown-open">
           {toast}
         </div>
       )}
@@ -321,7 +319,7 @@ export default function ChatAIPage() {
                   <span className="material-symbols-outlined text-white text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-white" style={{ fontFamily: 'Geist, sans-serif' }}>{t("Chat AI")}</h1>
+                  <h1 className="text-lg font-bold text-white" style={{ fontFamily: 'Geist, sans-serif' }}>Chat AI</h1>
                   <p className="text-[11px] text-on-surface-variant">Ask me anything about your content</p>
                 </div>
               </div>
@@ -343,7 +341,7 @@ export default function ChatAIPage() {
                     <span className={`material-symbols-outlined text-[10px] text-on-surface-variant transition-transform ${showModelPicker ? "rotate-180" : ""}`}>expand_more</span>
                   </button>
                   {showModelPicker && (
-                    <div className="absolute ltr:right-0 rtl:left-0 top-full mt-2 w-60 bg-surface-container border border-surface-border/60 rounded-xl shadow-xl z-50 py-2">
+                    <div className="absolute right-0 top-full mt-2 w-60 bg-surface-container border border-surface-border/60 rounded-xl shadow-xl z-50 py-2">
                       {MODEL_OPTIONS.map((opt) => (
                         <button key={opt.value} onClick={() => { setModel(opt); setShowModelPicker(false); }}
                           className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-surface-container-high ${model.value === opt.value ? "text-primary bg-primary/5" : "text-on-surface"}`}>
@@ -452,15 +450,15 @@ export default function ChatAIPage() {
                         onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'; }}
                       />
                       {isEditMode ? (
-                        <button onClick={saveEdit} disabled={!input.trim()} className="absolute ltr:right-1.5 rtl:left-1.5 bottom-1.5 w-8 h-8 bg-accent-cyan/80 rounded-lg flex items-center justify-center transition-all active:scale-90 hover:bg-accent-cyan disabled:opacity-50">
+                        <button onClick={saveEdit} disabled={!input.trim()} className="absolute right-1.5 bottom-1.5 w-8 h-8 bg-accent-cyan/80 rounded-lg flex items-center justify-center transition-all active:scale-90 hover:bg-accent-cyan disabled:opacity-50">
                           <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
                         </button>
                       ) : loading ? (
-                        <button onClick={stopGeneration} className="absolute ltr:right-1.5 rtl:left-1.5 bottom-1.5 w-8 h-8 bg-red-500/80 rounded-lg flex items-center justify-center transition-all active:scale-90 hover:bg-red-500">
+                        <button onClick={stopGeneration} className="absolute right-1.5 bottom-1.5 w-8 h-8 bg-red-500/80 rounded-lg flex items-center justify-center transition-all active:scale-90 hover:bg-red-500">
                           <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>stop</span>
                         </button>
                       ) : (
-                        <button onClick={sendMessage} disabled={!input.trim() && attachedImages.length === 0} className="absolute ltr:right-1.5 rtl:left-1.5 bottom-1.5 w-8 h-8 primary-gradient rounded-lg flex items-center justify-center shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90">
+                        <button onClick={sendMessage} disabled={!input.trim() && attachedImages.length === 0} className="absolute right-1.5 bottom-1.5 w-8 h-8 primary-gradient rounded-lg flex items-center justify-center shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-90">
                           <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
                         </button>
                       )}
