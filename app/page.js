@@ -90,11 +90,13 @@ export default function Dashboard() {
     router.push(`/ai-video?${params.toString()}`);
   };
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+        <div className="h-screen flex">
         <Sidebar />
+        <div className="flex flex-col flex-1 min-w-0">
         <TopBar />
-        <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+        <main className="flex-1 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6">
           <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[300px] md:min-h-[540px] flex items-end" style={{ background: 'transparent' }}>
             {templates.map((t, i) => (
@@ -181,6 +183,8 @@ export default function Dashboard() {
           </section>
         </div>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
     </div>
   );

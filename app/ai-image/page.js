@@ -235,10 +235,12 @@ export default function AIImagePage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+      <div className="h-screen flex">
       <Sidebar />
-      <div className="fixed inset-0 overflow-hidden z-0">
+      <div className="flex flex-col flex-1 min-w-0 relative">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         {TEMPLATE_VIDEOS.map((src, i) => (
           <video
             key={src}
@@ -251,7 +253,7 @@ export default function AIImagePage() {
         ))}
         <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-background/10 to-background/30"></div>
       </div>
-      <header className="fixed top-0 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 z-40 flex items-center justify-between md:justify-end px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+      <header className="shrink-0 w-full h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 z-10 flex items-center justify-between md:justify-end px-4 md:px-8 relative" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
         <button onClick={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
           <span className="material-symbols-outlined text-white text-xl">menu</span>
         </button>
@@ -268,7 +270,7 @@ export default function AIImagePage() {
           <ProfileDropdown />
         </div>
       </header>
-      <main style={{ height: 'calc(100vh - 3.5rem)' }} className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)]">
+      <main className="flex-1 overflow-y-auto smooth-scroll relative z-10">
         <div className="relative z-10 h-full p-5 lg:pl-6 lg:pr-0 flex flex-col xl:grid xl:grid-cols-[432px_1fr] gap-4 xl:gap-5 overflow-y-auto">
           {/* LEFT: Composer */}
           <div className="flex flex-col flex-1">
@@ -388,6 +390,8 @@ export default function AIImagePage() {
           </div>
         </div>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
       {showCreditModal && <InsufficientCreditsModal needed={neededCredits} current={credits} onClose={() => setShowCreditModal(false)} />}
     </div>

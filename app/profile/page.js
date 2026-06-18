@@ -72,11 +72,13 @@ export default function ProfilePage() {
   const router = useRouter();
 
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+      <div className="h-screen flex">
       <Sidebar />
+      <div className="flex flex-col flex-1 min-w-0">
       <TopBar />
-      <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+      <main className="flex-1 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 space-y-5">
 
           {/* Profile Header */}
@@ -241,6 +243,8 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
     </div>
   );

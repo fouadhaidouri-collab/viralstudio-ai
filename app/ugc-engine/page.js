@@ -22,10 +22,12 @@ export default function UGCFEnginePage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden no-x-scroll">
+    <div className="h-screen bg-background">
       <SidebarProvider>
+      <div className="h-screen flex">
       <Sidebar />
-      <header className="fixed top-0 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8 z-40" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+      <div className="flex flex-col flex-1 min-w-0">
+      <header className="shrink-0 w-full h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 flex justify-between items-center px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
         <div className="md:hidden">
           <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
             <span className="material-symbols-outlined text-white text-xl">menu</span>
@@ -47,7 +49,7 @@ export default function UGCFEnginePage() {
           <ProfileDropdown />
         </div>
       </header>
-      <main className="fixed top-14 md:top-16 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 p-4 md:p-5 lg:p-6 overflow-y-auto smooth-scroll">
+      <main className="flex-1 overflow-y-auto smooth-scroll p-4 md:p-5 lg:p-6">
         <div className="w-full grid grid-cols-12 gap-4 md:gap-5">
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
             <header>
@@ -215,6 +217,8 @@ export default function UGCFEnginePage() {
           </div>
         </div>
       </main>
+        </div>
+      </div>
       </SidebarProvider>
     </div>
   );

@@ -112,14 +112,16 @@ export default function PricingPage() {
   const [annual, setAnnual] = useState(true);
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
+    <div className="h-screen bg-background">
       <SidebarProvider>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="h-screen flex">
+      <Sidebar />
+      <div className="flex flex-col flex-1 min-w-0 relative">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/10 rounded-full blur-[100px]" />
       </div>
-      <Sidebar />
-      <div className="fixed top-0 ltr:right-0 rtl:left-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
+      <div className="flex-1 overflow-y-auto smooth-scroll relative z-10">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 relative z-10">
           <div className="flex justify-between md:justify-end items-center gap-4 mb-6">
             <button onClick={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all active:scale-90">
@@ -248,8 +250,10 @@ export default function PricingPage() {
               );
             })}
           </div>
+          </div>
         </div>
       </div>
+    </div>
       </SidebarProvider>
     </div>
   );
