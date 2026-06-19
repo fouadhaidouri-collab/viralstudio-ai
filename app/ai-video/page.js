@@ -57,7 +57,7 @@ function ModelDropdown({ label, value, options, onChange, compact, pricingMap, d
           {(() => {
             const p = pricingMap?.[value.label];
             const price = p ? p.unitPrice : 0;
-            return <span className="text-[9px] text-yellow-400 font-medium shrink-0">{(price * durationMultiplier(duration) * resolutionMultiplier(resolution) * USD_TO_CREDIT).toFixed(0)} credit</span>;
+            return price > 0 && <span className="text-[9px] text-yellow-400 font-medium shrink-0">{(price * durationMultiplier(duration) * resolutionMultiplier(resolution) * USD_TO_CREDIT).toFixed(0)} credit</span>;
           })()}
         </span>
         <Icon name="expand_more" className={`text-[10px] text-on-surface-variant shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
@@ -83,7 +83,7 @@ function ModelDropdown({ label, value, options, onChange, compact, pricingMap, d
                   {(() => {
                     const p = pricingMap?.[opt.label];
                     const price = p ? p.unitPrice : 0;
-                    return (
+                    return price > 0 && (
                       <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">{(price * USD_TO_CREDIT).toFixed(0)} credit</span>
                     );
                   })()}
@@ -149,9 +149,11 @@ export default function AIVideoPage() {
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(videoModels[0]);
-  const [aspectRatio, setAspectRatio] = useState(videoAspectRatios[0]);
-  const [resolution, setResolution] = useState(videoResolutions[0]);
-  const [duration, setDuration] = useState(videoDurations[0]);
+  const [modelConfigs, setModelConfigs] = useState({});
+  const currentConfig = modelConfigs[model.label] || { aspectRatio: videoAspectRatios[0], resolution: videoResolutions[0], duration: videoDurations[0] };
+  const updateConfig = (key, value) => {
+    setModelConfigs(prev => ({ ...prev, [model.label]: { ...(prev[model.label] || {}), [key]: value } }));
+  };
   const [videoCount, setVideoCount] = useState(1);
   const [images, setImages] = useState([]);
   const [generating, setGenerating] = useState(false);
@@ -200,14 +202,17 @@ export default function AIVideoPage() {
   const availableDurations = videoDurations.filter(d => caps.durations.includes(d));
 
   useEffect(() => {
+    if (modelConfigs[model.label]) return;
     const c = videoModelCapabilities[model.label];
     if (!c) return;
-    if (c.aspectRatios.length > 0 && !c.aspectRatios.includes(aspectRatio.label)) {
-      const first = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
-      if (first) setAspectRatio(first);
+    const defaults = { aspectRatio: videoAspectRatios[0], resolution: videoResolutions[0], duration: videoDurations[0] };
+    if (c.aspectRatios.length > 0) {
+      const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
+      if (found) defaults.aspectRatio = found;
     }
-    if (!c.resolutions.includes(resolution)) setResolution(c.resolutions[0]);
-    if (!c.durations.includes(duration)) setDuration(c.durations[0]);
+    if (c.resolutions.length > 0) defaults.resolution = c.resolutions[0];
+    if (c.durations.length > 0) defaults.duration = c.durations[0];
+    setModelConfigs(prev => ({ ...prev, [model.label]: defaults }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.label]);
 
@@ -233,7 +238,7 @@ export default function AIVideoPage() {
     const subRes = await fetch("/api/generate-video", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, modelId, aspectRatio: aspectRatio.label }),
+      body: JSON.stringify({ prompt, modelId, aspectRatio: currentConfig.aspectRatio.label }),
     });
 
     if (!subRes.ok) {
@@ -269,7 +274,7 @@ export default function AIVideoPage() {
     const p = pricing?.[model.label];
     const unitPrice = p ? p.unitPrice : 0;
     if (unitPrice) {
-      const totalCost = unitPrice * videoCount * durationMultiplier(duration) * resolutionMultiplier(resolution) * USD_TO_CREDIT;
+      const totalCost = unitPrice * videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution) * USD_TO_CREDIT;
       if (credits < totalCost) {
         setNeededCredits(Math.ceil(totalCost));
         setShowCreditModal(true);
@@ -362,13 +367,13 @@ export default function AIVideoPage() {
               )}
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelDropdown label="AI Model" value={model} options={videoModels} onChange={setModel} compact pricingMap={pricing} duration={duration} resolution={resolution}  />
+                <ModelDropdown label="AI Model" value={model} options={videoModels} onChange={setModel} compact pricingMap={pricing} duration={currentConfig.duration} resolution={currentConfig.resolution}  />
                 <div className={`grid grid-cols-2 gap-2 ${availableAspectRatios.length > 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
                   {availableAspectRatios.length > 0 && (
-                    <Dropdown label="Aspect Ratio" value={aspectRatio.label} options={availableAspectRatios} onChange={(v) => setAspectRatio(v)} compact />
+                    <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} compact />
                   )}
-                  <Dropdown label="Resolution" value={resolution} options={availableResolutions} onChange={setResolution} compact />
-                  <Dropdown label="Duration" value={duration} options={availableDurations} onChange={setDuration} compact />
+                  <Dropdown label="Resolution" value={currentConfig.resolution} options={availableResolutions} onChange={(v) => updateConfig("resolution", v)} compact />
+                  <Dropdown label="Duration" value={currentConfig.duration} options={availableDurations} onChange={(v) => updateConfig("duration", v)} compact />
                   <Dropdown label="Quantity" value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} compact />
                 </div>
                 <button
@@ -383,7 +388,7 @@ export default function AIVideoPage() {
                     <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
                       const p = pricing?.[model.label];
                       const price = p ? p.unitPrice : 0;
-                      return <span className="text-yellow-300/90">({(price * videoCount * durationMultiplier(duration) * resolutionMultiplier(resolution) * USD_TO_CREDIT).toFixed(0)} credits)</span>;
+                      return price > 0 && <span className="text-yellow-300/90">({(price * videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution) * USD_TO_CREDIT).toFixed(0)} credits)</span>;
                     })()}</>
                 )}
                 </button>

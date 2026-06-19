@@ -47,7 +47,7 @@ function ImageModelDropdown({ value, options, onChange, pricingMap }) {
             {(() => {
               const p = pricingMap?.[value.label];
               const price = p ? p.unitPrice : 0;
-              return <span className="text-[9px] text-yellow-400 font-medium shrink-0">{(price * USD_TO_CREDIT).toFixed(0)} credit</span>;
+              return price > 0 && <span className="text-[9px] text-yellow-400 font-medium shrink-0">{(price * USD_TO_CREDIT).toFixed(0)} credit</span>;
             })()}
           </span>
         <Icon name="expand_more" className={`text-[10px] text-on-surface-variant shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
@@ -73,7 +73,7 @@ function ImageModelDropdown({ value, options, onChange, pricingMap }) {
                   {(() => {
                     const p = pricingMap?.[opt.label];
                     const price = p ? p.unitPrice : 0;
-                    return (
+                    return price > 0 && (
                       <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">{(price * USD_TO_CREDIT).toFixed(0)} credit</span>
                     );
                   })()}
@@ -139,8 +139,11 @@ export default function AIImagePage() {
   const router = useRouter();
   const [selectedModel, setSelectedModel] = useState(imageModels[3]);
   const [prompt, setPrompt] = useState("");
-  const [aspectRatio, setAspectRatio] = useState(imageAspectRatios[0]);
-  const [resolution, setResolution] = useState("720p");
+  const [modelConfigs, setModelConfigs] = useState({});
+  const currentConfig = modelConfigs[selectedModel.label] || { aspectRatio: imageAspectRatios[0], resolution: "720p" };
+  const updateConfig = (key, value) => {
+    setModelConfigs(prev => ({ ...prev, [selectedModel.label]: { ...(prev[selectedModel.label] || {}), [key]: value } }));
+  };
   const [imageCount, setImageCount] = useState(1);
   const [images, setImages] = useState([]);
   const [generating, setGenerating] = useState(false);
@@ -176,13 +179,16 @@ export default function AIImagePage() {
   const availableResolutions = imageResolutions.filter(r => caps.resolutions.includes(r));
 
   useEffect(() => {
+    if (modelConfigs[selectedModel.label]) return;
     const c = imageModelCapabilities[selectedModel.label];
     if (!c) return;
-    if (!c.aspectRatios.includes(aspectRatio.label)) {
-      const first = imageAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
-      if (first) setAspectRatio(first);
+    const defaults = { aspectRatio: imageAspectRatios[0], resolution: "720p" };
+    if (c.aspectRatios.length > 0) {
+      const found = imageAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
+      if (found) defaults.aspectRatio = found;
     }
-    if (!c.resolutions.includes(resolution)) setResolution(c.resolutions[0]);
+    if (c.resolutions.length > 0) defaults.resolution = c.resolutions[0];
+    setModelConfigs(prev => ({ ...prev, [selectedModel.label]: defaults }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedModel.label]);
 
@@ -223,7 +229,7 @@ export default function AIImagePage() {
         const subRes = await fetch("/api/generate-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, modelId, aspectRatio: aspectRatio.label, resolution }),
+          body: JSON.stringify({ prompt, modelId, aspectRatio: currentConfig.aspectRatio.label, resolution: currentConfig.resolution }),
         });
 
         if (!subRes.ok) {
@@ -333,8 +339,8 @@ export default function AIImagePage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  <Dropdown label="Aspect Ratio" value={aspectRatio.label} options={availableAspectRatios} onChange={(v) => setAspectRatio(v)} compact />
-                  <Dropdown label="Resolution" value={resolution} options={availableResolutions} onChange={setResolution} compact />
+                  <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} compact />
+                  <Dropdown label="Resolution" value={currentConfig.resolution} options={availableResolutions} onChange={(v) => updateConfig("resolution", v)} compact />
                   <Dropdown label="Quantity" value={String(imageCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setImageCount(Number(v))} compact />
                 </div>
 
@@ -350,7 +356,7 @@ export default function AIImagePage() {
                     <><Icon name="auto_awesome" className="text-sm" /> Generate Image {(() => {
                       const up = pricing?.[selectedModel.label]?.unitPrice || 0;
                       const total = (up * USD_TO_CREDIT * imageCount).toFixed(0);
-                      return <span className="text-yellow-300/90">({total} credits)</span>;
+                      return up > 0 && <span className="text-yellow-300/90">({total} credits)</span>;
                     })()}</>
                   )}
                 </button>
