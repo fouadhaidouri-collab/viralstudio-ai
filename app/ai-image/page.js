@@ -47,7 +47,7 @@ function ImageModelDropdown({ value, options, onChange, pricingMap }) {
             {(() => {
               const p = pricingMap?.[value.label];
               const price = p ? p.unitPrice : 0;
-              return price > 0 && <span className="text-[9px] text-yellow-400 font-medium shrink-0">{(price * USD_TO_CREDIT).toFixed(0)} credit</span>;
+              return <span className="text-[9px] text-yellow-400 font-medium shrink-0">${price.toFixed(2)}</span>;
             })()}
           </span>
         <Icon name="expand_more" className={`text-[10px] text-on-surface-variant shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
@@ -73,8 +73,8 @@ function ImageModelDropdown({ value, options, onChange, pricingMap }) {
                   {(() => {
                     const p = pricingMap?.[opt.label];
                     const price = p ? p.unitPrice : 0;
-                    return price > 0 && (
-                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">{(price * USD_TO_CREDIT).toFixed(0)} credit</span>
+                    return (
+                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">${price.toFixed(2)}</span>
                     );
                   })()}
                   {selected && <Icon name="check" className="text-xs ml-auto text-primary" />}
@@ -355,8 +355,8 @@ export default function AIImagePage() {
                   ) : (
                     <><Icon name="auto_awesome" className="text-sm" /> Generate Image {(() => {
                       const up = pricing?.[selectedModel.label]?.unitPrice || 0;
-                      const total = (up * USD_TO_CREDIT * imageCount).toFixed(0);
-                      return up > 0 && <span className="text-yellow-300/90">({total} credits)</span>;
+                      const total = (up * imageCount).toFixed(2);
+                      return <span className="text-yellow-300/90">(${total})</span>;
                     })()}</>
                   )}
                 </button>
