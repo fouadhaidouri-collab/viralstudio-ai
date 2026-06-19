@@ -32,6 +32,7 @@ function ImageModelDropdown({ value, options, onChange }) {
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const ref = useRef(null);
   const btnRef = useRef(null);
+  const panelRef = useRef(null);
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -39,10 +40,18 @@ function ImageModelDropdown({ value, options, onChange }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    if (open && panelRef.current && btnRef.current) {
+      const h = panelRef.current.offsetHeight;
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.top - h - 7, left: Math.max(10, r.left) });
+    }
+  }, [open]);
+
   const toggle = () => {
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 7, left: Math.max(10, r.left) });
+      setPos({ top: r.top - 300, left: Math.max(10, r.left) });
     }
     setOpen(!open);
   };
@@ -63,6 +72,7 @@ function ImageModelDropdown({ value, options, onChange }) {
       </button>
       {open && typeof document !== "undefined" && createPortal(
         <div
+          ref={panelRef}
           className="fixed animate-dropdown-open z-[99999]"
           onMouseDown={(e) => e.stopPropagation()}
           style={{ top: pos.top, left: pos.left, width: "260px", borderRadius: "18px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
