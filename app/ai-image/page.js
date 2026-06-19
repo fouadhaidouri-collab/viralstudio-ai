@@ -65,19 +65,17 @@ function ImageModelDropdown({ value, options, onChange }) {
         <div
           className="fixed animate-dropdown-open z-[99999]"
           onMouseDown={(e) => e.stopPropagation()}
-          style={{ top: pos.top, left: pos.left, width: "260px", borderRadius: "18px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
+          style={{ top: pos.top, left: pos.left, width: "300px", borderRadius: "24px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
         >
-          <div className="py-2" style={{ maxHeight: "342px", overflowY: "auto" }}>
+          <div className="py-2" style={{ maxHeight: "500px", overflowY: "auto", overflowX: "hidden" }}>
             {options.map((opt) => {
               const selected = opt.label === value.label;
               return (
                 <button
                   key={opt.label}
                   onClick={() => { onChange(opt); setOpen(false); }}
-                  className="w-full flex items-center gap-3 px-5 transition-all duration-150"
-                  style={{ paddingTop: "10px", paddingBottom: "10px", background: selected ? "rgba(139,92,246,0.1)" : "transparent" }}
-                  onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-                  onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = "transparent"; }}
+                  className={`w-full flex items-center gap-3 px-5 transition-all duration-150 ${selected ? "" : "hover:bg-white/[0.04]"}`}
+                  style={{ paddingTop: "12px", paddingBottom: "12px", background: selected ? "rgba(139,92,246,0.15)" : "transparent" }}
                 >
                   <span className="text-base flex-shrink-0" role="img">{opt.icon}</span>
                   <span className="text-xs font-semibold" style={{ color: selected ? "#a78bfa" : "#ffffff" }}>{opt.label}</span>
