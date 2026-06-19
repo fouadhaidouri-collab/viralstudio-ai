@@ -202,17 +202,33 @@ export default function AIVideoPage() {
   const availableDurations = videoDurations.filter(d => caps.durations.includes(d));
 
   useEffect(() => {
-    if (modelConfigs[model.label]) return;
     const c = videoModelCapabilities[model.label];
     if (!c) return;
-    const defaults = { aspectRatio: videoAspectRatios[0], resolution: videoResolutions[0], duration: videoDurations[0] };
-    if (c.aspectRatios.length > 0) {
-      const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
-      if (found) defaults.aspectRatio = found;
+    const existing = modelConfigs[model.label];
+    if (!existing) {
+      const defaults = { aspectRatio: videoAspectRatios[0], resolution: videoResolutions[0], duration: videoDurations[0] };
+      if (c.aspectRatios.length > 0) {
+        const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
+        if (found) defaults.aspectRatio = found;
+      }
+      if (c.resolutions.length > 0) defaults.resolution = c.resolutions[0];
+      if (c.durations.length > 0) defaults.duration = c.durations[0];
+      setModelConfigs(prev => ({ ...prev, [model.label]: defaults }));
+      return;
     }
-    if (c.resolutions.length > 0) defaults.resolution = c.resolutions[0];
-    if (c.durations.length > 0) defaults.duration = c.durations[0];
-    setModelConfigs(prev => ({ ...prev, [model.label]: defaults }));
+    let changed = false;
+    const updated = { ...existing };
+    if (c.aspectRatios.length > 0 && !c.aspectRatios.includes(existing.aspectRatio?.label)) {
+      const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
+      if (found) { updated.aspectRatio = found; changed = true; }
+    }
+    if (c.resolutions.length > 0 && !c.resolutions.includes(existing.resolution)) {
+      updated.resolution = c.resolutions[0]; changed = true;
+    }
+    if (c.durations.length > 0 && !c.durations.includes(existing.duration)) {
+      updated.duration = c.durations[0]; changed = true;
+    }
+    if (changed) setModelConfigs(prev => ({ ...prev, [model.label]: updated }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.label]);
 

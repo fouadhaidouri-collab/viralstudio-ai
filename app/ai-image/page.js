@@ -179,16 +179,29 @@ export default function AIImagePage() {
   const availableResolutions = imageResolutions.filter(r => caps.resolutions.includes(r));
 
   useEffect(() => {
-    if (modelConfigs[selectedModel.label]) return;
     const c = imageModelCapabilities[selectedModel.label];
     if (!c) return;
-    const defaults = { aspectRatio: imageAspectRatios[0], resolution: "720p" };
-    if (c.aspectRatios.length > 0) {
-      const found = imageAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
-      if (found) defaults.aspectRatio = found;
+    const existing = modelConfigs[selectedModel.label];
+    if (!existing) {
+      const defaults = { aspectRatio: imageAspectRatios[0], resolution: "720p" };
+      if (c.aspectRatios.length > 0) {
+        const found = imageAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
+        if (found) defaults.aspectRatio = found;
+      }
+      if (c.resolutions.length > 0) defaults.resolution = c.resolutions[0];
+      setModelConfigs(prev => ({ ...prev, [selectedModel.label]: defaults }));
+      return;
     }
-    if (c.resolutions.length > 0) defaults.resolution = c.resolutions[0];
-    setModelConfigs(prev => ({ ...prev, [selectedModel.label]: defaults }));
+    let changed = false;
+    const updated = { ...existing };
+    if (c.aspectRatios.length > 0 && !c.aspectRatios.includes(existing.aspectRatio?.label)) {
+      const found = imageAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
+      if (found) { updated.aspectRatio = found; changed = true; }
+    }
+    if (c.resolutions.length > 0 && !c.resolutions.includes(existing.resolution)) {
+      updated.resolution = c.resolutions[0]; changed = true;
+    }
+    if (changed) setModelConfigs(prev => ({ ...prev, [selectedModel.label]: updated }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedModel.label]);
 

@@ -11,14 +11,14 @@ export const videoResolutions = ["720p", "1080p"];
 export const videoDurations = ["5 seconds", "8 seconds", "10 seconds", "15 seconds"];
 
 export const videoModels = [
-  { label: "Veo 3.1 Fast", icon: "videocam", color: "#7c3aed", fal_model: "fal-ai/veo3.1/fast", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds", "10 seconds", "15 seconds"] } },
-  { label: "Grok Imagine Video", icon: "psychology", color: "#06b6d4", fal_model: "xai/grok-imagine-video/text-to-video", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds", "10 seconds", "15 seconds"] } },
+  { label: "Veo 3.1 Fast", icon: "videocam", color: "#7c3aed", fal_model: "fal-ai/veo3.1/fast", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds"] } },
+  { label: "Grok Imagine Video", icon: "psychology", color: "#06b6d4", fal_model: "xai/grok-imagine-video/text-to-video", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
   { label: "SeeDance 1.5", icon: "directions_run", color: "#f59e0b", fal_model: "bytedance/seedance/v1.5/pro/text-to-video", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
   { label: "SeeDance 2.0", icon: "directions_run", color: "#f97316", fal_model: "bytedance/seedance-2.0/text-to-video", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
   { label: "Kling 3.0", icon: "smart_display", color: "#ef4444", fal_model: "kling-video/v3/pro/text-to-video", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
-  { label: "Runway Gen 4.5", icon: "run_circle", color: "#10b981", fal_model: "fal-ai/runway-gen-3", options: { aspect_ratio: [], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds", "10 seconds", "15 seconds"] } },
-  { label: "Luma Ray 2", icon: "flare", color: "#8b5cf6", fal_model: "fal-ai/luma-dream-machine", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds", "10 seconds", "15 seconds"] } },
-  { label: "Pika 2.1", icon: "pets", color: "#ec4899", fal_model: "fal-ai/pika", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds", "10 seconds", "15 seconds"] } },
+  { label: "Runway Gen 4.5", icon: "run_circle", color: "#10b981", fal_model: "fal-ai/runway-gen-3", options: { aspect_ratio: [], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds", "10 seconds"] } },
+  { label: "Luma Ray 2", icon: "flare", color: "#8b5cf6", fal_model: "fal-ai/luma-dream-machine", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
+  { label: "Pika 2.1", icon: "pets", color: "#ec4899", fal_model: "fal-ai/pika", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
   { label: "Happy Horse", icon: "emoji_nature", color: "#14b8a6", fal_model: "alibaba/happy-horse/text-to-video", options: { aspect_ratio: ["Cinematic 16:9", "Instagram 9:16", "Square 1:1", "Portrait 4:5"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
 ];
 
