@@ -70,18 +70,18 @@ function ModelDropdown({ label, value, options, onChange, compact, pricingMap, d
   const toggle = () => {
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 7, left: Math.max(10, r.left) });
+      setPos({ bottom: window.innerHeight - r.top + 7, left: Math.max(10, r.left) });
     }
     setOpen(!open);
   };
 
   return (
     <div ref={ref} className="w-full">
-      {!compact && <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium" style={{ fontFamily: 'Geist, sans-serif' }}>{label}</div>}
+      <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium" style={{ fontFamily: 'Geist, sans-serif' }}>{label}</div>
       <button
         ref={btnRef}
         onClick={toggle}
-        className={`w-full flex items-center justify-between gap-1.5 bg-surface-container-lowest border border-surface-border rounded-xl hover:border-primary/50 transition-all ${compact ? 'px-2 py-1' : 'px-3.5 py-3 text-sm'}`}
+        className={`w-full flex items-center justify-between gap-1.5 bg-surface-container-lowest border border-surface-border rounded-xl hover:border-primary/50 transition-all ${compact ? 'px-2.5 py-1.5' : 'px-3.5 py-3 text-sm'}`}
       >
         <span className="flex items-center gap-1.5 truncate min-w-0">
           <Icon name={value.icon} className="text-sm flex-shrink-0" style={{ color: value.color }} />
@@ -98,7 +98,7 @@ function ModelDropdown({ label, value, options, onChange, compact, pricingMap, d
           <div
             className="fixed animate-dropdown-open z-[99999]"
             onMouseDown={(e) => e.stopPropagation()}
-            style={{ top: pos.top, left: pos.left, width: "300px", borderRadius: "24px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
+            style={{ bottom: pos.bottom, left: pos.left, width: "300px", borderRadius: "24px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
         >
             <div className="py-2" style={{ maxHeight: "500px", overflowY: "auto", overflowX: "hidden" }}>
             {options.map((opt) => {
@@ -117,7 +117,7 @@ function ModelDropdown({ label, value, options, onChange, compact, pricingMap, d
                     const price = p ? p.unitPrice : opt.fallbackPrice;
                     const unit = p ? p.unit : "video";
                     return price ? (
-                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">{(price * USD_TO_CREDIT).toFixed(0)}</span>
+                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">{(price * USD_TO_CREDIT).toFixed(0)} cr</span>
                     ) : null;
                   })()}
                   {selected && <Icon name="check" className="text-xs ml-auto text-primary" />}
@@ -144,10 +144,10 @@ function Dropdown({ label, value, options, onChange, compact }) {
 
   return (
     <div ref={ref} className="relative w-full">
-      {!compact && <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium" style={{ fontFamily: 'Geist, sans-serif' }}>{label}</div>}
+      <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium" style={{ fontFamily: 'Geist, sans-serif' }}>{label}</div>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-2 bg-surface-container-lowest border border-surface-border rounded-lg hover:border-primary/50 transition-colors ${compact ? 'px-2 py-1.5 text-xs' : 'px-3 py-2.5 text-sm'}`}
+        className={`w-full flex items-center justify-between gap-2 bg-surface-container-lowest border border-surface-border rounded-lg hover:border-primary/50 transition-colors ${compact ? 'px-2.5 py-2 text-xs' : 'px-3 py-2.5 text-sm'}`}
       >
         <span className="truncate flex items-center gap-1.5">
           {(() => {

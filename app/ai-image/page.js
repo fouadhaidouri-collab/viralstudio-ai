@@ -42,7 +42,7 @@ function ImageModelDropdown({ value, options, onChange }) {
   const toggle = () => {
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 7, left: Math.max(10, r.left) });
+      setPos({ bottom: window.innerHeight - r.top + 7, left: Math.max(10, r.left) });
     }
     setOpen(!open);
   };
@@ -52,7 +52,7 @@ function ImageModelDropdown({ value, options, onChange }) {
       <button
         ref={btnRef}
         onClick={toggle}
-        className="w-full flex items-center justify-between gap-1.5 bg-surface-container-lowest border border-surface-border rounded-xl hover:border-primary/50 transition-all px-2 py-1"
+        className="w-full flex items-center justify-between gap-1.5 bg-surface-container-lowest border border-surface-border rounded-xl hover:border-primary/50 transition-all px-2.5 py-1.5"
       >
         <span className="flex items-center gap-1.5 truncate min-w-0">
           <span className="text-[11px] flex-shrink-0" role="img">{value.icon}</span>
@@ -65,7 +65,7 @@ function ImageModelDropdown({ value, options, onChange }) {
         <div
           className="fixed animate-dropdown-open z-[99999]"
           onMouseDown={(e) => e.stopPropagation()}
-          style={{ top: pos.top, left: pos.left, width: "300px", borderRadius: "24px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
+          style={{ bottom: pos.bottom, left: pos.left, width: "300px", borderRadius: "24px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
         >
           <div className="py-2" style={{ maxHeight: "500px", overflowY: "auto", overflowX: "hidden" }}>
             {options.map((opt) => {
@@ -104,10 +104,10 @@ function Dropdown({ label, value, options, onChange, compact }) {
 
   return (
     <div ref={ref} className="relative w-full">
-      {!compact && <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium">{label}</div>}
+      <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium">{label}</div>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-2 bg-surface-container-lowest border border-surface-border rounded-lg hover:border-primary/50 transition-colors ${compact ? 'px-2 py-1.5 text-xs' : 'px-3 py-2.5 text-sm'}`}
+        className={`w-full flex items-center justify-between gap-2 bg-surface-container-lowest border border-surface-border rounded-lg hover:border-primary/50 transition-colors ${compact ? 'px-2.5 py-2 text-xs' : 'px-3 py-2.5 text-sm'}`}
       >
         <span className="truncate flex items-center gap-1.5">
           {(() => {
