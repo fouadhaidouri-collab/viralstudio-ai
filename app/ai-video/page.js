@@ -383,7 +383,7 @@ export default function AIVideoPage() {
                     <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
                       const p = pricing?.[model.label];
                       const price = p ? p.unitPrice : 0;
-                      return price ? <span className="text-yellow-300/90">({(price * videoCount * durationMultiplier(duration) * resolutionMultiplier(resolution) * USD_TO_CREDIT).toFixed(0)} credits)</span> : null;
+                      return <span className="text-yellow-300/90">({(price * videoCount * durationMultiplier(duration) * resolutionMultiplier(resolution) * USD_TO_CREDIT).toFixed(0)} credits)</span>;
                     })()}</>
                 )}
                 </button>
