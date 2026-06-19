@@ -57,7 +57,7 @@ function ModelDropdown({ label, value, options, onChange, compact, pricingMap, d
           {(() => {
             const p = pricingMap?.[value.label];
             const price = p ? p.unitPrice : 0;
-            return <span className="text-[9px] text-yellow-400 font-medium shrink-0">${(price * durationMultiplier(duration) * resolutionMultiplier(resolution)).toFixed(2)}</span>;
+            return <span className="text-[9px] text-yellow-400 font-medium shrink-0">${(price * durationMultiplier(duration) * resolutionMultiplier(resolution))}</span>;
           })()}
         </span>
         <Icon name="expand_more" className={`text-[10px] text-on-surface-variant shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
@@ -84,7 +84,7 @@ function ModelDropdown({ label, value, options, onChange, compact, pricingMap, d
                     const p = pricingMap?.[opt.label];
                     const price = p ? p.unitPrice : 0;
                     return (
-                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">${price.toFixed(2)}</span>
+                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">${price}</span>
                     );
                   })()}
                   {selected && <Icon name="check" className="text-xs ml-auto text-primary" />}
@@ -182,7 +182,7 @@ export default function AIVideoPage() {
 
   useEffect(() => {
     const ids = videoModels.map(m => m.fal_model).join(",");
-    fetch(`/api/model-pricing?endpoint_ids=${ids}`)
+    fetch(`/api/model-pricing?endpoint_ids=${encodeURIComponent(ids)}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.prices) {
@@ -388,7 +388,7 @@ export default function AIVideoPage() {
                     <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
                       const p = pricing?.[model.label];
                       const price = p ? p.unitPrice : 0;
-                      return <span className="text-yellow-300/90">(${(price * videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution)).toFixed(2)})</span>;
+                      return <span className="text-yellow-300/90">(${(price * videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution))})</span>;
                     })()}</>
                 )}
                 </button>

@@ -11,23 +11,25 @@ export async function GET(request) {
     return Response.json({ error: "Missing endpoint_ids" }, { status: 400 });
   }
 
-  const res = await fetch(
-    `https://api.fal.ai/v1/models/pricing?endpoint_id=${endpointIds}`,
-    {
-      headers: { Authorization: `Key ${FAL_KEY}` },
-    }
-  );
-
-  if (!res.ok) {
-    const text = await res.text();
-    return Response.json({ error: `fal.ai error (${res.status}): ${text}` }, { status: res.status });
-  }
-
-  const data = await res.json();
-
+  const ids = endpointIds.split(",").filter(Boolean);
   const pricingMap = {};
-  for (const p of data.prices) {
-    pricingMap[p.endpoint_id] = { unitPrice: p.unit_price, unit: p.unit, currency: p.currency };
+
+  for (const eid of ids) {
+    try {
+      const url = `https://api.fal.ai/v1/models/pricing?endpoint_id=${encodeURIComponent(eid)}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Key ${FAL_KEY}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.prices && data.prices.length > 0) {
+          const p = data.prices[0];
+          pricingMap[eid] = { unitPrice: p.unit_price, unit: p.unit, currency: p.currency };
+        }
+      }
+    } catch {
+      // skip failed endpoint
+    }
   }
 
   return Response.json({ prices: pricingMap });

@@ -47,7 +47,7 @@ function ImageModelDropdown({ value, options, onChange, pricingMap }) {
             {(() => {
               const p = pricingMap?.[value.label];
               const price = p ? p.unitPrice : 0;
-              return <span className="text-[9px] text-yellow-400 font-medium shrink-0">${price.toFixed(2)}</span>;
+              return <span className="text-[9px] text-yellow-400 font-medium shrink-0">${price}</span>;
             })()}
           </span>
         <Icon name="expand_more" className={`text-[10px] text-on-surface-variant shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
@@ -74,7 +74,7 @@ function ImageModelDropdown({ value, options, onChange, pricingMap }) {
                     const p = pricingMap?.[opt.label];
                     const price = p ? p.unitPrice : 0;
                     return (
-                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">${price.toFixed(2)}</span>
+                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">${price}</span>
                     );
                   })()}
                   {selected && <Icon name="check" className="text-xs ml-auto text-primary" />}
@@ -160,7 +160,7 @@ export default function AIImagePage() {
 
   useEffect(() => {
     const ids = imageModels.map(m => m.fal_model).join(",");
-    fetch(`/api/model-pricing?endpoint_ids=${ids}`)
+    fetch(`/api/model-pricing?endpoint_ids=${encodeURIComponent(ids)}`)
       .then(r => r.json())
       .then(data => {
         if (data.prices) {
@@ -355,8 +355,7 @@ export default function AIImagePage() {
                   ) : (
                     <><Icon name="auto_awesome" className="text-sm" /> Generate Image {(() => {
                       const up = pricing?.[selectedModel.label]?.unitPrice || 0;
-                      const total = (up * imageCount).toFixed(2);
-                      return <span className="text-yellow-300/90">(${total})</span>;
+                      return <span className="text-yellow-300/90">(${up * imageCount})</span>;
                     })()}</>
                   )}
                 </button>
