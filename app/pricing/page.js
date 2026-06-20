@@ -128,7 +128,7 @@ export default function PricingPage() {
       <div className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 relative z-10">
           <div className="flex justify-between md:justify-end items-center gap-4 mb-6">
-            <button onClick={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all" style={{ touchAction: 'manipulation' }}>
+            <button onPointerDown={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all" style={{ touchAction: 'manipulation' }}>
               <Icon name="menu" className="text-white text-xl" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
