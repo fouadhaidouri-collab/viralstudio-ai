@@ -97,15 +97,13 @@ export default function Sidebar() {
       </div>
 
       {/* Mobile sidebar - overlay */}
-      {isMobileOpen && (
-        <div className="md:hidden">
-          <div className="mobile-sidebar-overlay" onClick={() => setMobileOpen(false)} />
-          <div className="fixed inset-0 z-[70] flex animate-slide-in-left">
-            <SidebarContent />
-            <div className="flex-1" onClick={() => setMobileOpen(false)} />
-          </div>
+      <div className={`md:hidden ${isMobileOpen ? '' : 'pointer-events-none'}`}>
+        <div className={`mobile-sidebar-overlay transition-opacity duration-300 ${isMobileOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setMobileOpen(false)} />
+        <div className={`fixed inset-0 z-[70] flex transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <SidebarContent />
+          <div className="flex-1" onClick={() => setMobileOpen(false)} />
         </div>
-      )}
+      </div>
 
       <style jsx global>{`
         .sidebar-link-text {
