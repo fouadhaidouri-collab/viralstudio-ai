@@ -4,31 +4,35 @@
     "unit": "seconds",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:57:20.769Z"
+    "last_synced_at": "2026-06-20T20:07:35.377Z"
   },
   "xai/grok-imagine-video/image-to-video": {
     "unit_price": 0.05,
     "unit": "seconds",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:03.189Z"
+    "last_synced_at": "2026-06-20T20:07:31.908Z"
   },
   "fal-ai/bytedance/seedance/v1.5/pro/image-to-video": {
-    "unit_price": 0.007,
-    "unit": "units",
+    "unit_price": 1.2,
+    "unit": "1m tokens",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:05.453Z"
+    "last_synced_at": "2026-06-20T20:07:32.455Z"
   },
   "bytedance/seedance-2.0/image-to-video": {
     "unit_price": 0.014,
     "unit": "units",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:07.720Z"
+    "last_synced_at": "2026-06-20T20:07:32.892Z"
   },
   "fal-ai/kling-video/v3/standard/image-to-video": {
-    "unit_price": 0.1,
+    "unit_price": 0.14,
     "unit": "seconds",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:09.948Z"
+    "last_synced_at": "2026-06-20T20:07:33.304Z"
   },
   "runway/gen4.5": {
     "unit_price": 0.05,
@@ -38,27 +42,31 @@
   },
   "fal-ai/luma-dream-machine/ray-2": {
     "unit_price": 0.5,
-    "unit": "videos",
+    "unit": "5 seconds",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:14.559Z"
+    "last_synced_at": "2026-06-20T20:07:34.213Z"
   },
   "fal-ai/recraft-20b": {
     "unit_price": 0.0219,
     "unit": "images",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:23.557Z"
+    "last_synced_at": "2026-06-20T17:31:29.840Z"
   },
   "fal-ai/pika/v2.1/image-to-video": {
-    "unit_price": 0.00017,
-    "unit": "compute seconds",
+    "unit_price": 0.4,
+    "unit": "videos",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:37.396Z"
+    "last_synced_at": "2026-06-20T20:07:34.593Z"
   },
   "alibaba/happy-horse/image-to-video": {
     "unit_price": 0.14,
     "unit": "seconds",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:49:56.401Z"
+    "last_synced_at": "2026-06-20T20:07:34.920Z"
   },
   "fal-ai/imagen-3": {
     "unit_price": 0.04,
@@ -71,13 +79,14 @@
     "unit": "megapixels",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:57:20.982Z"
+    "last_synced_at": "2026-06-20T17:31:29.230Z"
   },
   "fal-ai/ideogram/v2": {
     "unit_price": 0.08,
     "unit": "images",
+    "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-19T06:48:14.481Z"
+    "last_synced_at": "2026-06-20T17:31:30.317Z"
   },
   "fal-ai/stable-diffusion-v3": {
     "unit_price": 0.01,

@@ -1,0 +1,17 @@
+export const mockLogs = [
+  { id: 'log_001', action: 'admin_login', type: 'login', user_id: 'usr_001', admin_id: 'usr_001', severity: 'info', details: 'Admin Alex Virale logged in', created_at: '2026-06-20T14:30:00Z' },
+  { id: 'log_002', action: 'user_generation', type: 'user', user_id: 'usr_002', admin_id: null, severity: 'info', details: 'Sarah Johnson generated AI Video (3 credits)', created_at: '2026-06-20T10:00:00Z' },
+  { id: 'log_003', action: 'credit_purchase', type: 'credit', user_id: 'usr_003', admin_id: null, severity: 'info', details: 'Michael Chen purchased 5000 credits', created_at: '2026-06-19T00:00:00Z' },
+  { id: 'log_004', action: 'payment_received', type: 'payment', user_id: 'usr_008', admin_id: null, severity: 'info', details: 'Anna Martinez paid $79 for Pro plan', created_at: '2026-06-12T07:00:00Z' },
+  { id: 'log_005', action: 'api_failure', type: 'api', user_id: null, admin_id: null, severity: 'error', details: 'FAL API timeout on veo3.1/fast - request req_abc123', created_at: '2026-06-20T10:05:00Z' },
+  { id: 'log_006', action: 'model_error', type: 'model', user_id: 'usr_003', admin_id: null, severity: 'error', details: 'Kling 1.5 model unavailable - returned 503', created_at: '2026-06-19T14:00:00Z' },
+  { id: 'log_007', action: 'user_suspended', type: 'admin', user_id: 'usr_005', admin_id: 'usr_001', severity: 'warning', details: 'James Rodriguez suspended by Alex Virale - TOS violation', created_at: '2026-06-15T09:00:00Z' },
+  { id: 'log_008', action: 'credit_refund', type: 'credit', user_id: 'usr_005', admin_id: 'usr_015', severity: 'info', details: 'Refunded 3 credits to James Rodriguez - failed generation', created_at: '2026-06-17T00:00:00Z' },
+  { id: 'log_009', action: 'admin_action', type: 'admin', user_id: null, admin_id: 'usr_015', severity: 'info', details: 'Chris Evans updated AI Tool: Image Lab credit cost', created_at: '2026-06-16T11:00:00Z' },
+  { id: 'log_010', action: 'login_failed', type: 'login', user_id: 'usr_009', admin_id: null, severity: 'warning', details: 'Failed login attempt for Tom Wilson - banned account', created_at: '2026-06-19T08:00:00Z' },
+  { id: 'log_011', action: 'payment_failed', type: 'payment', user_id: 'usr_005', admin_id: null, severity: 'error', details: 'James Rodriguez PayPal payment failed - insufficient funds', created_at: '2026-05-01T08:00:00Z' },
+  { id: 'log_012', action: 'admin_action', type: 'admin', user_id: null, admin_id: 'usr_001', severity: 'info', details: 'Alex Virale updated Plan: Pro monthly price changed to $79', created_at: '2026-06-14T10:00:00Z' },
+  { id: 'log_013', action: 'user_signup', type: 'user', user_id: 'usr_013', admin_id: null, severity: 'info', details: 'New user registered: Kevin Brown (Free plan)', created_at: '2026-06-01T11:00:00Z' },
+  { id: 'log_014', action: 'api_failure', type: 'api', user_id: null, admin_id: null, severity: 'error', details: 'OpenRouter API rate limit hit - 429 too many requests', created_at: '2026-06-20T08:35:00Z' },
+  { id: 'log_015', action: 'generation_failed', type: 'user', user_id: 'usr_004', admin_id: null, severity: 'warning', details: 'Emma Williams generation failed - invalid prompt parameters', created_at: '2026-06-18T15:05:00Z' },
+];

@@ -1,13 +1,13 @@
 import {
   AlertCircle, AlertTriangle, AppWindow, ArrowLeft, ArrowRight, ArrowUpRight,
-  Award, BadgeCheck, BarChart3, Bitcoin, Bot, BrainCircuit, Building2, Calendar, Check, CheckCircle, ChevronDown, CircleDot,
-  Clapperboard, Clock, CloudUpload, Copy, CreditCard, Crop, Download, Eye,
-  FileVideo, Folder, FolderOpen, Footprints, Grid3x3, Heart, History, Hourglass,
-  Image, Info, Languages, LayoutDashboard, Leaf, ListChecks, Lock, Mail, Mars, Menu,
-  MessageCircle, MessageSquare, Mic, Monitor, Music,   PawPrint, Pencil, Phone, Play,
+  Award, BadgeCheck, BarChart3, Bitcoin, Bot, BrainCircuit, Building2, Calendar, Check, CheckCircle, ChevronDown, ChevronRight, CircleDot,
+  Clapperboard, Clock, CloudUpload, Copy, CreditCard, Crop, Download, Eye, ExternalLink,
+  FileVideo, Folder, FolderOpen, Footprints, Gift, Globe, Grid3x3, Heart, History, Hourglass,
+  Image, Inbox, Info, Key, Languages, LayoutDashboard, Leaf, ListChecks, Lock, Mail, Mars, Menu,
+  MessageCircle, MessageSquare, Mic, Monitor, MoreHorizontal, Music,   PawPrint, Pencil, Phone, Play,
   PlayCircle, Plus, RefreshCw, RotateCcw, Scissors, Search, Send, Settings,
-  Share2, Shield, Sliders, Smartphone, Sparkles, Square, Star, Trash2, Trophy, Tv, User,
-  UserPlus, Venus, Video, Timer, Headphones, X, Zap
+  Share2, Shield, Sliders, Smartphone, Sparkles, Square, Star, Trash2, TrendingUp, Trophy, Tv, User,
+  UserPlus, Venus, Video, Timer, Headphones, Webhook, X, Zap
 } from "lucide-react";
 
 const iconMap = {
@@ -28,6 +28,7 @@ const iconMap = {
   chat: MessageSquare,
   chat_bubble: MessageCircle,
   check: Check,
+  chevron_right: ChevronRight,
   check_circle: CheckCircle,
   checklist: ListChecks,
   close: X,
@@ -63,13 +64,16 @@ const iconMap = {
   is_favorite: Star,
   hourglass_top: Hourglass,
   image: Image,
+  inbox: Inbox,
+  info: Info,
+  key: Key,
   language: Languages,
   images: Image,
-  info: Info,
   lock: Lock,
   mail: Mail,
   male: Mars,
   menu: Menu,
+  more_horiz: MoreHorizontal,
   movie: Video,
   music_note: Music,
   north_east: ArrowUpRight,
@@ -102,6 +106,11 @@ const iconMap = {
   video_file: FileVideo,
   videocam: Video,
   visibility: Eye,
+  external_link: ExternalLink,
+  gift: Gift,
+  globe: Globe,
+  trending_up: TrendingUp,
+  webhook: Webhook,
   workspace_premium: Award,
 };
 

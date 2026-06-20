@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
+import { useAuth } from "../lib/AuthContext";
 import Icon from "./Icon";
 
 const homeItem = { href: "/", label: "Home", icon: "dashboard" };
@@ -10,14 +11,12 @@ const toolItems = [
   { href: "/ai-video", label: "AI Video", icon: "movie" },
   { href: "/chat-ai", label: "Chat AI", icon: "chat" },
   { href: "/ai-image", label: "Image Lab", icon: "image" },
-  { href: "/ugc-engine", label: "UGC Engine", icon: "record_voice_over" },
-  { href: "/hook-gen", label: "Hook Gen", icon: "auto_awesome" },
-  { href: "/clipping", label: "Clipping", icon: "content_cut" },
 ];
 
 function SidebarContent() {
   const pathname = usePathname();
   const { setMobileOpen } = useSidebar();
+  const { user } = useAuth();
 
   const handleNav = () => setMobileOpen(false);
 
@@ -73,6 +72,20 @@ function SidebarContent() {
             </Link>
           );
         })}
+        {user && (
+          <Link
+            href="/admin"
+            onClick={handleNav}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-[0.97] ${
+              pathname.startsWith("/admin")
+                ? "primary-gradient text-white shadow-lg shadow-primary/30"
+                : "text-on-surface-variant hover:bg-[rgba(255,255,255,0.04)] hover:text-white hover:translate-x-0.5"
+            }`}
+          >
+            <Icon name="settings" className="shrink-0" size={20} />
+            <span className="sidebar-link-text flex-1">Admin Panel</span>
+          </Link>
+        )}
       </nav>
       <div className="mt-auto pt-4 border-t border-surface-border/40 px-2">
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-surface-container-low border border-surface-border/40" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' }}>

@@ -45,33 +45,6 @@ const features = [
     bg: "bg-secondary/20",
     btn: "Open Image Lab",
   },
-  {
-    href: "/ugc-engine",
-    title: "UGC Engine",
-    desc: "Create realistic AI avatars and voiceovers for authentic-feeling user content.",
-    icon: "record_voice_over",
-    color: "text-tertiary",
-    bg: "bg-tertiary/20",
-    btn: "Design Avatar",
-  },
-  {
-    href: "/hook-gen",
-    title: "Hook Gen",
-    desc: "Optimize your video intros with AI hooks designed for maximum retention.",
-    icon: "auto_awesome",
-    color: "text-primary",
-    bg: "bg-primary/20",
-    btn: "Optimize Script",
-  },
-  {
-    href: "/clipping",
-    title: "Clipping",
-    desc: "Automatically extract high-engagement vertical clips from long-form content.",
-    icon: "content_cut",
-    color: "text-accent-orange",
-    bg: "bg-accent-orange/20",
-    btn: "Process Video",
-  },
 ];
 
 export default function Dashboard() {

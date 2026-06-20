@@ -80,9 +80,7 @@ export default function LandingPage() {
                   { icon: "🎬", color: "rgba(168,85,247,0.12)", text: "#a855f7", title: "AI Video Studio", desc: "Generate high-quality cinematic clips from text prompts, with professional transitions and effects." },
                   { icon: "📷", color: "rgba(6,182,212,0.12)", text: "#06b6d4", title: "Image Lab", desc: "Ultra-realistic 8K image generation for thumbnails, covers, and conceptual art in any style." },
                   { icon: "🧠", color: "rgba(250,204,21,0.12)", text: "#facc15", title: "Chat AI Assistant", desc: "Intelligent assistant that helps you brainstorm, script, and refine your content strategy." },
-                  { icon: "✏️", color: "rgba(239,68,68,0.12)", text: "#ef4444", title: "Hook Generator", desc: "Science-backed hook frameworks that maximize retention and engagement from the first second." },
-                  { icon: "👤", color: "rgba(16,185,129,0.12)", text: "#10b981", title: "UGC Engine", desc: "Create realistic AI avatars and voiceovers for authentic-feeling user-generated content." },
-                  { icon: "✂️", color: "rgba(139,92,246,0.12)", text: "#8b5cf6", title: "Auto Clipping", desc: "Automatically extract high-engagement vertical clips from long-form content with one click." },
+
                 ].map((f) => (
                   <div key={f.title} className="rounded-2xl p-6 md:p-7 transition-all hover:translate-y-[-3px]" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4" style={{ background: f.color, color: f.text }}>{f.icon}</div>
