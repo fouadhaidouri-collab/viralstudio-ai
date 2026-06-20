@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
+import AuthGuard from "../components/AuthGuard";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import Icon from "../components/Icon";
 
@@ -118,6 +119,7 @@ export default function PricingPage() {
   }, []);
 
   return (
+    <AuthGuard>
     <div className="h-screen overflow-hidden bg-background">
       <SidebarProvider>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -264,5 +266,6 @@ export default function PricingPage() {
       </div>
       </SidebarProvider>
     </div>
+    </AuthGuard>
   );
 }

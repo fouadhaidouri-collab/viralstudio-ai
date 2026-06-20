@@ -3,11 +3,14 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
+import AuthGuard from "../components/AuthGuard";
 import { SidebarProvider } from "../components/SidebarContext";
+import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
 
 export default function ProfilePage() {
   const [tab, setTab] = useState("overview");
+  const { user, logout } = useAuth();
 
   const sample = {
     email: "user@example.com",
@@ -22,6 +25,7 @@ export default function ProfilePage() {
   ];
 
   return (
+    <AuthGuard>
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
       <Sidebar />
@@ -31,8 +35,8 @@ export default function ProfilePage() {
 
           {/* Profile Header */}
           <div className="glass-card rounded-2xl p-6 md:p-8 border border-white/5 card-glow mb-6" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            <div className="flex items-center gap-5">
-              <div className="relative">
+            <div className="flex items-start gap-5">
+              <div className="relative shrink-0">
                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)' }}>
                   <div className="w-full h-full rounded-full bg-surface flex items-center justify-center">
                     <Icon name="person" className="text-primary" size={32} />
@@ -40,7 +44,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-green-500 border-2 border-surface rounded-full" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <h1 className="text-xl md:text-2xl font-bold text-white truncate">{sample.email}</h1>
                 <div className="flex items-center gap-3 mt-1.5">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary/15 text-primary border border-primary/20">
@@ -49,6 +53,9 @@ export default function ProfilePage() {
                   <span className="text-[11px] text-on-surface-variant">Member since {sample.memberSince}</span>
                 </div>
               </div>
+              <button onClick={() => { logout(); }} className="shrink-0 px-4 py-2 rounded-xl text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-400/10 border border-red-400/20 transition-all flex items-center gap-1.5">
+                <Icon name="logout" size={14} /> Logout
+              </button>
             </div>
           </div>
 
@@ -210,5 +217,6 @@ export default function ProfilePage() {
       </main>
       </SidebarProvider>
     </div>
+    </AuthGuard>
   );
 }

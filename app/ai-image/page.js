@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
+import AuthGuard from "../components/AuthGuard";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 import Icon from "../components/Icon";
@@ -324,6 +325,7 @@ export default function AIImagePage() {
   };
 
   return (
+    <AuthGuard>
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
       <Sidebar />
@@ -480,5 +482,6 @@ export default function AIImagePage() {
       </SidebarProvider>
       {showCreditModal && <InsufficientCreditsModal needed={neededCredits} available={credits} onClose={() => setShowCreditModal(false)} />}
     </div>
+    </AuthGuard>
   );
 }

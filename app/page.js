@@ -6,6 +6,7 @@ import Link from "next/link";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import { SidebarProvider } from "./components/SidebarContext";
+import AuthGuard from "./components/AuthGuard";
 import Icon from "./components/Icon";
 
 
@@ -90,6 +91,7 @@ export default function Dashboard() {
     router.push(`/ai-video?${params.toString()}`);
   };
   return (
+    <AuthGuard>
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
         <Sidebar />
@@ -183,5 +185,6 @@ export default function Dashboard() {
       </main>
       </SidebarProvider>
     </div>
+    </AuthGuard>
   );
 }

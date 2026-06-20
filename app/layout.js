@@ -1,4 +1,5 @@
 import "./globals.css";
+import { AuthProvider } from "./lib/AuthContext";
 
 export const metadata = {
   title: "ViralStudio AI | Premium Suite",
@@ -18,7 +19,9 @@ export default function RootLayout({ children }) {
         <style>{`*,*::before,*::after{border-width:0;border-style:solid;border-color:currentColor}hr{border-top-width:1px}`}</style>
       </head>
       <body className="h-full overflow-hidden">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
