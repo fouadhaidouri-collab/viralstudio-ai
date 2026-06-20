@@ -28,6 +28,10 @@ export default function TopBar() {
             <Icon name="add" className="text-yellow-400" size={10} />
           </button>
         </div>
+        <button onClick={() => router.push("/admin")} className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/50 rounded-xl hover:border-primary/30 hover:bg-primary/10 transition-all duration-200 text-xs font-bold text-primary">
+          <Icon name="shield" size={12} />
+          Admin
+        </button>
         <div className="h-6 md:h-8 w-px bg-surface-border/30"></div>
         <ProfileDropdown />
       </div>
