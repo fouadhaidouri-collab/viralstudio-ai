@@ -68,6 +68,7 @@ export default function ProfilePage() {
   const [tab, setTab] = useState("overview");
   const { user, logout } = useAuth();
   const email = user?.email || "user@example.com";
+  const name = user?.name || email.split("@")[0];
   const username = email.split("@")[0];
   const gravatarUrl = useMemo(() => {
     const hash = md5(email.trim().toLowerCase());
@@ -107,8 +108,8 @@ export default function ProfilePage() {
                 <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-green-500 border-2 border-surface rounded-full" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl md:text-2xl font-bold text-white truncate">{email}</h1>
-                <p className="text-sm text-on-surface-variant mt-0.5">@{username}</p>
+                <h1 className="text-xl md:text-2xl font-bold text-white truncate">{name}</h1>
+                <p className="text-sm text-on-surface-variant mt-0.5">{email} · @{username}</p>
                 <div className="flex items-center gap-3 mt-1.5">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary/15 text-primary border border-primary/20">
                     <Icon name="workspace_premium" size={12} /> {sample.plan}

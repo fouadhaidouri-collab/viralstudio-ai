@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import AuthGuard from "../components/AuthGuard";
 import { SidebarProvider } from "../components/SidebarContext";
 import { useSidebar } from "../components/SidebarContext";
+import { useAuth } from "../lib/AuthContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 import Icon from "../components/Icon";
 
@@ -175,6 +175,7 @@ function Dropdown({ label, value, options, onChange, compact }) {
 
 export default function AIVideoPage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(videoModels[0]);
   const [modelConfigs, setModelConfigs] = useState({});
@@ -339,6 +340,7 @@ export default function AIVideoPage() {
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
+    if (!isAuthenticated) { router.push("/login"); return; }
 
     const p = pricing?.[model.label];
     const quantity = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
@@ -368,7 +370,6 @@ export default function AIVideoPage() {
   };
 
   return (
-    <AuthGuard>
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
       <Sidebar />
@@ -521,6 +522,5 @@ export default function AIVideoPage() {
       )}
       </SidebarProvider>
     </div>
-    </AuthGuard>
   );
 }

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import AuthGuard from "../components/AuthGuard";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
+import { useAuth } from "../lib/AuthContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 import Icon from "../components/Icon";
 
@@ -165,6 +165,7 @@ function Dropdown({ label, value, options, onChange, compact }) {
 
 export default function AIImagePage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [selectedModel, setSelectedModel] = useState(imageModels[3]);
   const [prompt, setPrompt] = useState("");
   const [modelConfigs, setModelConfigs] = useState({});
@@ -270,6 +271,7 @@ export default function AIImagePage() {
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
+    if (!isAuthenticated) { router.push("/login"); return; }
     const p = pricing?.[selectedModel.label];
     const needed = calcModelCredits(p?.unitPrice ?? 0.05, imageCount, creditSettings);
     if (needed != null && credits < needed) { setNeededCredits(needed); setShowCreditModal(true); return; }
@@ -325,7 +327,6 @@ export default function AIImagePage() {
   };
 
   return (
-    <AuthGuard>
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
       <Sidebar />
@@ -482,6 +483,5 @@ export default function AIImagePage() {
       </SidebarProvider>
       {showCreditModal && <InsufficientCreditsModal needed={neededCredits} available={credits} onClose={() => setShowCreditModal(false)} />}
     </div>
-    </AuthGuard>
   );
 }
