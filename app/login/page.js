@@ -10,107 +10,43 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const { login, signUp, googleLogin, verifyEmail, isAuthenticated, pendingVerification, verificationEmail, isVerified } = useAuth();
-  const [verifyCode, setVerifyCode] = useState("");
-  const [verifyError, setVerifyError] = useState("");
-  const [verified, setVerified] = useState(false);
+  const { signUp, login, googleLogin, isAuthenticated, loginError, setLoginError, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated && isVerified && !pendingVerification) router.replace("/");
-  }, [isAuthenticated, isVerified, pendingVerification, router]);
+    if (isAuthenticated) router.replace("/");
+  }, [isAuthenticated, router]);
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    setError("");
+    setLoginError("");
     if (!name.trim() || !email.trim() || !password.trim()) {
-      setError("All fields are required");
+      setLoginError("All fields are required");
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setLoginError("Password must be at least 6 characters");
       return;
     }
-    signUp(name, email, password);
+    const ok = await signUp(name, email, password);
+    if (ok) router.push("/");
   };
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    setError("");
+    setLoginError("");
     if (!email.trim() || !password.trim()) {
-      setError("Please enter email and password");
+      setLoginError("Please enter email and password");
       return;
     }
-    login(email, password);
+    const ok = await login(email, password);
+    if (ok) router.push("/");
   };
 
-  const handleVerify = (e) => {
-    e.preventDefault();
-    setVerifyError("");
-    if (!verifyCode.trim()) { setVerifyError("Enter verification code"); return; }
-    const ok = verifyEmail(verifyCode);
-    if (ok) {
-      setVerified(true);
-      setTimeout(() => router.push("/"), 1200);
-    } else {
-      setVerifyError("Invalid code. Try 123456");
-    }
+  const handleGoogle = async () => {
+    const ok = await googleLogin();
+    if (ok) router.push("/");
   };
-
-  const handleGoogle = () => {
-    googleLogin();
-  };
-
-  if (pendingVerification && !verified) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #3b0764 100%)', boxShadow: '0 0 30px rgba(168,85,247,0.4)' }}>
-              <Icon name="mail" className="text-white" size={24} />
-            </div>
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Geist, sans-serif' }}>Verify your email</h1>
-            <p className="text-sm text-on-surface-variant mt-1">We sent a code to <span className="text-white font-medium">{verificationEmail}</span></p>
-          </div>
-
-          <form onSubmit={handleVerify} className="glass-card rounded-2xl p-6 border border-white/5 card-glow space-y-4" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            {verifyError && <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-2.5">{verifyError}</div>}
-            <div>
-              <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Verification Code</label>
-              <input
-                type="text"
-                value={verifyCode}
-                onChange={(e) => setVerifyCode(e.target.value)}
-                placeholder="Enter 6-digit code"
-                className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors tracking-widest text-center text-lg font-mono"
-              />
-            </div>
-            <button type="submit" className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98]">
-              Verify Email
-            </button>
-            <p className="text-xs text-center text-on-surface-variant">
-              Code: <span className="text-primary font-mono">123456</span>
-            </p>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  if (verified) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-            <Icon name="check" className="text-green-400" size={32} />
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Geist, sans-serif' }}>Email Verified!</h1>
-          <p className="text-sm text-on-surface-variant">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
@@ -128,13 +64,13 @@ export default function LoginPage() {
         {/* Tab Switcher */}
         <div className="flex gap-1 mb-6 p-1 bg-surface-container-low rounded-xl border border-surface-border/40">
           <button
-            onClick={() => { setTab("signin"); setError(""); }}
+            onClick={() => { setTab("signin"); setLoginError(""); }}
             className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${tab === "signin" ? "bg-surface-container-high text-white shadow-sm" : "text-on-surface-variant hover:text-white"}`}
           >
             Sign In
           </button>
           <button
-            onClick={() => { setTab("signup"); setError(""); }}
+            onClick={() => { setTab("signup"); setLoginError(""); }}
             className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${tab === "signup" ? "bg-surface-container-high text-white shadow-sm" : "text-on-surface-variant hover:text-white"}`}
           >
             Sign Up
@@ -143,7 +79,12 @@ export default function LoginPage() {
 
         {tab === "signin" ? (
           <form onSubmit={handleSignIn} className="glass-card rounded-2xl p-6 border border-white/5 card-glow space-y-4" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            {error && <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-2.5">{error}</div>}
+            {loginError && (
+              <div className="text-xs bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-2.5 flex items-start gap-2">
+                <Icon name="error" className="text-red-400 shrink-0 mt-0.5" size={14} />
+                <span className="text-red-400">{loginError}</span>
+              </div>
+            )}
             <div>
               <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="user@example.com" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
@@ -158,7 +99,12 @@ export default function LoginPage() {
           </form>
         ) : (
           <form onSubmit={handleSignUp} className="glass-card rounded-2xl p-6 border border-white/5 card-glow space-y-4" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            {error && <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-2.5">{error}</div>}
+            {loginError && (
+              <div className="text-xs bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-2.5 flex items-start gap-2">
+                <Icon name="error" className="text-red-400 shrink-0 mt-0.5" size={14} />
+                <span className="text-red-400">{loginError}</span>
+              </div>
+            )}
             <div>
               <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Name</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
