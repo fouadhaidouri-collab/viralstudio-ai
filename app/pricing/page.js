@@ -270,7 +270,7 @@ export default function PricingPage() {
                         displayFeature = `${num.toLocaleString()} AI credits/${annual ? "year" : "month"}`;
                       } else if (storageMatch && !plan.weekly && annual) {
                         const base = parseInt(storageMatch[1]);
-                        displayFeature = `${Math.round(base * (1 + DISCOUNT))} GB storage`;
+                        displayFeature = `${base * 5} GB storage`;
                       }
                       return (
                       <div key={i} className="flex items-start gap-2.5 group/feature">
