@@ -108,7 +108,7 @@ export default function Dashboard() {
         <TopBar />
         <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6">
-          <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[200px] md:min-h-[540px] flex items-end" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.04))' }}>
+          <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[360px] md:min-h-[540px] flex items-end" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.04))' }}>
             {templates.map((t, i) => (
               <video
                 key={t.video}
