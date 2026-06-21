@@ -243,6 +243,8 @@ export default function PricingPage() {
                       if (!isAuthenticated) { router.push("/login"); return; }
                       if (plan.name === "Enterprise") {
                         window.location.href = "mailto:sales@viralstudio.ai";
+                      } else if (plan.weekly) {
+                        router.push(`/pay?plan=${plan.name.toLowerCase()}&billing=weekly`);
                       } else {
                         router.push(`/pay?plan=${plan.name.toLowerCase()}&billing=${annual ? "annual" : "monthly"}`);
                       }
@@ -259,7 +261,7 @@ export default function PricingPage() {
                   {(plan.monthly || plan.weekly) && (
                     <p className="text-center text-sm text-yellow-400 font-bold mt-[-16px] mb-4 flex items-center justify-center gap-1.5">
                       <Icon name="bolt" size={16} className="text-yellow-400" />
-                      {annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : plan.credits.toLocaleString()} credits/year
+                      {plan.weekly ? plan.credits.toLocaleString() : annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : plan.credits.toLocaleString()} credits/year
                     </p>
                   )}
 
