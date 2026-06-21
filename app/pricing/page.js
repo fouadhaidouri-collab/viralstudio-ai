@@ -262,11 +262,15 @@ export default function PricingPage() {
                   <div className="space-y-2.5 flex-1">
                     {plan.features.map((f, i) => {
                       const creditMatch = f.match(/^([\d,]+) AI credits\/(year|week)$/);
+                      const storageMatch = f.match(/^(\d+) GB storage$/);
                       let displayFeature = f;
                       if (creditMatch && !plan.weekly) {
                         const base = parseInt(creditMatch[1].replace(/,/g, ''));
                         const num = annual ? Math.round(base * (1 + DISCOUNT)) : Math.round(base / 12);
                         displayFeature = `${num.toLocaleString()} AI credits/${annual ? "year" : "month"}`;
+                      } else if (storageMatch && !plan.weekly && annual) {
+                        const base = parseInt(storageMatch[1]);
+                        displayFeature = `${Math.round(base * (1 + DISCOUNT))} GB storage`;
                       }
                       return (
                       <div key={i} className="flex items-start gap-2.5 group/feature">
