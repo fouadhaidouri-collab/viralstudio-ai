@@ -11,6 +11,28 @@ const DISCOUNT = 0.30;
 
 const plans = [
   {
+    name: "Micro",
+    sub: "For creators starting their video journey",
+    monthly: 9,
+    popular: false,
+    credits: 500,
+    cta: "Buy Now",
+    features: [
+      "1 user",
+      "50 min of video",
+      "2 GB storage",
+      "1 brand kit",
+      "15 min AI voices (29 languages)",
+      "5M Getty Images & Storyblocks",
+      "500 AI credits/year",
+      "Up to 800 images",
+      "Up to 5 min video",
+      "Up to 15 min avatar video",
+      "No watermark",
+      "Basic AI tools",
+    ],
+  },
+  {
     name: "Starter",
     sub: "For creators starting their video journey",
     monthly: 25,
@@ -77,27 +99,6 @@ const plans = [
       "Up to 960 min avatar video",
       "Collaborative workspace",
       "Team onboarding & training",
-    ],
-  },
-  {
-    name: "Enterprise",
-    sub: "For companies scaling video production",
-    monthly: null,
-    popular: false,
-    cta: "Let's Talk",
-    features: [
-      "10+ users",
-      "Custom video minutes",
-      "Custom storage",
-      "Unlimited brand kits",
-      "Custom AI voices (29 languages)",
-      "18M Getty Images & Storyblocks",
-      "Custom AI credits",
-      "Interactive video hosting",
-      "AI-generated chapters",
-      "Quizzes & CTAs",
-      "SCORM export",
-      "SSO & dedicated success manager",
     ],
   },
 ];
@@ -244,7 +245,8 @@ export default function PricingPage() {
                   </button>
 
                   {plan.monthly && (
-                    <p className="text-center text-[10px] text-yellow-400 font-medium mt-[-16px] mb-4">
+                    <p className="text-center text-sm text-yellow-400 font-bold mt-[-16px] mb-4 flex items-center justify-center gap-1.5">
+                      <Icon name="bolt" size={16} className="text-yellow-400" />
                       {plan.credits.toLocaleString()} credits/year
                     </p>
                   )}
