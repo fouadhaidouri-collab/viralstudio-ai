@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import Icon from "../components/Icon";
 import { useAuth } from "../lib/AuthContext";
 
@@ -11,7 +10,7 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { isAuthenticated, loginError, setLoginError, loading } = useAuth();
+  const { isAuthenticated, loginError, setLoginError, login, signUp, googleLogin } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -20,7 +19,6 @@ export default function LoginPage() {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setLoginError("");
     if (!name.trim() || !email.trim() || !password.trim()) {
       setLoginError("All fields are required");
       return;
@@ -29,32 +27,22 @@ export default function LoginPage() {
       setLoginError("Password must be at least 6 characters");
       return;
     }
-    const result = await signIn("credentials", { email, password, name, redirect: false });
-    if (result?.error) {
-      setLoginError("Account not found. Please sign up.");
-      return;
-    }
-    router.push("/");
+    const ok = await signUp(name.trim(), email.trim(), password);
+    if (ok) router.push("/");
   };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setLoginError("");
     if (!email.trim() || !password.trim()) {
       setLoginError("Please enter email and password");
       return;
     }
-    const result = await signIn("credentials", { email, password, redirect: false });
-    if (result?.error) {
-      if (result.error.includes("CredentialsSignin")) setLoginError("Account not found. Please sign up.");
-      else setLoginError("Wrong email or password.");
-      return;
-    }
-    router.push("/");
+    const ok = await login(email.trim(), password);
+    if (ok) router.push("/");
   };
 
   const handleGoogle = async () => {
-    await signIn("google", { callbackUrl: "/" });
+    await googleLogin();
   };
 
   return (

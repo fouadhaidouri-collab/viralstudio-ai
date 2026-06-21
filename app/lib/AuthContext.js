@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
     setLoginError("");
     const result = await signIn("credentials", { email, password, redirect: false });
     if (result?.error) {
-      setLoginError("Account not found. Please sign up.");
+      setLoginError("This account does not exist. Please sign up.");
       return false;
     }
     return true;
@@ -43,6 +43,16 @@ export function AuthProvider({ children }) {
 
   const signUp = async (name, email, password) => {
     setLoginError("");
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      setLoginError(data.error || "Sign up failed");
+      return false;
+    }
     const result = await signIn("credentials", { email, password, redirect: false });
     if (result?.error) {
       setLoginError(result.error);
@@ -53,8 +63,7 @@ export function AuthProvider({ children }) {
 
   const googleLogin = async () => {
     setLoginError("");
-    await signIn("google", { redirect: false });
-    return true;
+    await signIn("google", { callbackUrl: "/" });
   };
 
   const logout = async () => {

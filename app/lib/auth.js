@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+import { verifyUser } from "./userStore";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -12,9 +13,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const email = credentials.email;
-        const password = credentials.password;
-        return { id: email, email, name: email.split("@")[0] };
+        const user = await verifyUser(credentials.email, credentials.password);
+        return user;
       },
     }),
     Google({
