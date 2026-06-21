@@ -115,7 +115,7 @@ export default function Dashboard() {
                 src={t.video}
                 muted autoPlay loop playsInline
                 preload="none"
-                className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 hidden md:block ${
+                className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${
                   i === bgVideoIdx ? "opacity-60" : "opacity-0"
                 }`}
               />
