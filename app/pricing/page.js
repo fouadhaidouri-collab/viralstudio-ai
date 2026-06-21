@@ -149,7 +149,7 @@ export default function PricingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 mb-4">
               <Icon name="auto_awesome" className="text-[12px] text-primary" />
-              <span className="text-[11px] text-primary font-semibold tracking-wide">Annual pricing (save up to 40%)</span>
+              <span className="text-[11px] text-primary font-semibold tracking-wide">Annual pricing (save up to 30%)</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
               Create Professional Videos
@@ -256,10 +256,10 @@ export default function PricingPage() {
                     {plan.cta === "Let's Talk" ? "Contact Sales" : plan.cta}
                   </button>
 
-                  {plan.monthly && (
+                  {(plan.monthly || plan.weekly) && (
                     <p className="text-center text-sm text-yellow-400 font-bold mt-[-16px] mb-4 flex items-center justify-center gap-1.5">
                       <Icon name="bolt" size={16} className="text-yellow-400" />
-                      {plan.credits.toLocaleString()} credits/year
+                      {annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : plan.credits.toLocaleString()} credits/year
                     </p>
                   )}
 
