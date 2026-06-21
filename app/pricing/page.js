@@ -29,10 +29,10 @@ const plans = [
   {
     name: "Starter",
     sub: "For creators starting their video journey",
-    monthly: 29,
+    monthly: 25,
     popular: false,
     badge: "Save 30%",
-    credits: 11832,
+    credits: 10200,
     cta: "Buy Now",
     features: [
       "1 user",
@@ -41,7 +41,7 @@ const plans = [
       "1 brand kit",
       "60 min AI voices (29 languages)",
       "5M Getty Images & Storyblocks",
-      "11,832 AI credits/year",
+      "10,200 AI credits/year",
       "Up to 2,000 images",
       "Up to 12.5 min video",
       "Up to 40 min avatar video",
