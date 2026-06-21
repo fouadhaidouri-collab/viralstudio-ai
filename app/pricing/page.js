@@ -38,6 +38,7 @@ const plans = [
     sub: "For creators starting their video journey",
     monthly: 25,
     popular: false,
+    badge: "Save 30%",
     credits: 1200,
     cta: "Buy Now",
     features: [
