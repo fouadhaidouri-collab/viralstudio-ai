@@ -174,7 +174,7 @@ export default function ProfilePage() {
                       </div>
                     </button>
                   )}
-                  <button className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
+                  <button onClick={() => router.push("/pricing")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
                     <div className="w-10 h-10 rounded-lg bg-yellow-400/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon name="bolt" className="text-yellow-400" size={18} />
                     </div>
