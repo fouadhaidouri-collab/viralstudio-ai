@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Icon from "../components/Icon";
 
-export default function ResetPasswordPage() {
+function ResetForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email") || "";
@@ -48,8 +48,16 @@ export default function ResetPasswordPage() {
           <Link href="/forgot-password" className="text-primary hover:underline">Request a new link</Link>
         </div>
       </div>
-    );
-  }
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
+      <ResetForm />
+    </Suspense>
+  );
+}
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
