@@ -13,8 +13,9 @@ const plans = [
   {
     name: "Micro",
     sub: "For creators starting their video journey",
-    monthly: 9,
+    weekly: 9,
     popular: false,
+    badge: "Weekly",
     credits: 500,
     cta: "Buy Now",
     features: [
@@ -198,7 +199,10 @@ export default function PricingPage() {
                   <div className="mb-6 mt-1">
                     <div className="flex items-center justify-between mb-2">
                       <h2 className="text-lg font-bold text-white">{plan.name}</h2>
-                      {plan.badge && annual && (
+                      {plan.weekly && plan.badge && (
+                        <span className="px-2 py-0.5 bg-surface-container-high text-white text-[9px] font-semibold rounded-md border border-surface-border/40">{plan.badge}</span>
+                      )}
+                      {!plan.weekly && plan.badge && annual && (
                         <span className="px-2 py-0.5 bg-secondary/15 text-secondary text-[9px] font-semibold rounded-md border border-secondary/20">{plan.badge}</span>
                       )}
                     </div>
@@ -206,7 +210,15 @@ export default function PricingPage() {
                   </div>
 
                   <div className="mb-6">
-                    {plan.monthly ? (
+                    {plan.weekly ? (
+                      <>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-extrabold text-white tracking-tight">${plan.weekly}</span>
+                          <span className="text-[11px] text-on-surface-variant/60 font-medium">/wk</span>
+                        </div>
+                        <p className="text-[10px] text-on-surface-variant/50 mt-1.5">${plan.weekly * 4}/month — <span className="text-green-400">cancel anytime</span></p>
+                      </>
+                    ) : plan.monthly ? (
                       <>
                         <div className="flex items-baseline gap-2">
                           {annual && (
