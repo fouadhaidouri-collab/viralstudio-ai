@@ -31,6 +31,7 @@ export default function ProfilePage() {
   const planIcon = plan === "Free" ? "person" : "workspace_premium";
   const planColor = plan === "Free" ? "text-on-surface-variant bg-surface-container-high border-surface-border/40" : "text-primary bg-primary/15 border-primary/20";
   const memberSince = user?.memberSince || "Jan 2026";
+  const isGoogleUser = user?.provider === "google";
 
   const [cpCurrent, setCpCurrent] = useState("");
   const [cpNew, setCpNew] = useState("");
@@ -66,7 +67,7 @@ export default function ProfilePage() {
 
   const tabs = [
     { key: "overview", label: "Overview", icon: "person" },
-    { key: "security", label: "Security", icon: "lock" },
+    ...(!isGoogleUser ? [{ key: "security", label: "Security", icon: "lock" }] : []),
   ];
 
   return (
@@ -151,24 +152,28 @@ export default function ProfilePage() {
                       <div className="text-[11px] text-on-surface-variant">Update your email address</div>
                     </div>
                   </button>
-                  <button onClick={() => setTab("security")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <Icon name="lock" className="text-primary" size={18} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-white">Reset Password</div>
-                      <div className="text-[11px] text-on-surface-variant">Change your password</div>
-                    </div>
-                  </button>
-                  <button onClick={() => router.push("/forgot-password")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <Icon name="refresh" className="text-primary" size={18} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-white">Recover Password</div>
-                      <div className="text-[11px] text-on-surface-variant">استيراد كلمة السر</div>
-                    </div>
-                  </button>
+                  {!isGoogleUser && (
+                    <button onClick={() => setTab("security")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <Icon name="lock" className="text-primary" size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-white">Reset Password</div>
+                        <div className="text-[11px] text-on-surface-variant">Change your password</div>
+                      </div>
+                    </button>
+                  )}
+                  {!isGoogleUser && (
+                    <button onClick={() => router.push("/forgot-password")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <Icon name="refresh" className="text-primary" size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-white">Recover Password</div>
+                        <div className="text-[11px] text-on-surface-variant">استيراد كلمة السر</div>
+                      </div>
+                    </button>
+                  )}
                   <button className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
                     <div className="w-10 h-10 rounded-lg bg-yellow-400/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon name="bolt" className="text-yellow-400" size={18} />
@@ -206,53 +211,54 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Password Section */}
-              <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon name="lock" className="text-primary" size={18} />
+              {!isGoogleUser && (
+                <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon name="lock" className="text-primary" size={18} />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-semibold text-white">Password</h2>
+                      <p className="text-[11px] text-on-surface-variant">Set a strong password to protect your account</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-white">Password</h2>
-                    <p className="text-[11px] text-on-surface-variant">Set a strong password to protect your account</p>
+                  <form onSubmit={handleChangePassword} className="space-y-3">
+                    {cpError && <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">{cpError}</div>}
+                    {cpMessage && <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs">{cpMessage}</div>}
+                    <div>
+                      <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Current Password</label>
+                      <input type="password" value={cpCurrent} onChange={(e) => setCpCurrent(e.target.value)} placeholder="Enter current password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">New Password</label>
+                      <input type="password" value={cpNew} onChange={(e) => setCpNew(e.target.value)} placeholder="Enter new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Confirm New Password</label>
+                      <input type="password" value={cpConfirm} onChange={(e) => setCpConfirm(e.target.value)} placeholder="Confirm new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                    </div>
+                    <button type="submit" disabled={cpLoading} className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                      {cpLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="lock" size={14} />}
+                      Update Password
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {!isGoogleUser && (
+                <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon name="refresh" className="text-primary" size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-sm font-semibold text-white">Recover Password</h2>
+                      <p className="text-[11px] text-on-surface-variant">استيراد كلمة السر — Send recovery link to your email</p>
+                    </div>
+                    <button onClick={() => router.push("/forgot-password")} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0">Send Link</button>
                   </div>
                 </div>
-
-                <form onSubmit={handleChangePassword} className="space-y-3">
-                  {cpError && <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">{cpError}</div>}
-                  {cpMessage && <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs">{cpMessage}</div>}
-                  <div>
-                    <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Current Password</label>
-                    <input type="password" value={cpCurrent} onChange={(e) => setCpCurrent(e.target.value)} placeholder="Enter current password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">New Password</label>
-                    <input type="password" value={cpNew} onChange={(e) => setCpNew(e.target.value)} placeholder="Enter new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Confirm New Password</label>
-                    <input type="password" value={cpConfirm} onChange={(e) => setCpConfirm(e.target.value)} placeholder="Confirm new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
-                  </div>
-                  <button type="submit" disabled={cpLoading} className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                    {cpLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="lock" size={14} />}
-                    Update Password
-                  </button>
-                </form>
-              </div>
-
-              {/* Recover Password */}
-              <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon name="refresh" className="text-primary" size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-sm font-semibold text-white">Recover Password</h2>
-                    <p className="text-[11px] text-on-surface-variant">استيراد كلمة السر — Send recovery link to your email</p>
-                  </div>
-                  <button onClick={() => router.push("/forgot-password")} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0">Send Link</button>
-                </div>
-              </div>
+              )}
             </div>
           )}
 

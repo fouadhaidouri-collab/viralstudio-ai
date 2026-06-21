@@ -28,6 +28,7 @@ export function AuthProvider({ children }) {
         credits: 1250,
         plan: "Pro Plan",
         memberSince: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+        provider: session.user.provider || "credentials",
       }
     : null;
 

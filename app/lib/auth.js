@@ -32,6 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
+        token.provider = account?.provider || "credentials";
       }
       if (account?.provider === "google") {
         token.picture = user?.image;
@@ -44,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
+        session.user.provider = token.provider;
       }
       return session;
     },
