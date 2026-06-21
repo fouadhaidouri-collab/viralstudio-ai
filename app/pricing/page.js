@@ -25,7 +25,7 @@ const plans = [
       "1 brand kit",
       "15 min AI voices (29 languages)",
       "5M Getty Images & Storyblocks",
-      "500 AI credits/year",
+      "500 AI credits/week",
       "Up to 800 images",
       "Up to 5 min video",
       "Up to 15 min avatar video",
@@ -262,7 +262,7 @@ export default function PricingPage() {
                   {(plan.monthly || plan.weekly) && (
                     <p className="text-center text-sm text-yellow-400 font-bold mt-[-16px] mb-4 flex items-center justify-center gap-1.5">
                       <Icon name="bolt" size={16} className="text-yellow-400" />
-                      {plan.weekly ? plan.credits.toLocaleString() : annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : plan.credits.toLocaleString()} credits/year
+                      {plan.weekly ? plan.credits.toLocaleString() : annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : plan.credits.toLocaleString()} credits/{plan.weekly ? "week" : "year"}
                     </p>
                   )}
 
