@@ -23,7 +23,7 @@ const plans = [
       "2 GB storage",
       "Up to 50 images",
       "Basic AI tools",
-      "NO ADS",
+      "Ad-free",
     ],
   },
   {
