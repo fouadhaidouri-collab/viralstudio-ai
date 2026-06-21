@@ -255,16 +255,19 @@ export default function PricingPage() {
                   {(plan.monthly || plan.weekly) && (
                     <p className="text-center text-sm text-yellow-400 font-bold mt-[-16px] mb-4 flex items-center justify-center gap-1.5">
                       <Icon name="bolt" size={16} className="text-yellow-400" />
-                      {plan.weekly ? plan.credits.toLocaleString() : annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : plan.credits.toLocaleString()} credits/{plan.weekly ? "week" : "year"}
+                      {plan.weekly ? plan.credits.toLocaleString() : annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : Math.round(plan.credits / 12).toLocaleString()} credits/{plan.weekly ? "week" : annual ? "year" : "month"}
                     </p>
                   )}
 
                   <div className="space-y-2.5 flex-1">
                     {plan.features.map((f, i) => {
                       const creditMatch = f.match(/^([\d,]+) AI credits\/(year|week)$/);
-                      const displayFeature = creditMatch && !plan.weekly && annual
-                        ? f.replace(creditMatch[1], Math.round(parseInt(creditMatch[1].replace(/,/g, '')) * (1 + DISCOUNT)).toLocaleString())
-                        : f;
+                      let displayFeature = f;
+                      if (creditMatch && !plan.weekly) {
+                        const base = parseInt(creditMatch[1].replace(/,/g, ''));
+                        const num = annual ? Math.round(base * (1 + DISCOUNT)) : Math.round(base / 12);
+                        displayFeature = `${num.toLocaleString()} AI credits/${annual ? "year" : "month"}`;
+                      }
                       return (
                       <div key={i} className="flex items-start gap-2.5 group/feature">
                         <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary/20 transition-colors">
