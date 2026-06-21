@@ -260,14 +260,20 @@ export default function PricingPage() {
                   )}
 
                   <div className="space-y-2.5 flex-1">
-                    {plan.features.map((f, i) => (
+                    {plan.features.map((f, i) => {
+                      const creditMatch = f.match(/^([\d,]+) AI credits\/(year|week)$/);
+                      const displayFeature = creditMatch && !plan.weekly && annual
+                        ? f.replace(creditMatch[1], Math.round(parseInt(creditMatch[1].replace(/,/g, '')) * (1 + DISCOUNT)).toLocaleString())
+                        : f;
+                      return (
                       <div key={i} className="flex items-start gap-2.5 group/feature">
                         <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary/20 transition-colors">
                           <Icon name="check" className="text-[10px] text-primary" />
                         </div>
-                        <span className="text-[12px] text-on-surface-variant/90 group-hover/feature:text-on-surface transition-colors">{f}</span>
+                        <span className="text-[12px] text-on-surface-variant/90 group-hover/feature:text-on-surface transition-colors">{displayFeature}</span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
