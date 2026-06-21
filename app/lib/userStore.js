@@ -64,3 +64,40 @@ export async function verifyUser(email, password) {
   if (user.password !== hashPassword(password)) return null;
   return { id: user.id, name: user.name, email: user.email };
 }
+
+export function generateResetToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+export async function saveResetToken(email, token) {
+  const users = await getUsers();
+  const user = users.find((u) => u.email === email);
+  if (!user) throw new Error("User not found");
+  user.resetToken = token;
+  user.resetTokenExpiry = Date.now() + 3600000;
+  await saveUsers(users);
+}
+
+export async function verifyResetToken(email, token) {
+  const user = await findUser(email);
+  if (!user) return false;
+  if (user.resetToken !== token) return false;
+  if (!user.resetTokenExpiry || user.resetTokenExpiry < Date.now()) return false;
+  return true;
+}
+
+export async function updatePassword(email, newPassword) {
+  const users = await getUsers();
+  const user = users.find((u) => u.email === email);
+  if (!user) throw new Error("User not found");
+  user.password = hashPassword(newPassword);
+  delete user.resetToken;
+  delete user.resetTokenExpiry;
+  await saveUsers(users);
+}
+
+export async function changePassword(email, currentPassword, newPassword) {
+  const user = await verifyUser(email, currentPassword);
+  if (!user) throw new Error("Current password is incorrect");
+  await updatePassword(email, newPassword);
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "../components/Icon";
 import { useAuth } from "../lib/AuthContext";
@@ -89,6 +90,9 @@ export default function LoginPage() {
             <div>
               <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Password</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+            </div>
+            <div className="flex justify-end -mt-1">
+              <Link href="/forgot-password" className="text-[11px] text-primary hover:text-primary/80 hover:underline underline-offset-2 transition-all">Forgot password?</Link>
             </div>
             <button type="submit" className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98]">
               Sign In

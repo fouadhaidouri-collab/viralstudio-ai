@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import AuthGuard from "../components/AuthGuard";
@@ -17,6 +18,7 @@ function gravatarUrl(email) {
 }
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [tab, setTab] = useState("overview");
   const { user, logout } = useAuth();
   const email = user?.email || "user@example.com";
@@ -29,6 +31,34 @@ export default function ProfilePage() {
   const planIcon = plan === "Free" ? "person" : "workspace_premium";
   const planColor = plan === "Free" ? "text-on-surface-variant bg-surface-container-high border-surface-border/40" : "text-primary bg-primary/15 border-primary/20";
   const memberSince = user?.memberSince || "Jan 2026";
+
+  const [cpCurrent, setCpCurrent] = useState("");
+  const [cpNew, setCpNew] = useState("");
+  const [cpConfirm, setCpConfirm] = useState("");
+  const [cpError, setCpError] = useState("");
+  const [cpMessage, setCpMessage] = useState("");
+  const [cpLoading, setCpLoading] = useState(false);
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setCpError(""); setCpMessage("");
+    if (!cpCurrent) { setCpError("Enter your current password"); return; }
+    if (!cpNew) { setCpError("Enter a new password"); return; }
+    if (cpNew.length < 6) { setCpError("New password must be at least 6 characters"); return; }
+    if (cpNew !== cpConfirm) { setCpError("Passwords do not match"); return; }
+    setCpLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: cpCurrent, newPassword: cpNew }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setCpError(data.error || "Failed"); return; }
+      setCpMessage("Password updated successfully!");
+      setCpCurrent(""); setCpNew(""); setCpConfirm("");
+    } catch { setCpError("Network error"); }
+    finally { setCpLoading(false); }
+  };
 
   useEffect(() => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setRealCredits(d.balance); }).catch(() => {});
@@ -112,7 +142,7 @@ export default function ProfilePage() {
               <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <h2 className="text-sm font-semibold text-white mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
+                  <button onClick={() => setTab("security")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon name="edit" className="text-primary" size={18} />
                     </div>
@@ -121,7 +151,7 @@ export default function ProfilePage() {
                       <div className="text-[11px] text-on-surface-variant">Update your email address</div>
                     </div>
                   </button>
-                  <button className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
+                  <button onClick={() => setTab("security")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon name="lock" className="text-primary" size={18} />
                     </div>
@@ -130,7 +160,7 @@ export default function ProfilePage() {
                       <div className="text-[11px] text-on-surface-variant">Change your password</div>
                     </div>
                   </button>
-                  <button className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
+                  <button onClick={() => router.push("/forgot-password")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon name="refresh" className="text-primary" size={18} />
                     </div>
@@ -188,23 +218,26 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <form onSubmit={handleChangePassword} className="space-y-3">
+                  {cpError && <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">{cpError}</div>}
+                  {cpMessage && <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs">{cpMessage}</div>}
                   <div>
                     <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Current Password</label>
-                    <input type="password" placeholder="Enter current password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                    <input type="password" value={cpCurrent} onChange={(e) => setCpCurrent(e.target.value)} placeholder="Enter current password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
                   </div>
                   <div>
                     <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">New Password</label>
-                    <input type="password" placeholder="Enter new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                    <input type="password" value={cpNew} onChange={(e) => setCpNew(e.target.value)} placeholder="Enter new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
                   </div>
                   <div>
                     <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Confirm New Password</label>
-                    <input type="password" placeholder="Confirm new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                    <input type="password" value={cpConfirm} onChange={(e) => setCpConfirm(e.target.value)} placeholder="Confirm new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
                   </div>
-                  <button className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98]">
+                  <button type="submit" disabled={cpLoading} className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                    {cpLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="lock" size={14} />}
                     Update Password
                   </button>
-                </div>
+                </form>
               </div>
 
               {/* Recover Password */}
@@ -217,7 +250,7 @@ export default function ProfilePage() {
                     <h2 className="text-sm font-semibold text-white">Recover Password</h2>
                     <p className="text-[11px] text-on-surface-variant">استيراد كلمة السر — Send recovery link to your email</p>
                   </div>
-                  <button className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0">Send Link</button>
+                  <button onClick={() => router.push("/forgot-password")} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0">Send Link</button>
                 </div>
               </div>
             </div>
