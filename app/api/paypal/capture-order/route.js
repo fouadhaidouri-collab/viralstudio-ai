@@ -59,7 +59,7 @@ export async function POST(req) {
     }
 
     if (captureData.status !== "COMPLETED") {
-      return Response.json({ error: `PayPal capture status: ${captureStatus}` }, { status: 400 });
+      return Response.json({ error: `PayPal capture status: ${captureData.status}` }, { status: 400 });
     }
 
     let tx = getTransactionByProviderId("paypal", orderID);
