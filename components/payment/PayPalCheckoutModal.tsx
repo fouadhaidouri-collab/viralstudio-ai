@@ -83,48 +83,6 @@ function PayPalButtonGroup({ planId, billingCycle, onSuccess, onError }) {
   );
 }
 
-function YouCanPayButton({ planId, billingCycle, onError }) {
-  const [loading, setLoading] = useState(false);
-
-  const handleClick = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/payments/youcanpay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, billingCycle }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Payment failed");
-      window.open(data.paymentUrl, "_blank");
-    } catch (err) {
-      onError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className="w-full h-[55px] flex items-center justify-center gap-2.5 rounded-xl font-semibold text-sm transition-all bg-[#0066cc] hover:bg-[#0052a3] text-white disabled:opacity-50"
-    >
-      {loading ? (
-        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-      ) : (
-        <>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
-            <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" strokeWidth="2" />
-          </svg>
-          Credit YouCan
-        </>
-      )}
-    </button>
-  );
-}
-
 export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCycle }) {
   const [step, setStep] = useState("payment");
   const [error, setError] = useState("");
@@ -240,19 +198,8 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                   />
                 </PayPalScriptProvider>
 
-                <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-[11px] text-on-surface-variant/40 font-medium uppercase tracking-wider">or</span>
-                  <div className="flex-1 h-px bg-white/10" />
-                </div>
               </>
             )}
-
-            <YouCanPayButton
-              planId={planId}
-              billingCycle={billingCycle}
-              onError={setError}
-            />
 
             <div className="mt-5 flex items-center justify-center gap-4 text-[10px] text-on-surface-variant/40">
               <span>SSL Encrypted</span>
