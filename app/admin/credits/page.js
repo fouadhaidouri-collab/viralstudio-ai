@@ -191,7 +191,7 @@ export default function AdminCreditsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-white p-6">
+    <div>
       <PageHeader
         title="Credits"
         subtitle="Manage user credits and transactions"
