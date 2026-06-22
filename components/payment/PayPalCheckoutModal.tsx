@@ -139,7 +139,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
       />
 
       <div
-        className="relative w-full max-w-[580px] rounded-3xl border border-white/10 shadow-2xl animate-fade-in-up overflow-hidden"
+        className="relative w-full max-w-[580px] rounded-3xl border border-white/10 shadow-2xl animate-fade-in-up"
         style={{ background: "#161616" }}
       >
         {step === "payment" && (
