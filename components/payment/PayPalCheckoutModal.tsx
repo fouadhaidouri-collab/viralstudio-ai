@@ -1,10 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import {
-  PayPalScriptProvider,
-  PayPalButtons,
-  usePayPalScriptReducer,
-} from "@paypal/react-paypal-js";
+import { useState, useEffect } from "react";
 
 const DISCOUNT = 0.30;
 
@@ -15,96 +10,7 @@ const PLANS_DATA = {
   team:   { name: "Team", monthly: 119, credits: 48552 },
 };
 
-function PayPalButtonGroup({ amount, planId, billingCycle, onSuccess, onError }) {
-  const [{ isPending, isResolved }] = usePayPalScriptReducer();
-  const [cardEligible, setCardEligible] = useState(true);
-
-  const createOrder = useCallback(async () => {
-    const res = await fetch("/api/paypal/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId, billingCycle }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Failed to create order");
-    return data.orderId;
-  }, [planId, billingCycle]);
-
-  const onApprove = useCallback(async (data) => {
-    const res = await fetch("/api/paypal/capture-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderID: data.orderID }),
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || "Capture failed");
-    onSuccess(result);
-  }, [onSuccess]);
-
-  const onErrorHandler = useCallback((err) => {
-    console.error("PayPal error:", err);
-    onError(err?.message || "PayPal payment failed");
-  }, [onError]);
-
-  return (
-    <div className="space-y-4">
-      <div className="min-h-[55px]">
-        {isPending && (
-          <div className="flex items-center justify-center h-[55px] bg-[#222] rounded-xl">
-            <span className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        {isResolved && (
-          <PayPalButtons
-            fundingSource="paypal"
-            style={{ layout: "vertical", color: "gold", shape: "pill", label: "pay" }}
-            createOrder={createOrder}
-            onApprove={onApprove}
-            onError={onErrorHandler}
-          />
-        )}
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-white/10" />
-        <span className="text-[11px] text-on-surface-variant/40 font-medium uppercase tracking-wider">or</span>
-        <div className="flex-1 h-px bg-white/10" />
-      </div>
-
-      <div className="min-h-[55px]">
-        {isPending && (
-          <div className="flex items-center justify-center h-[55px] bg-[#222] rounded-xl">
-            <span className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        {isResolved && cardEligible && (
-          <PayPalButtons
-            fundingSource="card"
-            style={{ layout: "vertical", color: "black", shape: "pill", label: "checkout" }}
-            createOrder={createOrder}
-            onApprove={onApprove}
-            onError={(err) => {
-              if (err?.message?.includes("not eligible") || err?.data?.details?.[0]?.issue === "INSTRUMENT_DECLINED") {
-                setCardEligible(false);
-              } else {
-                onErrorHandler(err);
-              }
-            }}
-          />
-        )}
-        {isResolved && !cardEligible && (
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl px-5 py-4 text-center">
-            <p className="text-xs text-on-surface-variant/60">
-              Card payment is not available for this account. Please use PayPal or try another payment method.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function YouCanPayButton({ amount, planId, billingCycle, onSuccess, onError }) {
+function YouCanPayButton({ planId, billingCycle, onError }) {
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {
@@ -116,9 +22,8 @@ function YouCanPayButton({ amount, planId, billingCycle, onSuccess, onError }) {
         body: JSON.stringify({ planId, billingCycle }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "YouCan Pay failed");
+      if (!res.ok) throw new Error(data.error || "Payment failed");
       window.open(data.paymentUrl, "_blank");
-      onSuccess?.();
     } catch (err) {
       onError(err.message);
     } finally {
@@ -140,7 +45,7 @@ function YouCanPayButton({ amount, planId, billingCycle, onSuccess, onError }) {
             <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
             <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" strokeWidth="2" />
           </svg>
-          Credit
+          Credit YouCan
         </>
       )}
     </button>
@@ -150,8 +55,6 @@ function YouCanPayButton({ amount, planId, billingCycle, onSuccess, onError }) {
 export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCycle }) {
   const [step, setStep] = useState("payment");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(null);
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
   const plan = PLANS_DATA[planId] || { name: planId, monthly: 0, credits: 0 };
   const planName = plan.name;
@@ -176,7 +79,6 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
     if (!isOpen) {
       setStep("payment");
       setError("");
-      setSuccess(null);
     }
   }, [isOpen]);
 
@@ -189,15 +91,6 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   }, [onClose, step]);
 
   if (!isOpen) return null;
-
-  const handleSuccess = (result) => {
-    setSuccess(result);
-    setStep("success");
-  };
-
-  const handleError = (msg) => {
-    setError(msg);
-  };
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -248,39 +141,11 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               </div>
             )}
 
-            {!paypalClientId ? (
-              <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl px-5 py-4 text-center">
-                <p className="text-sm text-yellow-300 font-medium">PayPal not configured</p>
-                <p className="text-[11px] text-on-surface-variant/60 mt-1">Please contact support to complete your purchase.</p>
-              </div>
-            ) : (
-              <PayPalScriptProvider
-                options={{
-                  clientId: paypalClientId,
-                  currency: "USD",
-                  intent: "capture",
-                  components: "buttons",
-                }}
-              >
-                <PayPalButtonGroup
-                  amount={amount}
-                  planId={planId}
-                  billingCycle={billingCycle}
-                  onSuccess={handleSuccess}
-                  onError={handleError}
-                />
-              </PayPalScriptProvider>
-            )}
-
-            <div className="mt-4">
-              <YouCanPayButton
-                amount={amount}
-                planId={planId}
-                billingCycle={billingCycle}
-                onSuccess={() => {}}
-                onError={handleError}
-              />
-            </div>
+            <YouCanPayButton
+              planId={planId}
+              billingCycle={billingCycle}
+              onError={setError}
+            />
 
             <div className="mt-5 flex items-center justify-center gap-4 text-[10px] text-on-surface-variant/40">
               <span>SSL Encrypted</span>
@@ -301,7 +166,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
             </div>
             <h2 className="text-xl font-extrabold text-white mb-2">Payment confirmed!</h2>
             <p className="text-sm text-on-surface-variant/60 mb-2">Your credits have been added to your account.</p>
-            <p className="text-lg font-bold text-yellow-400 mb-6">{success?.credits?.toLocaleString()} credits</p>
+            <p className="text-lg font-bold text-yellow-400 mb-6">{credits.toLocaleString()} credits</p>
             <a
               href="/"
               className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-primary to-purple-700 text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all"
