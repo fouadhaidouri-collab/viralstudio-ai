@@ -6,6 +6,7 @@ import ProfileDropdown from "../components/ProfileDropdown";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
+import PayPalCheckoutModal from "../../components/payment/PayPalCheckoutModal";
 
 const DISCOUNT = 0.30;
 
@@ -110,6 +111,7 @@ export default function PricingPage() {
   const { isAuthenticated } = useAuth();
   const [annual, setAnnual] = useState(true);
   const [credits, setCredits] = useState(null);
+  const [modalPlan, setModalPlan] = useState(null);
 
   useEffect(() => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
@@ -235,12 +237,10 @@ export default function PricingPage() {
                   <button
                     onClick={() => {
                       if (!isAuthenticated) { router.push("/login"); return; }
-                      if (plan.name === "Enterprise") {
-                        window.location.href = "mailto:sales@viralstudio.ai";
-                      } else if (plan.weekly) {
-                        router.push(`/pay?plan=${plan.name.toLowerCase()}&billing=weekly`);
+                      if (plan.weekly) {
+                        setModalPlan({ planId: plan.name.toLowerCase(), billingCycle: "weekly" });
                       } else {
-                        router.push(`/pay?plan=${plan.name.toLowerCase()}&billing=${annual ? "annual" : "monthly"}`);
+                        setModalPlan({ planId: plan.name.toLowerCase(), billingCycle: annual ? "annual" : "monthly" });
                       }
                     }}
                     className={`w-full py-3 rounded-xl font-semibold text-sm mb-6 transition-all duration-200 active:scale-[0.97] hover:translate-y-[-1px] ${
@@ -288,6 +288,14 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+
+      <PayPalCheckoutModal
+        isOpen={modalPlan !== null}
+        onClose={() => setModalPlan(null)}
+        planId={modalPlan?.planId || "professional"}
+        billingCycle={modalPlan?.billingCycle || "monthly"}
+      />
+
       </SidebarProvider>
     </div>
   );

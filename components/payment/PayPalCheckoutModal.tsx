@@ -45,7 +45,6 @@ function PayPalButtonGroup({ amount, planId, billingCycle, onSuccess, onError })
 
   return (
     <div className="space-y-4">
-      {/* PayPal Wallet Button */}
       <div className="min-h-[55px]">
         {isPending && (
           <div className="flex items-center justify-center h-[55px] bg-[#222] rounded-xl">
@@ -63,14 +62,12 @@ function PayPalButtonGroup({ amount, planId, billingCycle, onSuccess, onError })
         )}
       </div>
 
-      {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-white/10" />
         <span className="text-[11px] text-on-surface-variant/40 font-medium uppercase tracking-wider">or</span>
         <div className="flex-1 h-px bg-white/10" />
       </div>
 
-      {/* Credit/Debit Card Button */}
       <div className="min-h-[55px]">
         {isPending && (
           <div className="flex items-center justify-center h-[55px] bg-[#222] rounded-xl">
@@ -146,18 +143,15 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={step === "payment" ? onClose : undefined}
       />
 
-      {/* Modal */}
       <div
         className="relative w-full max-w-[580px] rounded-3xl border border-white/10 shadow-2xl animate-fade-in-up overflow-hidden"
         style={{ background: "#161616" }}
       >
-        {/* Close button */}
         {step === "payment" && (
           <button
             onClick={onClose}
@@ -171,7 +165,6 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
 
         {step === "payment" && (
           <div className="p-6 md:p-8">
-            {/* Title */}
             <h2 className="text-xl md:text-2xl font-extrabold text-white mb-2 pr-8">
               Get Instant Access to {planName} Plan
             </h2>
@@ -179,7 +172,6 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               Everything you need to create more, faster — pro-level tools, priority speed, secure payment, and cancel anytime.
             </p>
 
-            {/* Price info */}
             <div className="bg-white/[0.03] border border-white/5 rounded-xl px-5 py-3 mb-6 flex items-center justify-between">
               <div>
                 <span className="text-sm font-semibold text-white">{planName} Plan</span>
@@ -191,14 +183,12 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
                 {error}
               </div>
             )}
 
-            {/* PayPal Buttons */}
             {!paypalClientId ? (
               <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl px-5 py-4 text-center">
                 <p className="text-sm text-yellow-300 font-medium">PayPal not configured</p>
@@ -223,7 +213,6 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               </PayPalScriptProvider>
             )}
 
-            {/* Trust */}
             <div className="mt-5 flex items-center justify-center gap-4 text-[10px] text-on-surface-variant/40">
               <span>SSL Encrypted</span>
               <span className="w-px h-3 bg-white/10" />
