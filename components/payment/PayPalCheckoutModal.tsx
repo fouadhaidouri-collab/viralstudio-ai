@@ -77,7 +77,7 @@ function PayPalButtonGroup({ amount, planId, billingCycle, onSuccess, onError })
         {isResolved && cardEligible && (
           <PayPalButtons
             fundingSource="card"
-            style={{ layout: "vertical", color: "blue", shape: "pill", label: "checkout" }}
+            style={{ layout: "vertical", color: "black", shape: "pill", label: "checkout" }}
             createOrder={createOrder}
             onApprove={onApprove}
             onError={(err) => {
