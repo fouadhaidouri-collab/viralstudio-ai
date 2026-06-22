@@ -1,5 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  PayPalScriptProvider,
+  PayPalButtons,
+  usePayPalScriptReducer,
+} from "@paypal/react-paypal-js";
 
 const DISCOUNT = 0.30;
 
@@ -9,6 +14,74 @@ const PLANS_DATA = {
   professional: { name: "Professional", monthly: 35, credits: 14280 },
   team:   { name: "Team", monthly: 119, credits: 48552 },
 };
+
+function PayPalButtonGroup({ planId, billingCycle, onSuccess, onError }) {
+  const [{ isPending, isResolved }] = usePayPalScriptReducer();
+
+  const createOrder = useCallback(async () => {
+    const res = await fetch("/api/paypal/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planId, billingCycle }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to create order");
+    return data.orderId;
+  }, [planId, billingCycle]);
+
+  const onApprove = useCallback(async (data) => {
+    const res = await fetch("/api/paypal/capture-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderID: data.orderID }),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || "Capture failed");
+    onSuccess(result);
+  }, [onSuccess]);
+
+  const onErrorHandler = useCallback((err) => {
+    onError(err?.message || "PayPal payment failed");
+  }, [onError]);
+
+  return (
+    <div className="space-y-3">
+      <div className="min-h-[55px]">
+        {isPending && (
+          <div className="flex items-center justify-center h-[55px] bg-[#222] rounded-xl">
+            <span className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {isResolved && (
+          <PayPalButtons
+            fundingSource="paypal"
+            style={{ layout: "vertical", color: "gold", shape: "pill", label: "pay" }}
+            createOrder={createOrder}
+            onApprove={onApprove}
+            onError={onErrorHandler}
+          />
+        )}
+      </div>
+
+      <div className="min-h-[55px]">
+        {isPending && (
+          <div className="flex items-center justify-center h-[55px] bg-[#222] rounded-xl">
+            <span className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {isResolved && (
+          <PayPalButtons
+            fundingSource="card"
+            style={{ layout: "vertical", color: "black", shape: "pill", label: "checkout" }}
+            createOrder={createOrder}
+            onApprove={onApprove}
+            onError={onErrorHandler}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
 
 function YouCanPayButton({ planId, billingCycle, onError }) {
   const [loading, setLoading] = useState(false);
@@ -55,6 +128,8 @@ function YouCanPayButton({ planId, billingCycle, onError }) {
 export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCycle }) {
   const [step, setStep] = useState("payment");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(null);
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
   const plan = PLANS_DATA[planId] || { name: planId, monthly: 0, credits: 0 };
   const planName = plan.name;
@@ -75,10 +150,16 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
     billingLabel = "Monthly";
   }
 
+  const handleSuccess = (result) => {
+    setSuccess(result);
+    setStep("success");
+  };
+
   useEffect(() => {
     if (!isOpen) {
       setStep("payment");
       setError("");
+      setSuccess(null);
     }
   }, [isOpen]);
 
@@ -139,6 +220,32 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
                 {error}
               </div>
+            )}
+
+            {paypalClientId && (
+              <>
+                <PayPalScriptProvider
+                  options={{
+                    clientId: paypalClientId,
+                    currency: "USD",
+                    intent: "capture",
+                    components: "buttons",
+                  }}
+                >
+                  <PayPalButtonGroup
+                    planId={planId}
+                    billingCycle={billingCycle}
+                    onSuccess={handleSuccess}
+                    onError={setError}
+                  />
+                </PayPalScriptProvider>
+
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-[11px] text-on-surface-variant/40 font-medium uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+              </>
             )}
 
             <YouCanPayButton
