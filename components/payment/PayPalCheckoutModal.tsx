@@ -139,9 +139,10 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
       />
 
       <div
-        className="relative w-full max-w-[580px] rounded-3xl border border-white/10 shadow-2xl animate-fade-in-up"
+        className="relative w-full max-w-[580px] max-h-[90vh] rounded-3xl border border-white/10 shadow-2xl animate-fade-in-up"
         style={{ background: "#161616" }}
       >
+        <div className="overflow-y-auto max-h-[90vh] rounded-3xl">
         {step === "payment" && (
           <button
             onClick={onClose}
@@ -229,6 +230,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
             </a>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
