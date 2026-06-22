@@ -6,10 +6,13 @@ import {
   usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
 
-const PLAN_NAMES = {
-  starter: "Starter",
-  professional: "Professional",
-  team: "Team",
+const DISCOUNT = 0.30;
+
+const PLANS_DATA = {
+  micro:   { name: "Micro", weekly: 9, credits: 306 },
+  starter: { name: "Starter", monthly: 25, credits: 10200 },
+  professional: { name: "Professional", monthly: 35, credits: 14280 },
+  team:   { name: "Team", monthly: 119, credits: 48552 },
 };
 
 function PayPalButtonGroup({ amount, planId, billingCycle, onSuccess, onError }) {
@@ -150,10 +153,24 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   const [success, setSuccess] = useState(null);
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
-  const planName = PLAN_NAMES[planId] || planId;
-  const amount = billingCycle === "annual"
-    ? ({ starter: 151, professional: 294, team: 697 })[planId] || 0
-    : ({ starter: 18, professional: 25, team: 83 })[planId] || 0;
+  const plan = PLANS_DATA[planId] || { name: planId, monthly: 0, credits: 0 };
+  const planName = plan.name;
+
+  let amount, credits, billingLabel;
+  if (billingCycle === "weekly") {
+    amount = plan.weekly || 0;
+    credits = plan.credits;
+    billingLabel = "Weekly";
+  } else if (billingCycle === "annual") {
+    const annualPerMonth = plan.monthly ? Math.round(plan.monthly * (1 - DISCOUNT)) : 0;
+    amount = annualPerMonth * 12;
+    credits = Math.round(plan.credits * (1 + DISCOUNT));
+    billingLabel = "Annual";
+  } else {
+    amount = plan.monthly || 0;
+    credits = Math.round(plan.credits / 12);
+    billingLabel = "Monthly";
+  }
 
   useEffect(() => {
     if (!isOpen) {
@@ -181,8 +198,6 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   const handleError = (msg) => {
     setError(msg);
   };
-
-  const billingLabel = billingCycle === "annual" ? "Annual" : "Monthly";
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -219,6 +234,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               <div>
                 <span className="text-sm font-semibold text-white">{planName} Plan</span>
                 <span className="text-[11px] text-on-surface-variant/50 ml-2 capitalize">{billingLabel}</span>
+                <p className="text-[10px] text-yellow-400 font-medium mt-0.5">{credits.toLocaleString()} credits/{billingCycle === "weekly" ? "week" : billingCycle === "annual" ? "year" : "month"}</p>
               </div>
               <div className="text-right">
                 <span className="text-lg font-extrabold text-white">${amount}</span>
