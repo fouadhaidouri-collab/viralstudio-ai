@@ -17,13 +17,8 @@ const menuGroups = [
   {
     heading: "AI Tools",
     items: [
-      { href: "/admin/ai-tools", label: "AI Tools", icon: "apps" },
-      { href: "/admin/models", label: "Models", icon: "psychology" },
-      { href: "/admin/generations", label: "Generations", icon: "auto_awesome" },
-      { href: "/admin/clipping", label: "Clipping Jobs", icon: "content_cut" },
-      { href: "/admin/ugc", label: "UGC Engine", icon: "record_voice_over" },
-      { href: "/admin/hooks", label: "Hook Generator", icon: "auto_awesome" },
-      { href: "/admin/chat", label: "Chat AI", icon: "chat" },
+      { href: "/ai-video", label: "AI Video", icon: "video" },
+      { href: "/ai-image", label: "Image Lab", icon: "image" },
     ],
   },
   {
