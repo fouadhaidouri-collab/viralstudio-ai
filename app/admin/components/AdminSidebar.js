@@ -9,7 +9,6 @@ const menuGroups = [
     items: [
       { href: "/admin", label: "Overview", icon: "dashboard" },
       { href: "/admin/users", label: "Users", icon: "group_add" },
-      { href: "/admin/credits", label: "Credits", icon: "currency_bitcoin" },
       { href: "/admin/payment-methods", label: "Payments", icon: "credit_card" },
       { href: "/admin/payment-logs", label: "Payment Logs", icon: "webhook" },
     ],
