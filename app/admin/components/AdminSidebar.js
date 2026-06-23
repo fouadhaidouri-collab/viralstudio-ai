@@ -27,12 +27,6 @@ const menuGroups = [
     ],
   },
   {
-    heading: "Content",
-    items: [
-      { href: "/admin/templates", label: "Templates", icon: "folder" },
-    ],
-  },
-  {
     heading: "Business",
     items: [
       { href: "/admin/plans", label: "Plans & Pricing", icon: "workspace_premium" },
