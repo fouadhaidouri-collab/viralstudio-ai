@@ -39,14 +39,6 @@ const menuGroups = [
       { href: "/admin/affiliates", label: "Affiliates", icon: "share" },
     ],
   },
-  {
-    heading: "System",
-    items: [
-      { href: "/admin/support", label: "Support", icon: "support_agent" },
-      { href: "/admin/logs", label: "Logs", icon: "history" },
-      { href: "/admin/settings", label: "Settings", icon: "settings" },
-    ],
-  },
 ];
 
 export default function AdminSidebar({ mobileOpen, setMobileOpen }) {
