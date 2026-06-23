@@ -17,8 +17,8 @@ const menuGroups = [
   {
     heading: "AI Tools",
     items: [
-      { href: "/ai-video", label: "AI Video", icon: "video" },
-      { href: "/ai-image", label: "Image Lab", icon: "image" },
+      { href: "/admin/ai-video", label: "AI Video", icon: "video" },
+      { href: "/admin/ai-image", label: "Image Lab", icon: "image" },
     ],
   },
   {
