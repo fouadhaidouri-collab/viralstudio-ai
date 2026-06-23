@@ -1,258 +1,197 @@
 "use client";
-import { useState, useMemo } from "react";
-import { mockUsers } from "./data/mockUsers";
-import { mockGenerations } from "./data/mockGenerations";
-import { mockPayments } from "./data/mockPayments";
-import { mockModels } from "./data/mockModels";
-import StatCard from "./components/StatCard";
-import ChartCard, { SimpleBarChart, SimpleLineChart, SimplePieChart } from "./components/ChartCard";
-import StatusBadge from "./components/StatusBadge";
+import { useState } from "react";
 import Icon from "../components/Icon";
+import StatusBadge from "./components/StatusBadge";
 
-function formatDate(d) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-}
+const sampleUsers = [
+  { name: "Fouad", email: "alikom381@gmail.com", plan: "Pro Plan", credits: 1250, status: "active" },
+  { name: "Sara", email: "sara@example.com", plan: "Free Plan", credits: 120, status: "active" },
+  { name: "Adam", email: "adam@example.com", plan: "Creator Plan", credits: 600, status: "active" },
+];
 
-export default function AdminOverview() {
-  const [timeRange, setTimeRange] = useState("7d");
+const samplePlans = [
+  { name: "Free Plan", price: "$0", credits: "100/mo" },
+  { name: "Creator Plan", price: "$19/mo", credits: "500/mo" },
+  { name: "Pro Plan", price: "$29/mo", credits: "1,250/mo" },
+  { name: "Agency Plan", price: "$99/mo", credits: "5,000/mo" },
+];
 
-  const stats = useMemo(() => {
-    const totalUsers = mockUsers.length;
-    const activeUsers = mockUsers.filter((u) => u.status === "active").length;
-    const today = new Date().toISOString().split("T")[0];
-    const newUsersToday = mockUsers.filter((u) => u.signup_date.startsWith(today)).length;
-    const totalCreditsUsed = mockGenerations.reduce((s, g) => g.status === "completed" || g.status === "failed" ? s + g.credits_used : s, 0);
-    const totalRevenue = mockPayments.filter((p) => p.status === "paid").reduce((s, p) => s + p.amount, 0);
-    const monthlyRevenue = mockPayments.filter((p) => p.status === "paid" && p.created_at.startsWith("2026-06")).reduce((s, p) => s + p.amount, 0);
-    const activeSubscriptions = mockUsers.filter((u) => u.plan !== "Free" && u.status === "active").length;
-    const completedGens = mockGenerations.filter((g) => g.status === "completed").length;
-    const failedGens = mockGenerations.filter((g) => g.status === "failed").length;
-    const successfulGens = completedGens;
-    const toolCounts = {};
-    mockGenerations.forEach((g) => { toolCounts[g.tool] = (toolCounts[g.tool] || 0) + 1; });
-    const mostUsedTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
-    const modelCounts = {};
-    mockGenerations.forEach((g) => { modelCounts[g.model] = (modelCounts[g.model] || 0) + 1; });
-    const mostUsedModel = Object.entries(modelCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
-    const totalCreditsSold = mockPayments.filter((p) => p.status === "paid").reduce((s) => s + 5000, 0);
-    const creditsRemaining = totalCreditsSold - totalCreditsUsed;
+const samplePayments = [
+  { user: "Fouad", plan: "Pro Plan", amount: "$29", status: "paid", date: "Today" },
+  { user: "Sara", plan: "Creator Plan", amount: "$19", status: "paid", date: "Yesterday" },
+];
 
-    return { totalUsers, activeUsers, newUsersToday, totalCreditsUsed, totalCreditsSold, creditsRemaining, totalGenerations: mockGenerations.length, successfulGens, failedGens, totalRevenue, monthlyRevenue, activeSubscriptions, mostUsedTool, mostUsedModel };
-  }, []);
+const sampleModels = [
+  "AI Video", "Image Lab", "UGC Engine", "Hook Gen", "Clipping",
+];
 
-  const revenueData = [
-    { label: "Jan", value: 1200 }, { label: "Feb", value: 1800 }, { label: "Mar", value: 2400 },
-    { label: "Apr", value: 3100 }, { label: "May", value: 3900 }, { label: "Jun", value: 4800 },
-  ];
+export default function AdminPage() {
+  const [alertMsg, setAlertMsg] = useState(null);
 
-  const creditsUsageData = [
-    { label: "Mon", value: 45 }, { label: "Tue", value: 62 }, { label: "Wed", value: 38 },
-    { label: "Thu", value: 71 }, { label: "Fri", value: 55 }, { label: "Sat", value: 29 }, { label: "Sun", value: 43 },
-  ];
+  const showAlert = (msg) => {
+    setAlertMsg(msg);
+    setTimeout(() => setAlertMsg(null), 2000);
+  };
 
-  const genByTool = [
-    { label: "AI Video", value: 10, color: "#a855f7" },
-    { label: "Image Lab", value: 4, color: "#22d3ee" },
-    { label: "Chat AI", value: 2, color: "#fb923c" },
-    { label: "UGC Engine", value: 1, color: "#ec4899" },
-    { label: "Clipping", value: 3, color: "#f97316" },
-  ];
-
-  const newUsersChart = [
-    { label: "Week 1", value: 3 }, { label: "Week 2", value: 5 }, { label: "Week 3", value: 2 }, { label: "Week 4", value: 7 },
-  ];
-
-  const failedJobsChart = [
-    { label: "Mon", value: 2 }, { label: "Tue", value: 1 }, { label: "Wed", value: 3 },
-    { label: "Thu", value: 0 }, { label: "Fri", value: 1 }, { label: "Sat", value: 0 }, { label: "Sun", value: 0 },
-  ];
-
-  const latestUsers = [...mockUsers].sort((a, b) => new Date(b.signup_date) - new Date(a.signup_date)).slice(0, 5);
-  const latestGens = [...mockGenerations].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
-  const latestPayments = [...mockPayments].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
-  const failedGens = mockGenerations.filter((g) => g.status === "failed").slice(0, 3);
+  const StatCard = ({ label, value, icon, color }) => (
+    <div className="bg-[rgba(255,255,255,0.02)] border border-white/5 rounded-2xl p-4 card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), transparent)" }}>
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${color}`}>
+          <Icon name={icon} size={16} className="text-white" />
+        </div>
+      </div>
+      <p className="text-2xl font-extrabold text-white">{value}</p>
+      <p className="text-[11px] text-on-surface-variant mt-0.5">{label}</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-5 animate-fade-in-up">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg md:text-xl font-bold text-white" style={{ fontFamily: "Geist, sans-serif" }}>Admin Overview</h1>
-          <p className="text-xs text-on-surface-variant mt-0.5">Monitor your ViralStudio AI platform performance</p>
+    <div className="space-y-6 animate-fade-in-up">
+      <div>
+        <h1 className="text-lg md:text-xl font-bold text-white" style={{ fontFamily: "Geist, sans-serif" }}>Admin Panel</h1>
+        <p className="text-xs text-on-surface-variant mt-0.5">Manage your ViralStudio AI platform</p>
+      </div>
+
+      {alertMsg && (
+        <div className="px-4 py-3 rounded-xl bg-primary/15 border border-primary/20 text-xs text-primary font-medium">
+          {alertMsg}
         </div>
-        <div className="flex items-center gap-1.5 bg-surface-container-low border border-surface-border/50 rounded-lg p-0.5">
-          {["24h", "7d", "30d", "all"].map((t) => (
-            <button key={t} onClick={() => setTimeRange(t)} className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all ${timeRange === t ? "primary-gradient text-white" : "text-on-surface-variant hover:text-white"}`}>
-              {t === "24h" ? "24H" : t === "7d" ? "7 Days" : t === "30d" ? "30 Days" : "All Time"}
-            </button>
-          ))}
+      )}
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard label="Total Users" value="128" icon="group_add" color="bg-gradient-to-br from-purple-600 to-purple-800" />
+        <StatCard label="Total Credits Used" value="45,800" icon="bolt" color="bg-gradient-to-br from-yellow-500 to-yellow-700" />
+        <StatCard label="Total Revenue" value="$2,940" icon="credit_card" color="bg-gradient-to-br from-green-500 to-green-700" />
+        <StatCard label="Active Plans" value="36" icon="workspace_premium" color="bg-gradient-to-br from-cyan-500 to-cyan-700" />
+      </div>
+
+      <div className="bg-[rgba(255,255,255,0.02)] border border-white/5 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), transparent)" }}>
+        <div className="flex items-center justify-between p-4 pb-2">
+          <h3 className="text-xs font-semibold text-white flex items-center gap-2">
+            <Icon name="group_add" size={14} className="text-primary" />
+            Users
+          </h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-white/5 text-on-surface-variant">
+                <th className="text-left p-3 font-semibold">Name</th>
+                <th className="text-left p-3 font-semibold">Email</th>
+                <th className="text-left p-3 font-semibold">Plan</th>
+                <th className="text-left p-3 font-semibold">Credits</th>
+                <th className="text-left p-3 font-semibold">Status</th>
+                <th className="text-left p-3 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sampleUsers.map((u, i) => (
+                <tr key={i} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                  <td className="p-3 text-white font-medium">{u.name}</td>
+                  <td className="p-3 text-on-surface-variant">{u.email}</td>
+                  <td className="p-3 text-white">{u.plan}</td>
+                  <td className="p-3 text-yellow-400 font-semibold">{u.credits.toLocaleString()}</td>
+                  <td className="p-3"><StatusBadge status={u.status} /></td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-1.5">
+                      <button onClick={() => showAlert(`Viewing ${u.name}`)} className="px-2 py-1 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-[10px] font-medium transition-all">View</button>
+                      <button onClick={() => showAlert(`Edit credits for ${u.name}`)} className="px-2 py-1 rounded-lg bg-yellow-500/15 text-yellow-400 hover:bg-yellow-500/25 text-[10px] font-medium transition-all">Edit Credits</button>
+                      <button onClick={() => showAlert(`Disable ${u.name}`)} className="px-2 py-1 rounded-lg bg-error/15 text-error hover:bg-error/25 text-[10px] font-medium transition-all">Disable</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-        <StatCard title="Total Users" value={stats.totalUsers} icon="group_add" color="primary" trend="+12% this month" />
-        <StatCard title="Active Users" value={stats.activeUsers} icon="verified" color="green" trend={`${Math.round((stats.activeUsers / stats.totalUsers) * 100)}% of total`} />
-        <StatCard title="New Today" value={stats.newUsersToday} icon="person" color="secondary" subtitle="Signups in last 24h" />
-        <StatCard title="Credits Used" value={stats.totalCreditsUsed} icon="bolt" color="yellow" suffix=" cr" />
-        <StatCard title="Credits Sold" value={stats.totalCreditsSold} icon="currency_bitcoin" color="accentOrange" suffix=" cr" trend="+15% vs last month" />
-        <StatCard title="Credits Remaining" value={stats.creditsRemaining} icon="hourglass" color="accentCyan" suffix=" cr" />
-        <StatCard title="Total Generations" value={stats.totalGenerations} icon="auto_awesome" color="primary" />
-        <StatCard title="Successful" value={stats.successfulGens} icon="check_circle" color="green" trend={`${Math.round((stats.successfulGens / stats.totalGenerations) * 100)}% success rate`} />
-        <StatCard title="Failed" value={stats.failedGens} icon="error" color="error" trend={`${Math.round((stats.failedGens / stats.totalGenerations) * 100)}% failure rate`} />
-        <StatCard title="Total Revenue" value={`$${stats.totalRevenue.toLocaleString()}`} icon="credit_card" color="accentOrange" />
-        <StatCard title="Monthly Revenue" value={`$${stats.monthlyRevenue.toLocaleString()}`} icon="trending_up" color="green" trend="June 2026" />
-        <StatCard title="Active Subs" value={stats.activeSubscriptions} icon="workspace_premium" color="accentPink" trend={`${Math.round((stats.activeSubscriptions / stats.totalUsers) * 100)}% conversion`} />
-        <StatCard title="Top Tool" value={stats.mostUsedTool} icon="apps" color="secondary" subtitle="Most used AI tool" />
-        <StatCard title="Top Model" value={stats.mostUsedModel} icon="psychology" color="primary" subtitle="Most used AI model" />
-        <StatCard title="System Health" value="97.2%" icon="check_circle" color={stats.failedGens > 3 ? "yellow" : "green"} subtitle="API uptime" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Revenue" subtitle="Monthly revenue 2026" icon="credit_card" action={{ label: "View payments", onClick: () => window.location.href = "/admin/payments" }}>
-          <SimpleBarChart data={revenueData} />
-        </ChartCard>
-        <ChartCard title="Credits Usage" subtitle="Last 7 days" icon="bolt" action={{ label: "View credits", onClick: () => window.location.href = "/admin/credits" }}>
-          <SimpleLineChart data={creditsUsageData} />
-        </ChartCard>
-        <ChartCard title="Generations by Tool" subtitle="All time" icon="auto_awesome">
-          <SimplePieChart data={genByTool} />
-        </ChartCard>
-        <ChartCard title="New Users" subtitle="Weekly signups" icon="group_add">
-          <SimpleLineChart data={newUsersChart} />
-        </ChartCard>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card rounded-2xl overflow-hidden card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
-          <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <h3 className="text-xs font-semibold text-white flex items-center gap-2">
-              <Icon name="person" className="text-primary" size={14} />
-              Latest Users
-            </h3>
-            <a href="/admin/users" className="text-[10px] text-primary hover:text-primary/80 font-medium">View all</a>
-          </div>
-          <div className="px-4 pb-4 space-y-2">
-            {latestUsers.map((u) => (
-              <div key={u.id} className="flex items-center justify-between py-1.5 border-b border-surface-border/20 last:border-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">{u.name.charAt(0)}</div>
-                  <div>
-                    <p className="text-xs font-medium text-white">{u.name}</p>
-                    <p className="text-[9px] text-on-surface-variant">{u.email}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[9px] text-on-surface-variant">{new Date(u.signup_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="glass-card rounded-2xl overflow-hidden card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
-          <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <h3 className="text-xs font-semibold text-white flex items-center gap-2">
-              <Icon name="auto_awesome" className="text-primary" size={14} />
-              Latest Generations
-            </h3>
-            <a href="/admin/generations" className="text-[10px] text-primary hover:text-primary/80 font-medium">View all</a>
-          </div>
-          <div className="px-4 pb-4 space-y-2">
-            {latestGens.map((g) => (
-              <div key={g.id} className="flex items-center justify-between py-1.5 border-b border-surface-border/20 last:border-0">
-                <div>
-                  <p className="text-xs font-medium text-white">{g.tool} - {g.model}</p>
-                  <p className="text-[9px] text-on-surface-variant truncate max-w-[200px]">{g.prompt}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={g.status} />
-                  <span className="text-[9px] text-on-surface-variant">{formatDate(g.created_at)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card rounded-2xl overflow-hidden card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
-          <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <h3 className="text-xs font-semibold text-white flex items-center gap-2">
-              <Icon name="credit_card" className="text-primary" size={14} />
-              Latest Payments
-            </h3>
-            <a href="/admin/payments" className="text-[10px] text-primary hover:text-primary/80 font-medium">View all</a>
-          </div>
-          <div className="px-4 pb-4 space-y-2">
-            {latestPayments.map((p) => (
-              <div key={p.id} className="flex items-center justify-between py-1.5 border-b border-surface-border/20 last:border-0">
-                <div>
-                  <p className="text-xs font-medium text-white">{p.user_name}</p>
-                  <p className="text-[9px] text-on-surface-variant">{p.plan} - ${p.amount}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={p.status} />
-                  <span className="text-[9px] text-on-surface-variant">{formatDate(p.created_at)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="glass-card rounded-2xl overflow-hidden card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
-          <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <h3 className="text-xs font-semibold text-white flex items-center gap-2">
-              <Icon name="error" className="text-error" size={14} />
-              Failed Generations
-            </h3>
-            <a href="/admin/generations" className="text-[10px] text-primary hover:text-primary/80 font-medium">View all</a>
-          </div>
-          <div className="px-4 pb-4 space-y-2">
-            {failedGens.length === 0 ? (
-              <p className="text-xs text-on-surface-variant text-center py-4">No failed generations</p>
-            ) : (
-              failedGens.map((g) => (
-                <div key={g.id} className="flex items-start gap-2.5 py-1.5 border-b border-surface-border/20 last:border-0">
-                  <div className="w-6 h-6 rounded-lg bg-error/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <Icon name="error" className="text-error" size={12} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-white">{g.user_name} - {g.tool}</p>
-                    <p className="text-[9px] text-error mt-0.5">{g.error_message}</p>
-                  </div>
-                  <span className="text-[9px] text-on-surface-variant shrink-0">{formatDate(g.created_at)}</span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="glass-card rounded-2xl p-4 card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
-        <div className="flex items-center gap-2 mb-3">
-          <Icon name="check_circle" className="text-green-400" size={14} />
-          <h3 className="text-xs font-semibold text-white">System Health Status</h3>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: "API Status", value: "Operational", status: "success" },
-            { label: "Database", value: "Connected", status: "success" },
-            { label: "FAL.ai", value: "97.2% uptime", status: "success" },
-            { label: "OpenRouter", value: "99.1% uptime", status: "success" },
-            { label: "Stripe", value: "Operational", status: "success" },
-            { label: "PayPal", value: "Operational", status: "success" },
-            { label: "Storage", value: "78% used", status: "warning" },
-            { label: "Queue", value: "3 pending", status: "info" },
-          ].map((item) => (
-            <div key={item.label} className="bg-surface-container-low border border-surface-border/40 rounded-lg p-3 flex items-center gap-2.5">
-              <span className={`w-2 h-2 rounded-full ${item.status === "success" ? "bg-green-400" : item.status === "warning" ? "bg-yellow-400" : "bg-secondary"}`} />
-              <div>
-                <p className="text-[9px] text-on-surface-variant">{item.label}</p>
-                <p className="text-xs font-semibold text-white">{item.value}</p>
-              </div>
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <Icon name="workspace_premium" size={16} className="text-primary" />
+          Plans
+        </h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {samplePlans.map((p, i) => (
+            <div key={i} className="bg-[rgba(255,255,255,0.02)] border border-white/5 rounded-2xl p-4" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), transparent)" }}>
+              <p className="text-sm font-bold text-white">{p.name}</p>
+              <p className="text-lg font-extrabold text-yellow-400 mt-1">{p.price}</p>
+              <p className="text-[10px] text-on-surface-variant mt-0.5">{p.credits} credits</p>
+              <button onClick={() => showAlert(`Edit ${p.name}`)} className="mt-3 w-full px-3 py-1.5 rounded-xl text-[10px] font-semibold primary-gradient text-white hover:opacity-90 transition-all">Edit</button>
             </div>
           ))}
         </div>
       </div>
+
+      <div className="bg-[rgba(255,255,255,0.02)] border border-white/5 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), transparent)" }}>
+        <div className="flex items-center justify-between p-4 pb-2">
+          <h3 className="text-xs font-semibold text-white flex items-center gap-2">
+            <Icon name="credit_card" size={14} className="text-primary" />
+            Payments
+          </h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-white/5 text-on-surface-variant">
+                <th className="text-left p-3 font-semibold">User</th>
+                <th className="text-left p-3 font-semibold">Plan</th>
+                <th className="text-left p-3 font-semibold">Amount</th>
+                <th className="text-left p-3 font-semibold">Status</th>
+                <th className="text-left p-3 font-semibold">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {samplePayments.map((p, i) => (
+                <tr key={i} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                  <td className="p-3 text-white font-medium">{p.user}</td>
+                  <td className="p-3 text-on-surface-variant">{p.plan}</td>
+                  <td className="p-3 text-yellow-400 font-semibold">{p.amount}</td>
+                  <td className="p-3"><StatusBadge status={p.status} /></td>
+                  <td className="p-3 text-on-surface-variant">{p.date}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="bg-[rgba(255,255,255,0.02)] border border-white/5 rounded-2xl p-4" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), transparent)" }}>
+        <h3 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
+          <Icon name="apps" size={14} className="text-primary" />
+          AI Models
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          {sampleModels.map((m, i) => (
+            <div key={i} className="bg-[rgba(255,255,255,0.03)] border border-white/5 rounded-xl p-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-white">{m}</p>
+                <p className="text-[9px] text-green-400 mt-0.5">Active</p>
+              </div>
+              <button onClick={() => showAlert(`Edit ${m}`)} className="px-2 py-1 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-[10px] font-medium transition-all">Edit</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-[rgba(255,255,255,0.02)] border border-white/5 rounded-2xl p-4" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), transparent)" }}>
+        <h3 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
+          <Icon name="settings" size={14} className="text-primary" />
+          Admin Settings
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => showAlert("Add Credits to User — sample action")} className="px-4 py-2 rounded-xl text-xs font-semibold primary-gradient text-white hover:opacity-90 transition-all">Add Credits to User</button>
+          <button onClick={() => showAlert("Change User Plan — sample action")} className="px-4 py-2 rounded-xl text-xs font-semibold bg-yellow-500/15 text-yellow-400 hover:bg-yellow-500/25 border border-yellow-500/20 transition-all">Change User Plan</button>
+          <button onClick={() => showAlert("Disable User — sample action")} className="px-4 py-2 rounded-xl text-xs font-semibold bg-error/15 text-error hover:bg-error/25 border border-error/20 transition-all">Disable User</button>
+          <button onClick={() => showAlert("Add New Plan — sample action")} className="px-4 py-2 rounded-xl text-xs font-semibold bg-green-500/15 text-green-400 hover:bg-green-500/25 border border-green-500/20 transition-all">Add New Plan</button>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .primary-gradient {
+          background: linear-gradient(135deg, #a855f7, #7c3aed);
+        }
+      `}</style>
     </div>
   );
 }
