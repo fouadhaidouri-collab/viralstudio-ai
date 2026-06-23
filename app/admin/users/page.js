@@ -6,7 +6,6 @@ import SearchInput from "../components/SearchInput";
 import FilterSelect from "../components/FilterSelect";
 import StatusBadge from "../components/StatusBadge";
 import PlanBadge from "../components/PlanBadge";
-import CreditBadge from "../components/CreditBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
 import EmptyState from "../components/EmptyState";
