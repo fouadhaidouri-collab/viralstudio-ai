@@ -24,7 +24,6 @@ const menuGroups = [
   {
     heading: "Business",
     items: [
-      { href: "/admin/plans", label: "Plans & Pricing", icon: "workspace_premium" },
       { href: "/admin/affiliates", label: "Affiliates", icon: "share" },
     ],
   },
