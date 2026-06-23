@@ -11,16 +11,16 @@ import StatusBadge from "../components/StatusBadge";
 import Icon from "../../components/Icon";
 
 const mockPaymentLogs = [
-  { id: 'paylog_001', user_email: 'sarah@creatorhub.com', provider: 'stripe', amount: 29, currency: 'USD', status: 'completed', event_type: 'checkout.session.completed', credits_added: 500, plan_updated: null, raw_event: '{"id":"evt_001","type":"checkout.session.completed","data":{"object":{"amount_total":2900,"currency":"usd"}}}', created_at: '2026-06-20T10:00:00Z' },
-  { id: 'paylog_002', user_email: 'mike@studios.pro', provider: 'paypal', amount: 199, currency: 'USD', status: 'completed', event_type: 'PAYMENT.CAPTURE.COMPLETED', credits_added: 5000, plan_updated: 'Agency', raw_event: '{"id":"evt_002","event_type":"PAYMENT.CAPTURE.COMPLETED"}', created_at: '2026-06-19T14:00:00Z' },
-  { id: 'paylog_003', user_email: 'emma@viralcontent.com', provider: 'stripe', amount: 29, currency: 'USD', status: 'failed', event_type: 'checkout.session.expired', credits_added: 0, plan_updated: null, raw_event: '{"id":"evt_003","type":"checkout.session.expired"}', created_at: '2026-06-18T15:00:00Z' },
-  { id: 'paylog_004', user_email: 'nina@agencyworld.com', provider: 'stripe', amount: 199, currency: 'USD', status: 'completed', event_type: 'invoice.paid', credits_added: 20000, plan_updated: 'Agency', raw_event: '{"id":"evt_004","type":"invoice.paid"}', created_at: '2026-06-17T08:00:00Z' },
-  { id: 'paylog_005', user_email: 'david@marketing.pro', provider: 'paypal', amount: 29, currency: 'USD', status: 'completed', event_type: 'PAYMENT.CAPTURE.COMPLETED', credits_added: 1000, plan_updated: 'Creator', raw_event: '{"id":"evt_005","event_type":"PAYMENT.CAPTURE.COMPLETED"}', created_at: '2026-06-16T12:00:00Z' },
-  { id: 'paylog_006', user_email: 'sophie@luxebrand.com', provider: 'youcanpay', amount: 500, currency: 'MAD', status: 'pending', event_type: 'checkout.created', credits_added: 0, plan_updated: null, raw_event: '{"id":"evt_006","type":"checkout.created"}', created_at: '2026-06-20T08:00:00Z' },
-  { id: 'paylog_007', user_email: 'chris@businesspro.com', provider: 'stripe', amount: 79, currency: 'USD', status: 'completed', event_type: 'checkout.session.completed', credits_added: 5000, plan_updated: 'Pro', raw_event: '{"id":"evt_007","type":"checkout.session.completed"}', created_at: '2026-06-15T10:00:00Z' },
-  { id: 'paylog_008', user_email: 'rachel@influencer.io', provider: 'paypal', amount: 29, currency: 'USD', status: 'refunded', event_type: 'PAYMENT.CAPTURE.REFUNDED', credits_added: -1000, plan_updated: null, raw_event: '{"id":"evt_008","event_type":"PAYMENT.CAPTURE.REFUNDED"}', created_at: '2026-06-14T16:00:00Z' },
-  { id: 'paylog_009', user_email: 'james@agency.co', provider: 'stripe', amount: 79, currency: 'USD', status: 'failed', event_type: 'payment_intent.payment_failed', credits_added: 0, plan_updated: null, raw_event: '{"id":"evt_009","type":"payment_intent.payment_failed","data":{"object":{"failure_message":"card_declined"}}}', created_at: '2026-05-01T08:00:00Z' },
-  { id: 'paylog_010', user_email: 'anna@socialmedia.com', provider: 'youcanstore', amount: 300, currency: 'MAD', status: 'completed', event_type: 'order.paid', credits_added: 1200, plan_updated: null, raw_event: '{"id":"evt_010","type":"order.paid","data":{"order_id":"ORD-001"}}', created_at: '2026-06-13T09:00:00Z' },
+  { id: 'paylog_001', user_email: 'sarah@creatorhub.com', provider: 'stripe', amount: 29, currency: 'USD', country: 'United States', status: 'completed', event_type: 'checkout.session.completed', credits_added: 500, plan_updated: null, raw_event: '{"id":"evt_001","type":"checkout.session.completed","data":{"object":{"amount_total":2900,"currency":"usd"}}}', created_at: '2026-06-20T10:00:00Z' },
+  { id: 'paylog_002', user_email: 'mike@studios.pro', provider: 'paypal', amount: 199, currency: 'USD', country: 'United States', status: 'completed', event_type: 'PAYMENT.CAPTURE.COMPLETED', credits_added: 5000, plan_updated: 'Agency', raw_event: '{"id":"evt_002","event_type":"PAYMENT.CAPTURE.COMPLETED"}', created_at: '2026-06-19T14:00:00Z' },
+  { id: 'paylog_003', user_email: 'emma@viralcontent.com', provider: 'stripe', amount: 29, currency: 'USD', country: 'Canada', status: 'failed', event_type: 'checkout.session.expired', credits_added: 0, plan_updated: null, raw_event: '{"id":"evt_003","type":"checkout.session.expired"}', created_at: '2026-06-18T15:00:00Z' },
+  { id: 'paylog_004', user_email: 'nina@agencyworld.com', provider: 'stripe', amount: 199, currency: 'USD', country: 'United States', status: 'completed', event_type: 'invoice.paid', credits_added: 20000, plan_updated: 'Agency', raw_event: '{"id":"evt_004","type":"invoice.paid"}', created_at: '2026-06-17T08:00:00Z' },
+  { id: 'paylog_005', user_email: 'david@marketing.pro', provider: 'paypal', amount: 29, currency: 'USD', country: 'United Kingdom', status: 'completed', event_type: 'PAYMENT.CAPTURE.COMPLETED', credits_added: 1000, plan_updated: 'Creator', raw_event: '{"id":"evt_005","event_type":"PAYMENT.CAPTURE.COMPLETED"}', created_at: '2026-06-16T12:00:00Z' },
+  { id: 'paylog_006', user_email: 'sophie@luxebrand.com', provider: 'youcanpay', amount: 500, currency: 'MAD', country: 'Morocco', status: 'pending', event_type: 'checkout.created', credits_added: 0, plan_updated: null, raw_event: '{"id":"evt_006","type":"checkout.created"}', created_at: '2026-06-20T08:00:00Z' },
+  { id: 'paylog_007', user_email: 'chris@businesspro.com', provider: 'stripe', amount: 79, currency: 'USD', country: 'Australia', status: 'completed', event_type: 'checkout.session.completed', credits_added: 5000, plan_updated: 'Pro', raw_event: '{"id":"evt_007","type":"checkout.session.completed"}', created_at: '2026-06-15T10:00:00Z' },
+  { id: 'paylog_008', user_email: 'rachel@influencer.io', provider: 'paypal', amount: 29, currency: 'USD', country: 'United States', status: 'refunded', event_type: 'PAYMENT.CAPTURE.REFUNDED', credits_added: -1000, plan_updated: null, raw_event: '{"id":"evt_008","event_type":"PAYMENT.CAPTURE.REFUNDED"}', created_at: '2026-06-14T16:00:00Z' },
+  { id: 'paylog_009', user_email: 'james@agency.co', provider: 'stripe', amount: 79, currency: 'USD', country: 'France', status: 'failed', event_type: 'payment_intent.payment_failed', credits_added: 0, plan_updated: null, raw_event: '{"id":"evt_009","type":"payment_intent.payment_failed","data":{"object":{"failure_message":"card_declined"}}}', created_at: '2026-05-01T08:00:00Z' },
+  { id: 'paylog_010', user_email: 'anna@socialmedia.com', provider: 'youcanstore', amount: 300, currency: 'MAD', country: 'Morocco', status: 'completed', event_type: 'order.paid', credits_added: 1200, plan_updated: null, raw_event: '{"id":"evt_010","type":"order.paid","data":{"order_id":"ORD-001"}}', created_at: '2026-06-13T09:00:00Z' },
 ];
 
 const providerIcons = {
@@ -124,6 +124,10 @@ export default function AdminPaymentLogsPage() {
                 <p className="text-xs text-white font-semibold">{formatCurrency(log.amount, log.currency)}</p>
               </div>
               <div>
+                <p className="text-[10px] font-medium text-on-surface-variant mb-1">Country</p>
+                <p className="text-xs text-white">{log.country}</p>
+              </div>
+              <div>
                 <p className="text-[10px] font-medium text-on-surface-variant mb-1">Status</p>
                 <StatusBadge status={log.status} />
               </div>
@@ -197,6 +201,11 @@ export default function AdminPaymentLogsPage() {
       key: "status",
       label: "Status",
       render: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      key: "country",
+      label: "Country",
+      render: (row) => <span className="text-xs text-white">{row.country}</span>,
     },
     {
       key: "event_type",

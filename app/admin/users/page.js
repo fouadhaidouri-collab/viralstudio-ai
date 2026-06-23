@@ -191,7 +191,6 @@ export default function AdminUsersPage() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Name</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Email</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Plan</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Credits</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Generations</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Signup Date</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Last Login</th>
@@ -215,7 +214,6 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant">{user.email}</td>
                       <td className="px-4 py-3"><PlanBadge plan={user.plan} /></td>
-                      <td className="px-4 py-3"><CreditBadge amount={user.credits} /></td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant">{user.total_generations.toLocaleString()}</td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{formatDate(user.signup_date)}</td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{formatDate(user.last_login)}</td>
