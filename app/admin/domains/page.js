@@ -9,6 +9,7 @@ export default function AdminDomainsPage() {
   const [active, setActive] = useState(null);
   const [newDomain, setNewDomain] = useState("");
   const [showDns, setShowDns] = useState(null);
+  const [verifyMsg, setVerifyMsg] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -31,7 +32,8 @@ export default function AdminDomainsPage() {
     if (res.ok) {
       const data = await res.json();
       setDomains(data.domains);
-      setShowDns(newDomain);
+      const added = data.domains.find((d) => d.domain === newDomain);
+      setShowDns(added);
       setNewDomain("");
     }
   };
@@ -42,7 +44,12 @@ export default function AdminDomainsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "verify", id }),
     });
-    if (res.ok) { const data = await res.json(); setDomains(data.domains); }
+    if (res.ok) {
+      const data = await res.json();
+      setDomains(data.domains);
+      setVerifyMsg({ domain: domains.find((d) => d.id === id)?.domain, message: data.message, verified: data.verified });
+      setTimeout(() => setVerifyMsg(null), 8000);
+    }
   };
 
   const handleSetActive = async (id) => {
@@ -86,31 +93,18 @@ export default function AdminDomainsPage() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Active Domain"
-          value={activeDomain?.domain || "None"}
-          icon="language"
-          color="primary"
-        />
-        <StatCard
-          title="Domain Status"
-          value={activeDomain?.status || "N/A"}
-          icon="check_circle"
-          color={statusColor(activeDomain?.status)}
-        />
-        <StatCard
-          title="SSL Status"
-          value={activeDomain?.ssl_status || "N/A"}
-          icon="lock"
-          color={statusColor(activeDomain?.ssl_status)}
-        />
-        <StatCard
-          title="Last Checked"
-          value={activeDomain?.updated_at ? new Date(activeDomain.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}
-          icon="schedule"
-          color="info"
-        />
+        <StatCard title="Active Domain" value={activeDomain?.domain || "None"} icon="language" color="primary" />
+        <StatCard title="Domain Status" value={activeDomain?.status || "N/A"} icon="check_circle" color={statusColor(activeDomain?.status)} />
+        <StatCard title="SSL Status" value={activeDomain?.ssl_status || "N/A"} icon="lock" color={statusColor(activeDomain?.ssl_status)} />
+        <StatCard title="Last Checked" value={activeDomain?.updated_at ? new Date(activeDomain.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"} icon="schedule" color="info" />
       </div>
+
+      {verifyMsg && (
+        <div className={`rounded-xl p-4 text-xs flex items-center gap-2 ${verifyMsg.verified ? "bg-green-500/15 text-green-400 border border-green-500/30" : "bg-accent-orange/15 text-accent-orange border border-accent-orange/30"}`}>
+          <Icon name={verifyMsg.verified ? "check_circle" : "info"} size={14} />
+          <span><strong>{verifyMsg.domain}:</strong> {verifyMsg.message}</span>
+        </div>
+      )}
 
       <div className="glass-card rounded-xl p-5">
         <h3 className="text-sm font-bold text-white mb-1">Connect New Domain</h3>
@@ -124,26 +118,22 @@ export default function AdminDomainsPage() {
             placeholder="example.com"
             className="flex-1 bg-surface-container-lowest border border-surface-border/50 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant focus:outline-none focus:border-primary/50"
           />
-          <button
-            onClick={handleAdd}
-            disabled={!newDomain}
-            className="primary-gradient text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-40 whitespace-nowrap"
-          >
+          <button onClick={handleAdd} disabled={!newDomain} className="primary-gradient text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-40 whitespace-nowrap">
             Connect Domain
           </button>
         </div>
       </div>
 
-      {showDns && (
+      {showDns && showDns.verification_token && (
         <div className="glass-card rounded-xl p-5 border border-secondary/30">
           <div className="flex items-center gap-2 mb-3">
             <Icon name="info" size={16} className="text-secondary" />
-            <h3 className="text-sm font-bold text-white">DNS Configuration for {showDns}</h3>
+            <h3 className="text-sm font-bold text-white">DNS Configuration for {showDns.domain}</h3>
           </div>
-          <p className="text-xs text-on-surface-variant mb-3">Configure your DNS records with your domain provider, then click Verify DNS.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <p className="text-xs text-on-surface-variant mb-3">Configure these DNS records with your domain provider, then click Verify DNS.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <div className="bg-surface-container-lowest rounded-xl p-4 border border-surface-border/50">
-              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Root Domain (@)</p>
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">A Record (Root)</p>
               <div className="space-y-1.5">
                 <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Type:</span><span className="text-xs font-mono text-white">A</span></div>
                 <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Name:</span><span className="text-xs font-mono text-white">@</span></div>
@@ -151,11 +141,19 @@ export default function AdminDomainsPage() {
               </div>
             </div>
             <div className="bg-surface-container-lowest rounded-xl p-4 border border-surface-border/50">
-              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Subdomain (www)</p>
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">CNAME (www)</p>
               <div className="space-y-1.5">
                 <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Type:</span><span className="text-xs font-mono text-white">CNAME</span></div>
                 <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Name:</span><span className="text-xs font-mono text-white">www</span></div>
                 <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Value:</span><span className="text-xs font-mono text-white">cname.vercel-dns.com</span></div>
+              </div>
+            </div>
+            <div className="bg-surface-container-lowest rounded-xl p-4 border border-surface-border/50">
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">TXT Record (Verification)</p>
+              <div className="space-y-1.5">
+                <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Type:</span><span className="text-xs font-mono text-white">TXT</span></div>
+                <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Name:</span><span className="text-xs font-mono text-white">@</span></div>
+                <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Value:</span><span className="text-xs font-mono text-white break-all">{showDns.verification_token}</span></div>
               </div>
             </div>
           </div>
@@ -218,36 +216,20 @@ export default function AdminDomainsPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center gap-1 justify-end">
-                        <button
-                          onClick={() => setShowDns(d.domain)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high border border-surface-border/50 hover:bg-surface-container-higher transition-all"
-                          title="View DNS"
-                        >
+                        <button onClick={() => setShowDns(d)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high border border-surface-border/50 hover:bg-surface-container-higher transition-all" title="View DNS">
                           <Icon name="visibility" className="text-on-surface-variant" size={13} />
                         </button>
                         {d.status !== "verified" && (
-                          <button
-                            onClick={() => handleVerify(d.id)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all"
-                            title="Verify DNS"
-                          >
+                          <button onClick={() => handleVerify(d.id)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all" title="Verify DNS">
                             <Icon name="check_circle" size={13} />
                           </button>
                         )}
                         {!d.is_active && d.status === "verified" && (
-                          <button
-                            onClick={() => handleSetActive(d.id)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-all"
-                            title="Set Active"
-                          >
+                          <button onClick={() => handleSetActive(d.id)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-all" title="Set Active">
                             <Icon name="toggle_on" size={13} />
                           </button>
                         )}
-                        <button
-                          onClick={() => handleRemove(d.id)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all"
-                          title="Delete"
-                        >
+                        <button onClick={() => handleRemove(d.id)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all" title="Delete">
                           <Icon name="delete" size={13} />
                         </button>
                       </div>

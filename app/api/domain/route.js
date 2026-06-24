@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import dns from "dns";
+import { promisify } from "util";
+
+const resolve4 = promisify(dns.resolve4);
+const resolveCname = promisify(dns.resolveCname);
 
 const DATA_DIR = process.env.VERCEL ? "/tmp/data" : path.join(process.cwd(), "data");
 const FILE = path.join(DATA_DIR, "domains.json");
+const TARGET_IP = "76.76.21.21";
+const TARGET_CNAME = "cname.vercel-dns.com";
 
 function generateVerificationToken() {
   return "vs-" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -39,6 +46,16 @@ function writeDomains(domains) {
   fs.writeFileSync(FILE, JSON.stringify(domains, null, 2));
 }
 
+async function checkDns(domain) {
+  let aRecords = [];
+  let cnameRecords = [];
+  try { aRecords = await resolve4(domain); } catch {}
+  try { cnameRecords = await resolveCname(domain); } catch {}
+  const aMatch = aRecords.includes(TARGET_IP);
+  const cnameMatch = cnameRecords.includes(TARGET_CNAME);
+  return { aMatch, cnameMatch, aRecords, cnameRecords };
+}
+
 export async function GET() {
   const all = readDomains();
   const active = all.find((d) => d.is_active && d.status === "verified") || all[0];
@@ -56,9 +73,8 @@ export async function POST(req) {
     if (all.find((d) => d.domain === domain)) {
       return NextResponse.json({ error: "Domain already exists" }, { status: 400 });
     }
-    const dnsTarget = process.env.VERCEL_PROJECT_ID
-      ? `cname.vercel-dns.com`
-      : "76.76.21.21";
+    const dnsTarget = TARGET_CNAME;
+    const token = generateVerificationToken();
     all.push({
       id: Date.now().toString(),
       domain,
@@ -66,7 +82,7 @@ export async function POST(req) {
       status: "pending",
       ssl_status: "pending",
       dns_target: dnsTarget,
-      verification_token: generateVerificationToken(),
+      verification_token: token,
       is_active: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -77,11 +93,28 @@ export async function POST(req) {
 
   if (action === "verify") {
     const { id } = body;
+    const entry = all.find((d) => d.id === id);
+    if (!entry) return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+
+    const { aMatch, cnameMatch, aRecords, cnameRecords } = await checkDns(entry.domain);
+
+    let status = "pending";
+    let sslStatus = "pending";
+    let message = "";
+
+    if (aMatch || cnameMatch) {
+      status = "verified";
+      sslStatus = "active";
+      message = "DNS verification successful.";
+    } else {
+      message = `DNS not configured yet. Expected A record @ -> ${TARGET_IP} or CNAME www -> ${TARGET_CNAME}. Found A: ${aRecords.join(", ") || "none"}, CNAME: ${cnameRecords.join(", ") || "none"}`;
+    }
+
     all = all.map((d) =>
-      d.id === id ? { ...d, status: "verified", ssl_status: "active", updated_at: new Date().toISOString() } : d
+      d.id === id ? { ...d, status, ssl_status: sslStatus, updated_at: new Date().toISOString() } : d
     );
     writeDomains(all);
-    return NextResponse.json({ domains: all });
+    return NextResponse.json({ domains: all, message, verified: status === "verified" });
   }
 
   if (action === "set_active") {
