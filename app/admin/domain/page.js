@@ -1,57 +1,125 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
 
 export default function AdminDomainPage() {
-  const [domain, setDomain] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [domains, setDomains] = useState([]);
+  const [newDomain, setNewDomain] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = () => {
-    if (!domain) return;
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const loadDomains = async () => {
+    const res = await fetch("/api/domain");
+    const data = await res.json();
+    setDomains(data.domains);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadDomains(); }, []);
+
+  const handleAdd = async () => {
+    if (!newDomain) return;
+    const res = await fetch("/api/domain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add", domain: newDomain }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setDomains(data.domains);
+      setNewDomain("");
+    }
+  };
+
+  const handleVerify = async (domain) => {
+    const res = await fetch("/api/domain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "verify", domain }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setDomains(data.domains);
+    }
+  };
+
+  const handleRemove = async (domain) => {
+    const res = await fetch("/api/domain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "remove", domain }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setDomains(data.domains);
+    }
   };
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Domain Name"
-        subtitle="Connect your custom domain"
+        subtitle="Add and verify your custom domains"
         breadcrumbs={[{ label: "Admin" }, { label: "Domain" }]}
       />
 
-      <div className="glass-card rounded-xl p-6 max-w-lg">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Icon name="language" className="text-primary" size={20} />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-white">Custom Domain</h3>
-            <p className="text-xs text-on-surface-variant">Enter your domain name to connect it to your site</p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs font-medium text-on-surface-variant mb-1.5 block">Domain Name</label>
-            <input
-              type="text"
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
-              placeholder="example.com"
-              className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant focus:outline-none focus:border-primary/50"
-            />
-          </div>
-
+      <div className="glass-card rounded-xl p-6 max-w-xl">
+        <div className="flex items-center gap-2 mb-4">
+          <input
+            type="text"
+            value={newDomain}
+            onChange={(e) => setNewDomain(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            placeholder="Enter domain name..."
+            className="flex-1 bg-surface-container-lowest border border-surface-border/50 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant focus:outline-none focus:border-primary/50"
+          />
           <button
-            onClick={handleSave}
-            disabled={!domain}
-            className="primary-gradient text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-40"
+            onClick={handleAdd}
+            disabled={!newDomain}
+            className="primary-gradient text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-40 whitespace-nowrap"
           >
-            {saved ? "Connected!" : "Connect Domain"}
+            Add Domain
           </button>
         </div>
+
+        {loading ? (
+          <p className="text-xs text-on-surface-variant text-center py-6">Loading...</p>
+        ) : (
+          <div className="space-y-2">
+            {domains.map((d) => (
+              <div key={d.id} className="flex items-center justify-between bg-surface-container-lowest border border-surface-border/50 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <Icon name="language" size={18} className={d.verified ? "text-green-400" : "text-on-surface-variant"} />
+                  <div>
+                    <p className="text-sm font-medium text-white">{d.name}</p>
+                    <p className={`text-[10px] ${d.verified ? "text-green-400" : "text-accent-orange"}`}>
+                      {d.verified ? "Verified" : "Not verified"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!d.verified && (
+                    <button
+                      onClick={() => handleVerify(d)}
+                      className="px-3 py-1.5 bg-secondary/15 text-secondary rounded-lg text-xs font-medium hover:bg-secondary/25 transition-all"
+                    >
+                      Verify
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleRemove(d)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all"
+                  >
+                    <Icon name="delete" size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {domains.length === 0 && (
+              <p className="text-xs text-on-surface-variant text-center py-6">No domains added yet.</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
