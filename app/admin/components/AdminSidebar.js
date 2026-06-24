@@ -10,6 +10,7 @@ const menuGroups = [
       { href: "/admin/users", label: "Users", icon: "group_add" },
       { href: "/admin/payment-methods", label: "Payments", icon: "credit_card" },
       { href: "/admin/payment-logs", label: "Payment Logs", icon: "webhook" },
+      { href: "/admin/domains", label: "Domains", icon: "language" },
     ],
   },
   {
@@ -23,7 +24,6 @@ const menuGroups = [
     heading: "Business",
     items: [
       { href: "/admin/affiliates", label: "Affiliates", icon: "share" },
-      { href: "/admin/domain", label: "Domain Name", icon: "language" },
     ],
   },
   {
