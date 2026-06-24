@@ -68,7 +68,8 @@ export default function AdminPaymentLogsPage() {
       .reduce((sum, l) => sum + toUSD(l.amount, l.currency), 0);
     const successful = mockPaymentLogs.filter((l) => l.status === "completed").length;
     const failed = mockPaymentLogs.filter((l) => l.status === "failed").length;
-    return { total, revenue, successful, failed };
+    const refunded = mockPaymentLogs.filter((l) => l.status === "refunded").length;
+    return { total, revenue, successful, failed, refunded };
   }, []);
 
   const filtered = useMemo(() => {
@@ -294,11 +295,12 @@ export default function AdminPaymentLogsPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <StatCard title="Total Transactions" value={stats.total} icon="receipt_long" color="primary" />
         <StatCard title="Total Revenue" value={stats.revenue} icon="payments" color="green" prefix="$" />
         <StatCard title="Successful Payments" value={stats.successful} icon="check_circle" color="secondary" />
         <StatCard title="Failed Payments" value={stats.failed} icon="error" color="error" />
+        <StatCard title="Refunded Payments" value={stats.refunded} icon="refresh" color="accentOrange" />
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden">

@@ -23,6 +23,13 @@ const menuGroups = [
     heading: "Business",
     items: [
       { href: "/admin/affiliates", label: "Affiliates", icon: "share" },
+      { href: "/admin/domain", label: "Domain Name", icon: "language" },
+    ],
+  },
+  {
+    heading: "",
+    items: [
+      { href: "/", label: "Back to Dashboard", icon: "arrow_back" },
     ],
   },
 ];
@@ -84,17 +91,6 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }) {
           </div>
         ))}
       </nav>
-
-      <div className="shrink-0 px-4 pb-4">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:bg-[rgba(255,255,255,0.04)] hover:text-white transition-all duration-200 text-xs font-semibold active:scale-[0.97]"
-          onClick={handleNav}
-        >
-          <Icon name="arrow_back" className="shrink-0" size={20} />
-          <span className="sidebar-link-text flex-1">Back to Dashboard</span>
-        </Link>
-      </div>
     </aside>
   );
 
