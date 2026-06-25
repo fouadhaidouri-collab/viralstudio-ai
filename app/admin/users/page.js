@@ -198,9 +198,7 @@ export default function AdminUsersPage() {
                           <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
                             {user.name.charAt(0)}
                           </div>
-                          <Link href={`/admin/users/${user.id}`} className="text-xs font-medium text-white hover:text-primary transition-colors">
-                            {user.name}
-                          </Link>
+                          <span className="text-xs font-medium text-white">{user.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant">{user.email}</td>
