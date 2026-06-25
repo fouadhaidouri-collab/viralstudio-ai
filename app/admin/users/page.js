@@ -189,12 +189,6 @@ export default function AdminUsersPage() {
                   <tr className="border-b border-surface-border bg-surface-container-higher/50">
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Name</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Email</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Plan</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Generations</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Signup Date</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Last Login</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Status</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Role</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-on-surface-variant">Actions</th>
                   </tr>
                 </thead>
@@ -212,14 +206,6 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant">{user.email}</td>
-                      <td className="px-4 py-3"><PlanBadge plan={user.plan} /></td>
-                      <td className="px-4 py-3 text-xs text-on-surface-variant">{user.total_generations.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{formatDate(user.signup_date)}</td>
-                      <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{formatDate(user.last_login)}</td>
-                      <td className="px-4 py-3"><StatusBadge status={user.status} /></td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs capitalize text-on-surface-variant">{user.role}</span>
-                      </td>
                       <td className="px-4 py-3 text-right">
                         <ActionMenu items={getActionItems(user)} />
                       </td>
