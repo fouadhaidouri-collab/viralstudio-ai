@@ -118,13 +118,9 @@ export default function AdminUsersPage() {
   };
 
   const getActionItems = (user) => [
-    { icon: "visibility", label: "View User", onClick: () => { window.location.href = `/admin/users/${user.id}`; } },
     { icon: "add", label: "Add Credits", onClick: () => handleQuickAction("add_credits", user) },
     { icon: "delete", label: "Remove Credits", onClick: () => handleQuickAction("remove_credits", user) },
     { icon: "edit", label: "Change Plan", onClick: () => handleQuickAction("change_plan", user) },
-    { icon: "edit", label: "Change Role", onClick: () => handleQuickAction("change_role", user) },
-    { icon: "error", label: "Suspend", onClick: () => handleQuickAction("suspend", user) },
-    { icon: "error", label: "Ban", variant: "danger", onClick: () => handleQuickAction("ban", user) },
     { icon: "delete", label: "Delete", variant: "danger", onClick: () => handleQuickAction("delete", user) },
   ];
 
