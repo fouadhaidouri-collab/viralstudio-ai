@@ -137,6 +137,8 @@ export default function AdminUsersPage() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">ID</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Name</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Email</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Country</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Date</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-on-surface-variant">Actions</th>
                   </tr>
                 </thead>
@@ -153,6 +155,8 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant">{user.email}</td>
+                      <td className="px-4 py-3 text-xs text-on-surface-variant">{user.country}</td>
+                      <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{new Date(user.signup_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                       <td className="px-4 py-3 text-right">
                         <ActionMenu items={getActionItems(user)} />
                       </td>
