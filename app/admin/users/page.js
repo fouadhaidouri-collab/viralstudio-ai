@@ -3,42 +3,14 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { mockUsers } from "../data/mockUsers";
 import SearchInput from "../components/SearchInput";
-import FilterSelect from "../components/FilterSelect";
-import StatusBadge from "../components/StatusBadge";
-import PlanBadge from "../components/PlanBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
 import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
 
-function formatDate(d) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
-const STATUS_OPTIONS = [
-  { value: "active", label: "Active" },
-  { value: "suspended", label: "Suspended" },
-  { value: "banned", label: "Banned" },
-];
-
-const PLAN_OPTIONS = [
-  { value: "Free", label: "Free" },
-  { value: "Creator", label: "Creator" },
-  { value: "Pro", label: "Pro" },
-  { value: "Agency", label: "Agency" },
-];
-
-const ROLE_OPTIONS = [
-  { value: "user", label: "User" },
-  { value: "admin", label: "Admin" },
-];
-
 export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [planFilter, setPlanFilter] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -58,11 +30,8 @@ export default function AdminUsersPage() {
       const q = search.toLowerCase();
       result = result.filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
     }
-    if (statusFilter) result = result.filter((u) => u.status === statusFilter);
-    if (planFilter) result = result.filter((u) => u.plan === planFilter);
-    if (roleFilter) result = result.filter((u) => u.role === roleFilter);
     return result;
-  }, [search, statusFilter, planFilter, roleFilter]);
+  }, [search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const paginated = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
@@ -155,18 +124,6 @@ export default function AdminUsersPage() {
           options={STATUS_OPTIONS}
           placeholder="All Statuses"
         />
-        <FilterSelect
-          value={planFilter}
-          onChange={(v) => { setPlanFilter(v); setCurrentPage(1); }}
-          options={PLAN_OPTIONS}
-          placeholder="All Plans"
-        />
-        <FilterSelect
-          value={roleFilter}
-          onChange={(v) => { setRoleFilter(v); setCurrentPage(1); }}
-          options={ROLE_OPTIONS}
-          placeholder="All Roles"
-        />
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
@@ -175,7 +132,7 @@ export default function AdminUsersPage() {
             icon="person"
             title="No users found"
             description="Try adjusting your search or filter criteria."
-            action={{ label: "Clear Filters", onClick: () => { setSearch(""); setStatusFilter(""); setPlanFilter(""); setRoleFilter(""); } }}
+            action={{ label: "Clear Search", onClick: () => setSearch("") }}
           />
         ) : (
           <>
