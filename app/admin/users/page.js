@@ -183,6 +183,7 @@ export default function AdminUsersPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-surface-border bg-surface-container-higher/50">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">ID</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Name</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Email</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-on-surface-variant">Actions</th>
@@ -191,6 +192,7 @@ export default function AdminUsersPage() {
                 <tbody>
                   {paginated.map((user) => (
                     <tr key={user.id} className="border-b border-surface-border/50 hover:bg-surface-container-high/30 transition-colors">
+                      <td className="px-4 py-3 text-xs font-mono text-on-surface-variant">{user.id}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
