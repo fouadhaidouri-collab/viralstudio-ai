@@ -8,27 +8,36 @@ import SearchInput from "../components/SearchInput";
 import EmptyState from "../components/EmptyState";
 
 const mockPaymentLogs = [
-  { id: 'paylog_001', user_id: 'usr_002', user_name: 'Sarah Johnson', user_email: 'sarah@creatorhub.com', country: 'Canada', credits_added: 500, plan_updated: null, status: 'completed', created_at: '2026-06-20T10:00:00Z' },
-  { id: 'paylog_002', user_id: 'usr_003', user_name: 'Michael Chen', user_email: 'mike@studios.pro', country: 'United States', credits_added: 5000, plan_updated: 'Agency', status: 'completed', created_at: '2026-06-19T14:00:00Z' },
-  { id: 'paylog_003', user_id: 'usr_004', user_name: 'Emma Williams', user_email: 'emma@viralcontent.com', country: 'United Kingdom', credits_added: 0, plan_updated: null, status: 'failed', created_at: '2026-06-18T15:00:00Z' },
-  { id: 'paylog_004', user_id: 'usr_010', user_name: 'Nina Kravitz', user_email: 'nina@agencyworld.com', country: 'Morocco', credits_added: 20000, plan_updated: 'Agency', status: 'completed', created_at: '2026-06-17T08:00:00Z' },
-  { id: 'paylog_005', user_id: 'usr_007', user_name: 'David Thompson', user_email: 'david@marketing.pro', country: 'Australia', credits_added: 1000, plan_updated: 'Creator', status: 'completed', created_at: '2026-06-16T12:00:00Z' },
-  { id: 'paylog_006', user_id: 'usr_012', user_name: 'Sophie Laurent', user_email: 'sophie@luxebrand.com', country: 'Italy', credits_added: 0, plan_updated: null, status: 'pending', created_at: '2026-06-20T08:00:00Z' },
-  { id: 'paylog_007', user_id: 'usr_015', user_name: 'Chris Evans', user_email: 'chris@businesspro.com', country: 'United States', credits_added: 5000, plan_updated: 'Pro', status: 'completed', created_at: '2026-06-15T10:00:00Z' },
-  { id: 'paylog_008', user_id: 'usr_014', user_name: 'Rachel Green', user_email: 'rachel@influencer.io', country: 'Netherlands', credits_added: -1000, plan_updated: null, status: 'refunded', created_at: '2026-06-14T16:00:00Z' },
-  { id: 'paylog_009', user_id: 'usr_005', user_name: 'James Rodriguez', user_email: 'james@agency.co', country: 'Spain', credits_added: 0, plan_updated: null, status: 'failed', created_at: '2026-05-01T08:00:00Z' },
-  { id: 'paylog_010', user_id: 'usr_008', user_name: 'Anna Martinez', user_email: 'anna@socialmedia.com', country: 'France', credits_added: 1200, plan_updated: null, status: 'completed', created_at: '2026-06-13T09:00:00Z' },
+  { id: 'paylog_001', user_id: 'usr_002', user_name: 'Sarah Johnson', user_email: 'sarah@creatorhub.com', amount: 29, currency: 'USD', country: 'Canada', credits_added: 500, plan_updated: null, status: 'completed', created_at: '2026-06-20T10:00:00Z' },
+  { id: 'paylog_002', user_id: 'usr_003', user_name: 'Michael Chen', user_email: 'mike@studios.pro', amount: 199, currency: 'USD', country: 'United States', credits_added: 5000, plan_updated: 'Agency', status: 'completed', created_at: '2026-06-19T14:00:00Z' },
+  { id: 'paylog_003', user_id: 'usr_004', user_name: 'Emma Williams', user_email: 'emma@viralcontent.com', amount: 29, currency: 'USD', country: 'United Kingdom', credits_added: 0, plan_updated: null, status: 'failed', created_at: '2026-06-18T15:00:00Z' },
+  { id: 'paylog_004', user_id: 'usr_010', user_name: 'Nina Kravitz', user_email: 'nina@agencyworld.com', amount: 199, currency: 'USD', country: 'Morocco', credits_added: 20000, plan_updated: 'Agency', status: 'completed', created_at: '2026-06-17T08:00:00Z' },
+  { id: 'paylog_005', user_id: 'usr_007', user_name: 'David Thompson', user_email: 'david@marketing.pro', amount: 29, currency: 'USD', country: 'Australia', credits_added: 1000, plan_updated: 'Creator', status: 'completed', created_at: '2026-06-16T12:00:00Z' },
+  { id: 'paylog_006', user_id: 'usr_012', user_name: 'Sophie Laurent', user_email: 'sophie@luxebrand.com', amount: 500, currency: 'MAD', country: 'Italy', credits_added: 0, plan_updated: null, status: 'pending', created_at: '2026-06-20T08:00:00Z' },
+  { id: 'paylog_007', user_id: 'usr_015', user_name: 'Chris Evans', user_email: 'chris@businesspro.com', amount: 79, currency: 'USD', country: 'United States', credits_added: 5000, plan_updated: 'Pro', status: 'completed', created_at: '2026-06-15T10:00:00Z' },
+  { id: 'paylog_008', user_id: 'usr_014', user_name: 'Rachel Green', user_email: 'rachel@influencer.io', amount: 29, currency: 'USD', country: 'Netherlands', credits_added: -1000, plan_updated: null, status: 'refunded', created_at: '2026-06-14T16:00:00Z' },
+  { id: 'paylog_009', user_id: 'usr_005', user_name: 'James Rodriguez', user_email: 'james@agency.co', amount: 79, currency: 'USD', country: 'Spain', credits_added: 0, plan_updated: null, status: 'failed', created_at: '2026-05-01T08:00:00Z' },
+  { id: 'paylog_010', user_id: 'usr_008', user_name: 'Anna Martinez', user_email: 'anna@socialmedia.com', amount: 300, currency: 'MAD', country: 'France', credits_added: 1200, plan_updated: null, status: 'completed', created_at: '2026-06-13T09:00:00Z' },
 ];
+
+function toUSD(amount, currency) {
+  if (currency === "USD") return amount;
+  if (currency === "MAD") return Math.round(amount * 0.1);
+  return amount;
+}
 
 export default function AdminPaymentLogsPage() {
   const [search, setSearch] = useState("");
 
   const stats = useMemo(() => {
     const total = mockPaymentLogs.length;
+    const revenue = mockPaymentLogs
+      .filter((l) => l.status === "completed")
+      .reduce((sum, l) => sum + toUSD(l.amount, l.currency), 0);
     const completed = mockPaymentLogs.filter((l) => l.status === "completed").length;
     const failed = mockPaymentLogs.filter((l) => l.status === "failed").length;
     const refunded = mockPaymentLogs.filter((l) => l.status === "refunded").length;
-    return { total, completed, failed, refunded };
+    return { total, revenue, completed, failed, refunded };
   }, []);
 
   const filtered = useMemo(() => {
@@ -82,6 +91,13 @@ export default function AdminPaymentLogsPage() {
       ),
     },
     {
+      key: "amount",
+      label: "Payment",
+      render: (row) => (
+        <span className="text-xs font-semibold text-white">{row.currency === "USD" ? `$${row.amount}` : `${row.amount} ${row.currency}`}</span>
+      ),
+    },
+    {
       key: "created_at",
       label: "Date",
       render: (row) => (
@@ -104,8 +120,9 @@ export default function AdminPaymentLogsPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <StatCard title="Total Transactions" value={stats.total} icon="receipt_long" color="primary" />
+        <StatCard title="Total Revenue" value={stats.revenue} icon="payments" color="green" prefix="$" />
         <StatCard title="Successful Payments" value={stats.completed} icon="check_circle" color="secondary" />
         <StatCard title="Failed Payments" value={stats.failed} icon="error" color="error" />
         <StatCard title="Refunded Payments" value={stats.refunded} icon="refresh" color="accentOrange" />
