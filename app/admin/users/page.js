@@ -118,12 +118,6 @@ export default function AdminUsersPage() {
           placeholder="Search by name or email..."
           className="w-full sm:w-64"
         />
-        <FilterSelect
-          value={statusFilter}
-          onChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}
-          options={STATUS_OPTIONS}
-          placeholder="All Statuses"
-        />
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
