@@ -76,7 +76,7 @@ export default function AdminAiToolsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-white p-6">
+    <div className="min-h-full bg-background text-white p-6">
       <PageHeader
         title="AI Tools"
         subtitle="Manage the tools that appear in the client dashboard"

@@ -94,7 +94,7 @@ export default function AdminUsersPage() {
   ];
 
   return (
-    <div className="space-y-5 animate-fade-in-up">
+    <div className="min-h-full bg-background text-white p-6"><div className="space-y-5 animate-fade-in-up">
       <PageHeader
         title="Users"
         subtitle={`${mockUsers.length} total users`}
@@ -215,6 +215,7 @@ export default function AdminUsersPage() {
         confirmLabel={confirmAction ? confirmAction.charAt(0).toUpperCase() + confirmAction.slice(1) : "Confirm"}
         confirmVariant="danger"
       />
+    </div>
     </div>
   );
 }

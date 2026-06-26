@@ -85,7 +85,7 @@ export default function AdminDomainsPage() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="min-h-full bg-background text-white p-6"><div className="space-y-5">
       <PageHeader
         title="Domain Settings"
         subtitle="Manage the public domain connected to your client-facing site"
@@ -241,6 +241,7 @@ export default function AdminDomainsPage() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

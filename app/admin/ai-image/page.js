@@ -23,7 +23,7 @@ export default function AdminAiImagePage() {
   }, [search]);
 
   return (
-    <div className="space-y-5 animate-fade-in-up">
+    <div className="min-h-full bg-background text-white p-6"><div className="space-y-5 animate-fade-in-up">
       <div>
         <h1 className="text-lg md:text-xl font-bold text-white" style={{ fontFamily: "Geist, sans-serif" }}>Image Lab</h1>
         <p className="text-xs text-on-surface-variant mt-0.5">Monitor Image Lab generations and manage user credits</p>
@@ -90,6 +90,7 @@ export default function AdminAiImagePage() {
           background: linear-gradient(135deg, #a855f7, #7c3aed);
         }
       `}</style>
+    </div>
     </div>
   );
 }

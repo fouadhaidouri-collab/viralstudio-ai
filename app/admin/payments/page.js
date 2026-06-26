@@ -170,7 +170,7 @@ export default function AdminPaymentsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-white p-6">
+    <div className="min-h-full bg-background text-white p-6">
       <PageHeader
         title="Payments"
         subtitle="Track and manage payments"

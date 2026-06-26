@@ -27,8 +27,7 @@ export default function AdminAffiliatesPage() {
     const active = affiliates.filter((a) => a.status === "active").length;
     const totalClicks = affiliates.reduce((s, a) => s + a.clicks, 0);
     const totalRevenue = affiliates.reduce((s, a) => s + a.revenue, 0);
-    const totalCommission = affiliates.reduce((s, a) => s + a.commission_earned, 0);
-    return { total, active, totalClicks, totalRevenue, totalCommission };
+    return { total, active, totalClicks, totalRevenue };
   }, [affiliates]);
 
   const filtered = useMemo(() => {
@@ -79,8 +78,8 @@ export default function AdminAffiliatesPage() {
   };
 
   const handleExportReport = () => {
-    const headers = ["Name", "Email", "Code", "Link", "Clicks", "Signups", "Paid Users", "Revenue", "Commission Rate", "Commission Earned", "Status"];
-    const rows = filtered.map((a) => [a.name, a.email, a.code, a.link, a.clicks, a.signups, a.paid_users, a.revenue, `${a.commission_rate}%`, a.commission_earned, a.status]);
+    const headers = ["Name", "Email", "Code", "Link", "Clicks", "Signups", "Paid Users", "Revenue", "Commission Rate", "Status"];
+    const rows = filtered.map((a) => [a.name, a.email, a.code, a.link, a.clicks, a.signups, a.paid_users, a.revenue, `${a.commission_rate}%`, a.status]);
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -141,7 +140,6 @@ export default function AdminAffiliatesPage() {
     { key: "paid_users", label: "Paid Users", align: "right", render: (row) => <span className="text-xs font-medium text-white">{row.paid_users.toLocaleString()}</span> },
     { key: "revenue", label: "Revenue", align: "right", render: (row) => <span className="text-xs font-semibold text-white">${row.revenue.toLocaleString()}</span> },
     { key: "commission_rate", label: "Commission Rate", align: "right", render: (row) => <span className="text-xs text-on-surface-variant">{row.commission_rate}%</span> },
-    { key: "commission_earned", label: "Commission Earned", align: "right", render: (row) => <span className="text-xs font-semibold text-green-400">${row.commission_earned.toLocaleString()}</span> },
     { key: "status", label: "Status", render: (row) => <StatusBadge status={row.status} /> },
     {
       key: "actions",
@@ -161,7 +159,7 @@ export default function AdminAffiliatesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-white p-6">
+    <div className="min-h-full bg-background text-white p-6">
       <PageHeader
         title="Affiliates"
         subtitle="Manage influencer and affiliate partners"
@@ -171,12 +169,11 @@ export default function AdminAffiliatesPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard title="Total Affiliates" value={stats.total} icon="people" color="primary" />
         <StatCard title="Active Affiliates" value={stats.active} icon="verified" color="green" />
         <StatCard title="Total Clicks" value={stats.totalClicks} icon="ads_click" color="secondary" />
         <StatCard title="Total Revenue Generated" value={stats.totalRevenue} icon="payments" color="primary" prefix="$" />
-        <StatCard title="Total Commission Paid" value={stats.totalCommission} icon="monetization_on" color="accentOrange" prefix="$" />
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden">

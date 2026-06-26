@@ -109,7 +109,7 @@ export default function AdminPaymentLogsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-white p-6">
+    <div className="min-h-full bg-background text-white p-6">
       <PageHeader
         title="Payment Logs"
         subtitle="Track all payment transactions and events"

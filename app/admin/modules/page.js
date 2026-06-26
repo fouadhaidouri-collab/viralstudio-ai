@@ -102,7 +102,7 @@ export default function AdminModulesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-white p-8" style={{ fontFamily: "Geist, sans-serif" }}>
+    <div className="min-h-full bg-background text-white p-8" style={{ fontFamily: "Geist, sans-serif" }}>
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

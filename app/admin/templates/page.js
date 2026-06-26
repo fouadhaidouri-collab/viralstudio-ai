@@ -104,7 +104,7 @@ export default function AdminTemplatesPage() {
   const getGradient = (index) => gradientColors[index % gradientColors.length];
 
   return (
-    <div className="min-h-screen bg-background text-white p-6">
+    <div className="min-h-full bg-background text-white p-6">
       <PageHeader
         title="Templates"
         subtitle="Manage featured templates from the home page"

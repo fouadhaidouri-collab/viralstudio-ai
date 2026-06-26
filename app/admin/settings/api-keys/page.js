@@ -66,7 +66,7 @@ export default function ApiKeysPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-white p-8" style={{ fontFamily: "Geist, sans-serif" }}>
+    <div className="min-h-full bg-background text-white p-8" style={{ fontFamily: "Geist, sans-serif" }}>
       <div className="max-w-lg mx-auto space-y-8">
         <div>
           <h1 className="text-2xl font-bold">API Settings</h1>

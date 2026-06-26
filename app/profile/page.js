@@ -143,13 +143,12 @@ export default function ProfilePage() {
               <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <h2 className="text-sm font-semibold text-white mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button onClick={() => setTab("security")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
+                  <button className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon name="edit" className="text-primary" size={18} />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-white">Change Email</div>
-                      <div className="text-[11px] text-on-surface-variant">Update your email address</div>
+                      <div className="text-sm font-medium text-white">Affiliate</div>
                     </div>
                   </button>
                   {!isGoogleUser && (
