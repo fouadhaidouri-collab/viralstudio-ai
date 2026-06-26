@@ -77,7 +77,7 @@ export default function ProfilePage() {
       <Sidebar />
       <TopBar />
       <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
-        <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
+        <div className="max-w-full mx-auto px-4 md:px-8 py-6 md:py-10">
 
           {/* Profile Header */}
           <div className="glass-card rounded-2xl p-6 md:p-8 border border-white/5 card-glow mb-6" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
