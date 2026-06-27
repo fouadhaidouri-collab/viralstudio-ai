@@ -4,6 +4,7 @@ import {
   addCreditLedgerEntry,
 } from "../../../../lib/paymentTransactions";
 import { addUserCredits } from "../../../../lib/pricing";
+import { processCommissionForPayment } from "../../../../lib/affiliateStore";
 
 export async function POST(req) {
   try {
@@ -111,6 +112,7 @@ export async function POST(req) {
           planId: tx.plan_id,
         });
         console.log(`PayPal: Added ${credits} credits to user ${tx.user_id}`);
+        processCommissionForPayment(tx.user_id, tx.plan_id, tx.amount);
       } else {
         console.log(`PayPal webhook: Transaction ${tx.id} already processed`);
       }

@@ -5,6 +5,7 @@ import {
   addCreditLedgerEntry,
 } from "../../../../lib/paymentTransactions";
 import { addUserCredits } from "../../../../lib/pricing";
+import { processCommissionForPayment } from "../../../../lib/affiliateStore";
 
 export async function POST(req) {
   const sig = req.headers.get("stripe-signature");
@@ -69,6 +70,7 @@ export async function POST(req) {
           planId: tx.plan_id,
         });
         console.log(`Stripe: Added ${credits} credits to user ${tx.user_id}`);
+        processCommissionForPayment(tx.user_id, tx.plan_id, tx.amount);
       } else {
         console.log(`Stripe webhook: Transaction ${tx.id} already processed (idempotent)`);
       }

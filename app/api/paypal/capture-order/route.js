@@ -6,6 +6,7 @@ import {
   addCreditLedgerEntry,
 } from "../../../../lib/paymentTransactions";
 import { addUserCredits } from "../../../../lib/pricing";
+import { processCommissionForPayment } from "../../../../lib/affiliateStore";
 
 export async function POST(req) {
   try {
@@ -104,6 +105,7 @@ export async function POST(req) {
     });
 
     console.log(`PayPal capture: Added ${tx.credits} credits to user ${tx.user_id}`);
+    processCommissionForPayment(tx.user_id, tx.plan_id, tx.amount);
 
     return Response.json({
       success: true,
