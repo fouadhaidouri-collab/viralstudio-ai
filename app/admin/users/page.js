@@ -1,7 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { mockUsers } from "../data/mockUsers";
 import SearchInput from "../components/SearchInput";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -10,12 +9,21 @@ import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
 
 export default function AdminUsersPage() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionTarget, setActionTarget] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/admin/users")
+      .then((r) => r.json())
+      .then((d) => { setUsers(d.users || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   const PER_PAGE = 10;
 
@@ -25,13 +33,13 @@ export default function AdminUsersPage() {
   };
 
   const filtered = useMemo(() => {
-    let result = [...mockUsers];
+    let result = [...users];
     if (search) {
       const q = search.toLowerCase();
       result = result.filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
     }
     return result;
-  }, [search]);
+  }, [search, users]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const paginated = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
@@ -42,23 +50,50 @@ export default function AdminUsersPage() {
     setConfirmOpen(true);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!actionTarget) return;
-    showToast(`"${actionTarget.name}" ${confirmAction}ed`);
+    if (confirmAction === "delete") {
+      showToast(`"${actionTarget.name}" deleted`);
+      setUsers((prev) => prev.filter((u) => u.id !== actionTarget.id));
+    } else if (confirmAction === "suspend") {
+      await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: actionTarget.id, action: "change_plan", value: "suspended" }),
+      });
+      showToast(`"${actionTarget.name}" suspended`);
+    } else {
+      showToast(`"${actionTarget.name}" ${confirmAction}ed`);
+    }
     setConfirmOpen(false);
     setConfirmAction(null);
     setActionTarget(null);
   };
 
-  const handleQuickAction = (action, user) => {
+  const handleQuickAction = async (action, user) => {
     switch (action) {
       case "add_credits":
-        showToast(`Added 1000 credits to "${user.name}"`);
+        await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action: "add_credits", value: "500" }),
+        });
+        showToast(`Added 500 credits to "${user.name}"`);
         break;
       case "remove_credits":
-        showToast(`Removed 500 credits from "${user.name}"`);
+        await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action: "remove_credits", value: "200" }),
+        });
+        showToast(`Removed 200 credits from "${user.name}"`);
         break;
       case "change_plan":
+        await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action: "change_plan", value: "pro" }),
+        });
         showToast(`Changed "${user.name}" plan to Pro`);
         break;
       case "change_role":
@@ -97,7 +132,7 @@ export default function AdminUsersPage() {
     <div className="min-h-full bg-background text-white p-6"><div className="space-y-5 animate-fade-in-up">
       <PageHeader
         title="Users"
-        subtitle={`${mockUsers.length} total users`}
+        subtitle={`${users.length} total users`}
         breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Users" }]}
         actions={[
           { label: "Add User", icon: "add", variant: "primary", onClick: () => showToast("Add user modal would open here") },

@@ -1,24 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StatCard from "../components/StatCard";
 import DataTable from "../components/DataTable";
 import PageHeader from "../components/PageHeader";
 import SearchInput from "../components/SearchInput";
 import EmptyState from "../components/EmptyState";
-
-const mockPaymentLogs = [
-  { id: 'paylog_001', user_id: 'usr_002', user_name: 'Sarah Johnson', user_email: 'sarah@creatorhub.com', amount: 29, currency: 'USD', country: 'Canada', credits_added: 500, plan_updated: null, status: 'completed', created_at: '2026-06-20T10:00:00Z' },
-  { id: 'paylog_002', user_id: 'usr_003', user_name: 'Michael Chen', user_email: 'mike@studios.pro', amount: 199, currency: 'USD', country: 'United States', credits_added: 5000, plan_updated: 'Agency', status: 'completed', created_at: '2026-06-19T14:00:00Z' },
-  { id: 'paylog_003', user_id: 'usr_004', user_name: 'Emma Williams', user_email: 'emma@viralcontent.com', amount: 29, currency: 'USD', country: 'United Kingdom', credits_added: 0, plan_updated: null, status: 'failed', created_at: '2026-06-18T15:00:00Z' },
-  { id: 'paylog_004', user_id: 'usr_010', user_name: 'Nina Kravitz', user_email: 'nina@agencyworld.com', amount: 199, currency: 'USD', country: 'Morocco', credits_added: 20000, plan_updated: 'Agency', status: 'completed', created_at: '2026-06-17T08:00:00Z' },
-  { id: 'paylog_005', user_id: 'usr_007', user_name: 'David Thompson', user_email: 'david@marketing.pro', amount: 29, currency: 'USD', country: 'Australia', credits_added: 1000, plan_updated: 'Creator', status: 'completed', created_at: '2026-06-16T12:00:00Z' },
-  { id: 'paylog_006', user_id: 'usr_012', user_name: 'Sophie Laurent', user_email: 'sophie@luxebrand.com', amount: 500, currency: 'MAD', country: 'Italy', credits_added: 0, plan_updated: null, status: 'pending', created_at: '2026-06-20T08:00:00Z' },
-  { id: 'paylog_007', user_id: 'usr_015', user_name: 'Chris Evans', user_email: 'chris@businesspro.com', amount: 79, currency: 'USD', country: 'United States', credits_added: 5000, plan_updated: 'Pro', status: 'completed', created_at: '2026-06-15T10:00:00Z' },
-  { id: 'paylog_008', user_id: 'usr_014', user_name: 'Rachel Green', user_email: 'rachel@influencer.io', amount: 29, currency: 'USD', country: 'Netherlands', credits_added: -1000, plan_updated: null, status: 'refunded', created_at: '2026-06-14T16:00:00Z' },
-  { id: 'paylog_009', user_id: 'usr_005', user_name: 'James Rodriguez', user_email: 'james@agency.co', amount: 79, currency: 'USD', country: 'Spain', credits_added: 0, plan_updated: null, status: 'failed', created_at: '2026-05-01T08:00:00Z' },
-  { id: 'paylog_010', user_id: 'usr_008', user_name: 'Anna Martinez', user_email: 'anna@socialmedia.com', amount: 300, currency: 'MAD', country: 'France', credits_added: 1200, plan_updated: null, status: 'completed', created_at: '2026-06-13T09:00:00Z' },
-];
 
 function toUSD(amount, currency) {
   if (currency === "USD") return amount;
@@ -27,26 +14,35 @@ function toUSD(amount, currency) {
 }
 
 export default function AdminPaymentLogsPage() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const stats = useMemo(() => {
-    const total = mockPaymentLogs.length;
-    const revenue = mockPaymentLogs
-      .filter((l) => l.status === "completed")
-      .reduce((sum, l) => sum + toUSD(l.amount, l.currency), 0);
-    const completed = mockPaymentLogs.filter((l) => l.status === "completed").length;
-    const failed = mockPaymentLogs.filter((l) => l.status === "failed").length;
-    const refunded = mockPaymentLogs.filter((l) => l.status === "refunded").length;
-    return { total, revenue, completed, failed, refunded };
+  useEffect(() => {
+    fetch("/api/admin/payment-logs")
+      .then((r) => r.json())
+      .then((d) => { setLogs(d.logs || []); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
+  const stats = useMemo(() => {
+    const total = logs.length;
+    const revenue = logs
+      .filter((l) => l.status === "completed")
+      .reduce((sum, l) => sum + toUSD(l.amount, l.currency), 0);
+    const completed = logs.filter((l) => l.status === "completed").length;
+    const failed = logs.filter((l) => l.status === "failed").length;
+    const refunded = logs.filter((l) => l.status === "refunded").length;
+    return { total, revenue, completed, failed, refunded };
+  }, [logs]);
+
   const filtered = useMemo(() => {
-    return mockPaymentLogs.filter((l) => {
+    return logs.filter((l) => {
       if (!search) return true;
       const q = search.toLowerCase();
       return l.user_name.toLowerCase().includes(q) || l.user_email.toLowerCase().includes(q);
     });
-  }, [search]);
+  }, [search, logs]);
 
   const columns = [
     {
@@ -132,7 +128,11 @@ export default function AdminPaymentLogsPage() {
         <div className="p-4 border-b border-surface-border/50">
           <SearchInput value={search} onChange={setSearch} placeholder="Search by name or email..." className="w-full sm:w-64" />
         </div>
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState icon="payments" title="No payment logs found" description="No payment transactions match your search." />
         ) : (
           <DataTable columns={columns} data={filtered} />

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { mockPayments } from "../data/mockPayments";
+import { useState, useMemo, useEffect } from "react";
 import StatCard from "../components/StatCard";
 import DataTable from "../components/DataTable";
 import PageHeader from "../components/PageHeader";
@@ -46,12 +45,20 @@ function formatDate(dateStr) {
 }
 
 export default function AdminPaymentsPage() {
-  const [payments, setPayments] = useState(mockPayments);
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [providerFilter, setProviderFilter] = useState("");
   const [viewPayment, setViewPayment] = useState(null);
   const [refundPaymentId, setRefundPaymentId] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/admin/payments")
+      .then((r) => r.json())
+      .then((d) => { setPayments(d.payments || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   const stats = useMemo(() => {
     const totalRevenue = payments.reduce((s, p) => s + (p.status === "paid" ? p.amount : 0), 0);
@@ -212,7 +219,11 @@ export default function AdminPaymentsPage() {
             ]}
           />
         </div>
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState icon="payments" title="No payments found" description="No payments match your current filters." />
         ) : (
           <DataTable columns={columns} data={filtered} />

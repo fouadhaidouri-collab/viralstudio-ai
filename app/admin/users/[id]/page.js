@@ -1,10 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { mockUsers, mockCreditTransactions } from "../../data/mockUsers";
-import { mockPayments } from "../../data/mockPayments";
-import { mockGenerations } from "../../data/mockGenerations";
 import StatusBadge from "../../components/StatusBadge";
 import PlanBadge from "../../components/PlanBadge";
 import CreditBadge from "../../components/CreditBadge";
@@ -24,14 +21,30 @@ const TABS = [
 
 export default function AdminUserDetailPage() {
   const params = useParams();
-  const user = mockUsers.find((u) => u.id === params.id);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile");
   const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    fetch(`/api/admin/users/${params.id}`)
+      .then((r) => { if (!r.ok) throw new Error("Not found"); return r.json(); })
+      .then((d) => { setUser(d.user); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [params.id]);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -48,9 +61,40 @@ export default function AdminUserDetailPage() {
     );
   }
 
-  const userPayments = mockPayments.filter((p) => p.user_id === user.id);
-  const userGenerations = mockGenerations.filter((g) => g.user_id === user.id);
-  const userTransactions = mockCreditTransactions.filter((t) => t.user_id === user.id);
+  const userPayments = user.payments || [];
+  const userTransactions = user.credit_transactions || [];
+
+  const handleQuickAction = async (action) => {
+    switch (action) {
+      case "add_credits":
+        await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action: "add_credits", value: "500" }),
+        });
+        showToast(`Added 500 credits to "${user.name}"`);
+        break;
+      case "remove_credits":
+        await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action: "remove_credits", value: "200" }),
+        });
+        showToast(`Removed 200 credits from "${user.name}"`);
+        break;
+      case "change_plan":
+        await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action: "change_plan", value: "pro" }),
+        });
+        showToast(`Changed "${user.name}" plan to Pro`);
+        break;
+      case "reset_password":
+        showToast(`"${user.name}" emailed a password reset link`);
+        break;
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -92,7 +136,7 @@ export default function AdminUserDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs text-on-surface-variant">Total Generations</p>
-                    <p className="text-sm text-white mt-0.5">{user.total_generations.toLocaleString()}</p>
+                    <p className="text-sm text-white mt-0.5">{(user.total_generations || 0).toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-on-surface-variant">Credits</p>
@@ -120,16 +164,16 @@ export default function AdminUserDetailPage() {
               <div className="bg-surface-container-low border border-surface-border/50 rounded-xl p-4">
                 <p className="text-[10px] text-on-surface-variant uppercase tracking-wider mb-2">Quick Actions</p>
                 <div className="space-y-2">
-                  <button onClick={() => showToast(`Added 500 credits to "${user.name}"`)} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
+                  <button onClick={() => handleQuickAction("add_credits")} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
                     + Add Credits
                   </button>
-                  <button onClick={() => showToast(`Removed 200 credits from "${user.name}"`)} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
+                  <button onClick={() => handleQuickAction("remove_credits")} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
                     - Remove Credits
                   </button>
-                  <button onClick={() => showToast(`Changed "${user.name}" plan to Pro`)} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
+                  <button onClick={() => handleQuickAction("change_plan")} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
                     Change Plan
                   </button>
-                  <button onClick={() => showToast(`"${user.name}" emailed a password reset link`)} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
+                  <button onClick={() => handleQuickAction("reset_password")} className="w-full px-3 py-1.5 bg-surface-container-high border border-surface-border/50 rounded-lg text-xs text-white hover:bg-surface-container-higher transition-all">
                     Send Reset Password
                   </button>
                 </div>
@@ -176,41 +220,10 @@ export default function AdminUserDetailPage() {
         );
 
       case "generations":
-        return userGenerations.length === 0 ? (
+        return (
           <div className="bg-surface-container-low border border-surface-border/50 rounded-xl p-8 text-center">
             <Icon name="auto_awesome" className="text-on-surface-variant/40 mx-auto mb-3" size={32} />
             <p className="text-sm text-on-surface-variant">No generations by this user yet.</p>
-          </div>
-        ) : (
-          <div className="bg-surface-container-low border border-surface-border/50 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-surface-border bg-surface-container-higher/50">
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">ID</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Tool</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Model</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Prompt</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Credits</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Status</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-on-surface-variant">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {userGenerations.map((g) => (
-                    <tr key={g.id} className="border-b border-surface-border/50 hover:bg-surface-container-high/30 transition-colors">
-                      <td className="px-4 py-3 text-xs font-mono text-on-surface-variant">{g.id}</td>
-                      <td className="px-4 py-3 text-xs text-white">{g.tool}</td>
-                      <td className="px-4 py-3 text-xs text-on-surface-variant">{g.model}</td>
-                      <td className="px-4 py-3 text-xs text-on-surface-variant max-w-[200px] truncate">{g.prompt}</td>
-                      <td className="px-4 py-3"><CreditBadge amount={g.credits_used} /></td>
-                      <td className="px-4 py-3"><StatusBadge status={g.status} /></td>
-                      <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{formatDate(g.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
         );
 
@@ -318,10 +331,10 @@ export default function AdminUserDetailPage() {
               <p className="text-lg font-bold text-yellow-400">{user.credits.toLocaleString()}</p>
             </div>
             <div className="flex flex-col gap-1">
-              <button onClick={() => showToast(`Added 500 credits to "${user.name}"`)} className="px-3 py-1 primary-gradient text-white rounded-lg text-[10px] font-semibold hover:brightness-110 transition-all whitespace-nowrap">
+              <button onClick={() => handleQuickAction("add_credits")} className="px-3 py-1 primary-gradient text-white rounded-lg text-[10px] font-semibold hover:brightness-110 transition-all whitespace-nowrap">
                 + Add
               </button>
-              <button onClick={() => showToast(`Removed 200 credits from "${user.name}"`)} className="px-3 py-1 bg-surface-container-high border border-surface-border/50 rounded-lg text-[10px] text-on-surface-variant hover:text-white hover:bg-surface-container-higher transition-all whitespace-nowrap">
+              <button onClick={() => handleQuickAction("remove_credits")} className="px-3 py-1 bg-surface-container-high border border-surface-border/50 rounded-lg text-[10px] text-on-surface-variant hover:text-white hover:bg-surface-container-higher transition-all whitespace-nowrap">
                 - Remove
               </button>
             </div>
