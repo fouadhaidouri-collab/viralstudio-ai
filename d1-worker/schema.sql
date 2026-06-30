@@ -154,6 +154,16 @@ CREATE TABLE IF NOT EXISTS affiliate_referrals (
   FOREIGN KEY (subscription_id) REFERENCES user_subscriptions(id)
 );
 
+CREATE TABLE IF NOT EXISTS domains (
+  id TEXT PRIMARY KEY,
+  domain TEXT UNIQUE NOT NULL,
+  status TEXT DEFAULT 'pending',
+  is_active INTEGER DEFAULT 0,
+  ssl_status TEXT DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS notifications (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
