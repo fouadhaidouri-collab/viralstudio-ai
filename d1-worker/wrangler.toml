@@ -1,0 +1,8 @@
+name = "viralstudio-db-proxy"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "viralstudio-db"
+database_id = "07f34eb4-9007-4b91-893f-ddcb9d7f9694"
