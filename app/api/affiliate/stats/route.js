@@ -1,4 +1,5 @@
 import { auth } from "../../../lib/auth";
+import { findUser } from "../../../lib/userStore";
 import { getOrCreateAffiliate, getClicksForAffiliate } from "../../../../lib/affiliateStore";
 
 export async function GET() {
@@ -6,23 +7,27 @@ export async function GET() {
   if (!session?.user?.email) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { email, name } = session.user;
-  const affiliate = await getOrCreateAffiliate({ user_id: email, name: name || email.split("@")[0], email });
-  const clicks = await getClicksForAffiliate(affiliate.code, 1000);
-  const signups_count = affiliate.total_signups || 0;
-  const conversion_rate = affiliate.total_clicks > 0
-    ? Math.round(((affiliate.total_paid_customers || 0) / affiliate.total_clicks) * 10000) / 100
+  const user = await findUser(session.user.email);
+  if (!user) return Response.json({ error: "User not found" }, { status: 404 });
+
+  const affiliate = await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
+  if (!affiliate) return Response.json({ error: "Affiliate not found" }, { status: 404 });
+
+  const clicks = await getClicksForAffiliate(affiliate.id, 1000);
+  const signups_count = affiliate.signups || 0;
+  const conversion_rate = affiliate.clicks > 0
+    ? Math.round(((signups_count) / affiliate.clicks) * 10000) / 100
     : 0;
   return Response.json({
     affiliate,
-    clicks_total: affiliate.total_clicks || 0,
+    clicks_total: affiliate.clicks || 0,
     signups_total: signups_count,
-    paid_customers: affiliate.total_paid_customers || 0,
+    paid_customers: affiliate.total_earnings > 0 ? affiliate.signups : 0,
     conversion_rate,
     total_earnings: affiliate.total_earnings || 0,
-    pending: affiliate.total_pending || 0,
-    paid: affiliate.total_paid || 0,
-    commission_rate: affiliate.commission_rate || 30,
+    pending: affiliate.available_balance || 0,
+    paid: affiliate.paid_balance || 0,
+    commission_rate: affiliate.commission_percent || 30,
     clicks_latest: clicks,
   });
 }

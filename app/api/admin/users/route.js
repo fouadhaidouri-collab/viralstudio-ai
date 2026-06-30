@@ -1,27 +1,22 @@
-import { getUsers, updateUserPlan } from "../../../lib/userStore";
+import { getUsers } from "../../../lib/userStore";
 import { query, run, get } from "../../../../lib/db";
 
 export async function GET() {
   const users = await getUsers();
-  const credits = await query("SELECT user_id, credits FROM user_credits");
+  const credits = await query("SELECT user_id, current_balance FROM credits");
   const creditMap = {};
-  for (const c of credits) creditMap[c.user_id] = c.credits;
+  for (const c of credits) creditMap[c.user_id] = c.current_balance;
   const enriched = users.map((u) => ({
     id: u.id,
     name: u.name,
     email: u.email,
-    plan: u.plan || "free",
-    credits: creditMap[u.id] ?? u.credits ?? 0,
-    storage_used: u.storage_used_bytes || 0,
-    storage_total: u.storage_limit_bytes || 524288000,
-    status: "active",
-    role: "user",
-    country: "-",
+    role: u.role || "user",
+    credits: creditMap[u.id] ?? 0,
+    status: u.status || "active",
     signup_date: u.created_at,
-    last_login: u.created_at,
+    last_login: u.last_login || u.created_at,
     created_at: u.created_at,
-    total_generations: 0,
-    email_verified: true,
+    email_verified: !!u.email_verified,
   }));
   return Response.json({ users: enriched, total: enriched.length });
 }
@@ -35,35 +30,36 @@ export async function PATCH(req) {
   switch (action) {
     case "add_credits": {
       const amount = parseInt(value) || 500;
-      await run(
-        "INSERT INTO user_credits (user_id, credits, total_purchased, total_used) VALUES (?, ?, 0, 0) ON CONFLICT(user_id) DO UPDATE SET credits = credits + ?",
-        [userId, amount, amount]
-      );
+      const existing = await get("SELECT * FROM credits WHERE user_id = ?", [userId]);
+      if (existing) {
+        await run("UPDATE credits SET current_balance = current_balance + ?, total_purchased = total_purchased + ?, updated_at = datetime('now') WHERE user_id = ?", [amount, amount, userId]);
+      } else {
+        const credId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        await run("INSERT INTO credits (id, user_id, current_balance, total_purchased, total_used, updated_at) VALUES (?, ?, ?, ?, 0, datetime('now'))", [credId, userId, amount, amount]);
+      }
       const id = `ledger_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       await run(
         "INSERT INTO credit_ledger (id, user_id, credits_added, reason, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
         [id, userId, amount, `admin_add: +${amount}`]
       );
-      const updated = await get("SELECT credits FROM user_credits WHERE user_id = ?", [userId]);
-      return Response.json({ credits: updated?.credits ?? 0 });
+      const updated = await get("SELECT current_balance FROM credits WHERE user_id = ?", [userId]);
+      return Response.json({ credits: updated?.current_balance ?? 0 });
     }
     case "remove_credits": {
       const amount = parseInt(value) || 200;
-      const current = await get("SELECT credits FROM user_credits WHERE user_id = ?", [userId]);
-      const remove = Math.min(amount, current?.credits ?? 0);
-      await run("UPDATE user_credits SET credits = credits - ? WHERE user_id = ?", [remove, userId]);
+      const current = await get("SELECT current_balance FROM credits WHERE user_id = ?", [userId]);
+      const remove = Math.min(amount, current?.current_balance ?? 0);
+      await run("UPDATE credits SET current_balance = current_balance - ?, total_used = total_used + ?, updated_at = datetime('now') WHERE user_id = ?", [remove, remove, userId]);
       const id = `ledger_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       await run(
         "INSERT INTO credit_ledger (id, user_id, credits_added, reason, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
         [id, userId, -remove, `admin_remove: -${remove}`]
       );
-      const updated = await get("SELECT credits FROM user_credits WHERE user_id = ?", [userId]);
-      return Response.json({ credits: updated?.credits ?? 0 });
+      const updated = await get("SELECT current_balance FROM credits WHERE user_id = ?", [userId]);
+      return Response.json({ credits: updated?.current_balance ?? 0 });
     }
     case "change_plan": {
-      const plan = value || "free";
-      await updateUserPlan(userId, plan);
-      return Response.json({ plan });
+      return Response.json({ plan: value || "free" });
     }
     default:
       return Response.json({ error: "Unknown action" }, { status: 400 });

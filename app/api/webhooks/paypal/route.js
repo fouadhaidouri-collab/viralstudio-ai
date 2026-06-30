@@ -13,11 +13,9 @@ export async function POST(req) {
     const resource = body.resource;
 
     if (!eventType || !resource) {
-      // PayPal sends verification ping
       return Response.json({ received: true });
     }
 
-    // Verify webhook by checking PayPal signature (verify_webhook_signature API)
     const verifyUrl = process.env.PAYPAL_MODE === "live"
       ? "https://api-m.paypal.com/v1/notifications/verify-webhook-signature"
       : "https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature";
@@ -63,7 +61,6 @@ export async function POST(req) {
       }
     }
 
-    // Handle CHECKOUT.ORDER.APPROVED (from our capture flow)
     if (eventType === "CHECKOUT.ORDER.APPROVED" || eventType === "PAYMENT.CAPTURE.COMPLETED") {
       const orderId = resource.id || resource.supplementary_data?.related_ids?.order_id;
       const customId = resource.custom_id || resource.purchase_units?.[0]?.custom_id;
@@ -76,20 +73,18 @@ export async function POST(req) {
       }
 
       const txId = parsed?.transactionId;
-      const userId = parsed?.userId;
       const credits = parsed?.credits || 0;
 
       let tx;
       if (txId) {
-        tx = updateTransaction(txId, {
+        tx = await updateTransaction(txId, {
           status: "completed",
           provider_payment_id: orderId,
-          raw_payload: body,
         });
       } else {
-        tx = getTransactionByProviderId("paypal", orderId);
+        tx = await getTransactionByProviderId("paypal", orderId);
         if (tx) {
-          updateTransaction(tx.id, { status: "completed", raw_payload: body });
+          await updateTransaction(tx.id, { status: "completed" });
         }
       }
 
@@ -98,21 +93,20 @@ export async function POST(req) {
         return Response.json({ received: true });
       }
 
-      const ledgerEntry = addCreditLedgerEntry({
+      const ledgerEntry = await addCreditLedgerEntry({
         userId: tx.user_id,
         transactionId: tx.id,
         creditsAdded: credits,
-        reason: `PayPal payment for ${tx.plan_id} plan (${tx.billing_cycle})`,
+        reason: `PayPal payment`,
       });
 
       if (ledgerEntry) {
-        addUserCredits(tx.user_id, credits, "purchase", {
+        await addUserCredits(tx.user_id, credits, "purchase", {
           transactionId: tx.id,
           provider: "paypal",
-          planId: tx.plan_id,
         });
         console.log(`PayPal: Added ${credits} credits to user ${tx.user_id}`);
-        processCommissionForPayment(tx.user_id, tx.plan_id, tx.amount);
+        await processCommissionForPayment(tx.user_id, null, tx.amount);
       } else {
         console.log(`PayPal webhook: Transaction ${tx.id} already processed`);
       }

@@ -2,7 +2,7 @@ import { query } from "../../../../lib/db";
 
 export async function GET() {
   const rows = await query(
-    "SELECT t.*, u.name AS user_name, u.email AS user_email FROM transactions t LEFT JOIN users u ON t.user_id = u.id ORDER BY t.created_at DESC"
+    "SELECT p.*, u.name AS user_name, u.email AS user_email FROM payments p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC"
   );
   const payments = rows.map((r) => ({
     id: r.id,

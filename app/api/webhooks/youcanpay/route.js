@@ -11,7 +11,6 @@ export async function POST(req) {
     const raw = await req.text();
     const body = JSON.parse(raw);
 
-    // YouCanPay sends IPN with payment data
     const paymentId = body.id || body.payment_id;
     const status = body.status || body.payment_status;
     const orderId = body.order_id;
@@ -21,7 +20,6 @@ export async function POST(req) {
       return Response.json({ received: true });
     }
 
-    // Verify IPN with YouCanPay API
     const privateKey = process.env.YOUCANPAY_PRIVATE_KEY;
     if (privateKey) {
       const isSandbox = privateKey.includes("sandbox");
@@ -43,15 +41,14 @@ export async function POST(req) {
 
       let tx;
       if (txId && txId.startsWith("tx_")) {
-        tx = updateTransaction(txId, {
+        tx = await updateTransaction(txId, {
           status: "completed",
           provider_payment_id: paymentId,
-          raw_payload: body,
         });
       } else {
-        tx = getTransactionByProviderId("youcanpay", paymentId);
+        tx = await getTransactionByProviderId("youcanpay", paymentId);
         if (tx) {
-          updateTransaction(tx.id, { status: "completed", raw_payload: body });
+          await updateTransaction(tx.id, { status: "completed" });
         }
       }
 
@@ -62,28 +59,27 @@ export async function POST(req) {
 
       const credits = metadata?.credits ? parseInt(metadata.credits, 10) : tx.credits || 0;
 
-      const ledgerEntry = addCreditLedgerEntry({
+      const ledgerEntry = await addCreditLedgerEntry({
         userId: tx.user_id,
         transactionId: tx.id,
         creditsAdded: credits,
-        reason: `YouCanPay payment for ${tx.plan_id} plan (${tx.billing_cycle})`,
+        reason: `YouCanPay payment`,
       });
 
       if (ledgerEntry) {
-        addUserCredits(tx.user_id, credits, "purchase", {
+        await addUserCredits(tx.user_id, credits, "purchase", {
           transactionId: tx.id,
           provider: "youcanpay",
-          planId: tx.plan_id,
         });
         console.log(`YouCanPay: Added ${credits} credits to user ${tx.user_id}`);
-        processCommissionForPayment(tx.user_id, tx.plan_id, tx.amount);
+        await processCommissionForPayment(tx.user_id, null, tx.amount);
       } else {
         console.log(`YouCanPay webhook: Transaction ${tx.id} already processed`);
       }
     } else if (status === "failed" || status === "cancelled") {
       const txId = metadata?.transactionId || orderId;
       if (txId && txId.startsWith("tx_")) {
-        updateTransaction(txId, { status: "failed", raw_payload: body });
+        await updateTransaction(txId, { status: "failed" });
       }
     }
 

@@ -63,14 +63,14 @@ export async function POST(req) {
       return Response.json({ error: `PayPal capture status: ${captureData.status}` }, { status: 400 });
     }
 
-    let tx = getTransactionByProviderId("paypal", orderID);
+    let tx = await getTransactionByProviderId("paypal", orderID);
 
     if (!tx) {
       const customId = captureData.purchase_units?.[0]?.custom_id;
       if (customId) {
         try {
           const parsed = JSON.parse(customId);
-          tx = getTransaction(parsed.transactionId);
+          tx = await getTransaction(parsed.transactionId);
         } catch {}
       }
     }
@@ -80,11 +80,11 @@ export async function POST(req) {
       return Response.json({ error: "Transaction not found" }, { status: 404 });
     }
 
-    const ledgerEntry = addCreditLedgerEntry({
+    const ledgerEntry = await addCreditLedgerEntry({
       userId: tx.user_id,
       transactionId: tx.id,
       creditsAdded: tx.credits || 0,
-      reason: `PayPal payment for ${tx.plan_id} plan (${tx.billing_cycle})`,
+      reason: `PayPal payment`,
     });
 
     if (!ledgerEntry) {
@@ -95,23 +95,19 @@ export async function POST(req) {
       });
     }
 
-    updateTransaction(tx.id, { status: "completed", raw_payload: captureData });
+    await updateTransaction(tx.id, { status: "completed" });
 
-    addUserCredits(tx.user_id, tx.credits || 0, "purchase", {
+    await addUserCredits(tx.user_id, tx.credits || 0, "purchase", {
       transactionId: tx.id,
       provider: "paypal",
-      planId: tx.plan_id,
-      billingCycle: tx.billing_cycle,
     });
 
     console.log(`PayPal capture: Added ${tx.credits} credits to user ${tx.user_id}`);
-    processCommissionForPayment(tx.user_id, tx.plan_id, tx.amount);
+    await processCommissionForPayment(tx.user_id, null, tx.amount);
 
     return Response.json({
       success: true,
       credits: tx.credits,
-      planId: tx.plan_id,
-      billingCycle: tx.billing_cycle,
     });
   } catch (err) {
     console.error("PayPal capture error:", err);

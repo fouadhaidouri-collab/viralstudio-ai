@@ -32,21 +32,19 @@ export async function POST(req) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const transactionId = session.metadata?.transactionId;
-      const userId = session.metadata?.userId;
       const credits = parseInt(session.metadata?.credits || "0", 10);
       const providerPaymentId = session.id;
 
       let tx;
       if (transactionId) {
-        tx = updateTransaction(transactionId, {
+        tx = await updateTransaction(transactionId, {
           status: "completed",
           provider_payment_id: providerPaymentId,
-          raw_payload: event,
         });
       } else {
-        tx = getTransactionByProviderId("stripe", providerPaymentId);
+        tx = await getTransactionByProviderId("stripe", providerPaymentId);
         if (tx) {
-          updateTransaction(tx.id, { status: "completed", raw_payload: event });
+          await updateTransaction(tx.id, { status: "completed" });
         }
       }
 
@@ -55,22 +53,20 @@ export async function POST(req) {
         return Response.json({ received: true });
       }
 
-      // Idempotency check
-      const ledgerEntry = addCreditLedgerEntry({
+      const ledgerEntry = await addCreditLedgerEntry({
         userId: tx.user_id,
         transactionId: tx.id,
         creditsAdded: credits,
-        reason: `Stripe payment for ${tx.plan_id} plan (${tx.billing_cycle})`,
+        reason: `Stripe payment`,
       });
 
       if (ledgerEntry) {
-        addUserCredits(tx.user_id, credits, "purchase", {
+        await addUserCredits(tx.user_id, credits, "purchase", {
           transactionId: tx.id,
           provider: "stripe",
-          planId: tx.plan_id,
         });
         console.log(`Stripe: Added ${credits} credits to user ${tx.user_id}`);
-        processCommissionForPayment(tx.user_id, tx.plan_id, tx.amount);
+        await processCommissionForPayment(tx.user_id, null, tx.amount);
       } else {
         console.log(`Stripe webhook: Transaction ${tx.id} already processed (idempotent)`);
       }

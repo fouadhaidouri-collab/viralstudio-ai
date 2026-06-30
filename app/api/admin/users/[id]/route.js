@@ -7,26 +7,21 @@ export async function GET(_, { params }) {
   if (!user) {
     return Response.json({ error: "User not found" }, { status: 404 });
   }
-  const creditsRec = await get("SELECT credits FROM user_credits WHERE user_id = ?", [id]);
-  const transactions = await query("SELECT * FROM transactions WHERE user_id = ? ORDER BY created_at DESC", [id]);
+  const creditsRec = await get("SELECT current_balance FROM credits WHERE user_id = ?", [id]);
+  const payments = await query("SELECT * FROM payments WHERE user_id = ? ORDER BY created_at DESC", [id]);
   const ledger = await query("SELECT * FROM credit_ledger WHERE user_id = ? ORDER BY created_at DESC", [id]);
   const enriched = {
     id: user.id,
     name: user.name,
     email: user.email,
-    plan: user.plan || "free",
-    credits: creditsRec?.credits ?? user.credits ?? 0,
-    storage_used: user.storage_used_bytes || 0,
-    storage_total: user.storage_limit_bytes || 524288000,
-    status: "active",
-    role: "user",
-    country: "-",
+    role: user.role || "user",
+    credits: creditsRec?.current_balance ?? 0,
+    status: user.status || "active",
     signup_date: user.created_at,
-    last_login: user.created_at,
+    last_login: user.last_login || user.created_at,
     created_at: user.created_at,
-    total_generations: 0,
-    email_verified: true,
-    payments: transactions.map((t) => ({
+    email_verified: !!user.email_verified,
+    payments: payments.map((t) => ({
       id: t.id,
       user_id: t.user_id,
       plan: t.plan_id,

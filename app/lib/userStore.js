@@ -5,6 +5,10 @@ function hashPassword(password) {
   return crypto.createHash("sha256").update(password).digest("hex");
 }
 
+function makeId(prefix) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export async function getUsers() {
   return await query("SELECT * FROM users ORDER BY created_at DESC");
 }
@@ -20,9 +24,9 @@ export async function findUserById(id) {
 export async function createUser(name, email, password) {
   const existing = await findUser(email);
   if (existing) throw new Error("User already exists");
-  const id = email;
+  const id = makeId("usr");
   await run(
-    "INSERT INTO users (id, name, email, password, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+    "INSERT INTO users (id, name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))",
     [id, name, email, hashPassword(password)]
   );
   return { id, name, email };
@@ -43,7 +47,7 @@ export async function saveResetToken(email, token) {
   const user = await findUser(email);
   if (!user) throw new Error("User not found");
   await run(
-    "UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?",
+    "UPDATE users SET reset_token = ?, reset_token_expiry = ?, updated_at = datetime('now') WHERE email = ?",
     [token, Date.now() + 3600000, email]
   );
 }
@@ -60,7 +64,7 @@ export async function updatePassword(email, newPassword) {
   const user = await findUser(email);
   if (!user) throw new Error("User not found");
   await run(
-    "UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE email = ?",
+    "UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL, updated_at = datetime('now') WHERE email = ?",
     [hashPassword(newPassword), email]
   );
 }
@@ -71,12 +75,6 @@ export async function changePassword(email, currentPassword, newPassword) {
   await updatePassword(email, newPassword);
 }
 
-export async function updateUserStorage(email, storageUsedBytes) {
-  await run("UPDATE users SET storage_used_bytes = ? WHERE email = ?", [storageUsedBytes, email]);
-}
-
-export async function updateUserPlan(email, plan) {
-  const limits = { free: 524288000, starter: 1073741824, pro: 5368709120, team: 21474836480 };
-  const limit = limits[plan] || 524288000;
-  await run("UPDATE users SET plan = ?, storage_limit_bytes = ? WHERE email = ?", [plan, limit, email]);
+export async function updateLastLogin(userId) {
+  await run("UPDATE users SET last_login = datetime('now'), updated_at = datetime('now') WHERE id = ?", [userId]);
 }
