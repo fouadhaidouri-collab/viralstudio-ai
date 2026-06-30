@@ -7,8 +7,8 @@ export async function GET() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { email, name } = session.user;
-  const affiliate = getOrCreateAffiliate({ user_id: email, name: name || email.split("@")[0], email });
-  const clicks = getClicksForAffiliate(affiliate.code, 1000);
+  const affiliate = await getOrCreateAffiliate({ user_id: email, name: name || email.split("@")[0], email });
+  const clicks = await getClicksForAffiliate(affiliate.code, 1000);
   const signups_count = affiliate.total_signups || 0;
   const conversion_rate = affiliate.total_clicks > 0
     ? Math.round(((affiliate.total_paid_customers || 0) / affiliate.total_clicks) * 10000) / 100

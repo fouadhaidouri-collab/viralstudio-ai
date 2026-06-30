@@ -11,11 +11,11 @@ export async function POST(req) {
   if (!amount || !method) {
     return Response.json({ error: "Amount and method are required" }, { status: 400 });
   }
-  const affiliate = getOrCreateAffiliate({ user_id: email, name: name || email.split("@")[0], email });
+  const affiliate = await getOrCreateAffiliate({ user_id: email, name: name || email.split("@")[0], email });
   if (amount > (affiliate.total_pending || 0)) {
     return Response.json({ error: "Insufficient pending balance" }, { status: 400 });
   }
-  const wd = createWithdrawal({
+  const wd = await createWithdrawal({
     affiliate_user_id: email,
     affiliate_code: affiliate.code,
     amount,

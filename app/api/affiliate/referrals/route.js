@@ -7,7 +7,7 @@ export async function GET() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { email, name } = session.user;
-  const affiliate = getOrCreateAffiliate({ user_id: email, name: name || email.split("@")[0], email });
-  const referrals = getReferralsForAffiliate(affiliate.code);
+  const affiliate = await getOrCreateAffiliate({ user_id: email, name: name || email.split("@")[0], email });
+  const referrals = await getReferralsForAffiliate(affiliate.code);
   return Response.json({ referrals });
 }
