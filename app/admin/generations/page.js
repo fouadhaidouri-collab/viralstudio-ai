@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { mockGenerations } from "../data/mockGenerations";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -53,7 +52,10 @@ const toolIcons = {
 };
 
 export default function AdminGenerationsPage() {
-  const [generations, setGenerations] = useState(mockGenerations);
+  const [generations, setGenerations] = useState([]);
+  useEffect(() => {
+    fetch("/api/admin/generations").then((r) => r.json()).then((d) => setGenerations(d.data || [])).catch(() => {});
+  }, []);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [toolFilter, setToolFilter] = useState("");

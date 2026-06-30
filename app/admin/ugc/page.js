@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -8,27 +8,22 @@ import PageHeader from "../components/PageHeader";
 import EmptyState from "../components/EmptyState";
 import Icon from "../../components/Icon";
 
-const mockAvatars = [
-  { id: 'av_001', name: 'Real Human', style: 'realistic', status: 'active', created_at: '2025-02-01T00:00:00Z' },
-  { id: 'av_002', name: 'Studio Creator', style: 'studio', status: 'active', created_at: '2025-02-01T00:00:00Z' },
-  { id: 'av_003', name: 'Cartoon Mascot', style: 'animated', status: 'inactive', created_at: '2025-06-01T00:00:00Z' },
-];
-
-const mockVoices = [
-  { id: 'vc_001', name: 'Jessica US Female', gender: 'female', accent: 'US', status: 'active' },
-  { id: 'vc_002', name: 'Marcus US Male', gender: 'male', accent: 'US', status: 'active' },
-  { id: 'vc_003', name: 'Layla UK Female', gender: 'female', accent: 'UK', status: 'inactive' },
-];
-
-const mockUgcTemplates = [
-  { id: 'ugc_tpl_001', name: 'Skincare Review - Authentic', target_audience: 'Women 25-40', offer: 'Skincare product review', status: 'active' },
-  { id: 'ugc_tpl_002', name: 'Fitness App Testimonial', target_audience: 'Fitness enthusiasts', offer: 'Free 7-day trial', status: 'active' },
-];
-
-const mockExportPresets = [
-  { id: 'exp_001', name: 'HD MP4', resolution: '1080p', format: 'MP4', status: 'active' },
-  { id: 'exp_002', name: 'TikTok Ads', resolution: '1080p', format: 'MP4', status: 'active' },
-];
+export default function UGCPage() {
+  const [avatars, setAvatars] = useState([]);
+  const [voices, setVoices] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [presets, setPresets] = useState([]);
+  const [addModal, setAddModal] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [addForm, setAddForm] = useState({});
+  useEffect(() => {
+    fetch("/api/admin/ugc").then((r) => r.json()).then((d) => {
+      setAvatars(d.avatars || []);
+      setVoices(d.voices || []);
+      setTemplates(d.templates || []);
+      setPresets(d.presets || []);
+    }).catch(() => {});
+  }, []);
 
 function UGCDataTable({ items, columns, onAction }) {
   if (items.length === 0) {
@@ -58,14 +53,7 @@ function UGCDataTable({ items, columns, onAction }) {
   );
 }
 
-export default function UGCPage() {
-  const [avatars, setAvatars] = useState(mockAvatars);
-  const [voices, setVoices] = useState(mockVoices);
-  const [templates, setTemplates] = useState(mockUgcTemplates);
-  const [presets, setPresets] = useState(mockExportPresets);
-  const [addModal, setAddModal] = useState(null);
-  const [confirmAction, setConfirmAction] = useState(null);
-  const [addForm, setAddForm] = useState({});
+
 
   function toggleStatus(items, setItems, id) {
     setItems(items.map((i) => i.id === id ? { ...i, status: i.status === "active" ? "inactive" : "active" } : i));

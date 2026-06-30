@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -9,15 +9,6 @@ import PageHeader from "../components/PageHeader";
 import EmptyState from "../components/EmptyState";
 import CreditBadge from "../components/CreditBadge";
 import Icon from "../../components/Icon";
-
-const mockClippingJobs = [
-  { id: 'clip_001', user_id: 'usr_002', user_name: 'Sarah Johnson', video_name: 'gaming_highlights.mp4', file_size: 245, reels_requested: 10, clip_length: 30, aspect_ratio: '9:16', status: 'completed', generated_reels: 10, failed_clips: 0, credits_used: 15, created_at: '2026-06-19T10:00:00Z' },
-  { id: 'clip_002', user_id: 'usr_003', user_name: 'Michael Chen', video_name: 'podcast_interview.mp4', file_size: 512, reels_requested: 20, clip_length: 45, aspect_ratio: '9:16', status: 'processing', generated_reels: 12, failed_clips: 1, credits_used: 30, created_at: '2026-06-20T08:00:00Z' },
-  { id: 'clip_003', user_id: 'usr_010', user_name: 'Nina Kravitz', video_name: 'product_demo.mp4', file_size: 180, reels_requested: 5, clip_length: 15, aspect_ratio: '1:1', status: 'failed', generated_reels: 3, failed_clips: 2, credits_used: 15, created_at: '2026-06-18T14:00:00Z' },
-  { id: 'clip_004', user_id: 'usr_008', user_name: 'Anna Martinez', video_name: 'tutorial_video.mp4', file_size: 890, reels_requested: 30, clip_length: 60, aspect_ratio: '16:9', status: 'pending', generated_reels: 0, failed_clips: 0, credits_used: 45, created_at: '2026-06-20T12:00:00Z' },
-  { id: 'clip_005', user_id: 'usr_014', user_name: 'Rachel Green', video_name: 'vlog_daily.mp4', file_size: 320, reels_requested: 15, clip_length: 30, aspect_ratio: '9:16', status: 'completed', generated_reels: 15, failed_clips: 0, credits_used: 15, created_at: '2026-06-18T20:00:00Z' },
-  { id: 'clip_006', user_id: 'usr_012', user_name: 'Sophie Laurent', video_name: 'wedding_highlights.mp4', file_size: 1500, reels_requested: 50, clip_length: 45, aspect_ratio: '9:16', status: 'failed', generated_reels: 0, failed_clips: 50, credits_used: 15, error_message: 'File size exceeds 500MB limit', created_at: '2026-06-17T09:00:00Z' },
-];
 
 function formatSize(mb) {
   if (mb >= 1024) return (mb / 1024).toFixed(2) + " GB";
@@ -29,26 +20,30 @@ function formatDate(d) {
 }
 
 export default function ClippingJobsPage() {
+  const [jobs, setJobs] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [viewJob, setViewJob] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
+  useEffect(() => {
+    fetch("/api/admin/clipping-jobs").then((r) => r.json()).then((d) => setJobs(d.data || [])).catch(() => {});
+  }, []);
 
   const filtered = useMemo(() => {
-    return mockClippingJobs.filter((j) => {
-      const matchSearch = !search || j.user_name.toLowerCase().includes(search.toLowerCase()) || j.video_name.toLowerCase().includes(search.toLowerCase());
+    return jobs.filter((j) => {
+      const matchSearch = !search || j.user_name?.toLowerCase().includes(search.toLowerCase()) || j.video_name?.toLowerCase().includes(search.toLowerCase());
       const matchStatus = !statusFilter || j.status === statusFilter;
       return matchSearch && matchStatus;
     });
-  }, [search, statusFilter]);
+  }, [search, statusFilter, jobs]);
 
   const stats = useMemo(() => {
-    const total = mockClippingJobs.length;
-    const completed = mockClippingJobs.filter((j) => j.status === "completed").length;
-    const failed = mockClippingJobs.filter((j) => j.status === "failed").length;
-    const processingPending = mockClippingJobs.filter((j) => j.status === "processing" || j.status === "pending").length;
+    const total = jobs.length;
+    const completed = jobs.filter((j) => j.status === "completed").length;
+    const failed = jobs.filter((j) => j.status === "failed").length;
+    const processingPending = jobs.filter((j) => j.status === "processing" || j.status === "pending").length;
     return { total, completed, failed, processingPending };
-  }, []);
+  }, [jobs]);
 
   const statusOptions = [
     { value: "pending", label: "Pending" },
@@ -114,7 +109,7 @@ export default function ClippingJobsPage() {
                   <tr key={job.id} className="border-b border-surface-border/20 hover:bg-surface-container-low transition-colors">
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">{job.user_name.charAt(0)}</div>
+                        <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">{job.user_name?.charAt(0) || "?"}</div>
                         <span className="font-medium text-white">{job.user_name}</span>
                       </div>
                     </td>
@@ -230,42 +225,10 @@ export default function ClippingJobsPage() {
         </div>
       )}
 
-      <ConfirmModal
-        open={confirmAction?.type === "cancel"}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={() => setConfirmAction(null)}
-        title="Cancel Job"
-        message={`Are you sure you want to cancel this clipping job for ${confirmAction?.job?.user_name}?`}
-        confirmLabel="Cancel Job"
-        confirmVariant="danger"
-      />
-      <ConfirmModal
-        open={confirmAction?.type === "refund"}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={() => setConfirmAction(null)}
-        title="Refund Credits"
-        message={`Refund ${confirmAction?.job?.credits_used} credits to ${confirmAction?.job?.user_name}?`}
-        confirmLabel="Refund Credits"
-        confirmVariant="primary"
-      />
-      <ConfirmModal
-        open={confirmAction?.type === "delete_source"}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={() => setConfirmAction(null)}
-        title="Delete Source Video"
-        message={`Delete the source video "${confirmAction?.job?.video_name}" permanently? This cannot be undone.`}
-        confirmLabel="Delete Video"
-        confirmVariant="danger"
-      />
-      <ConfirmModal
-        open={confirmAction?.type === "delete_clips"}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={() => setConfirmAction(null)}
-        title="Delete Generated Clips"
-        message={`Delete all generated clips for this job? This cannot be undone.`}
-        confirmLabel="Delete Clips"
-        confirmVariant="danger"
-      />
+      <ConfirmModal open={confirmAction?.type === "cancel"} onClose={() => setConfirmAction(null)} onConfirm={() => setConfirmAction(null)} title="Cancel Job" message={`Are you sure you want to cancel this clipping job for ${confirmAction?.job?.user_name}?`} confirmLabel="Cancel Job" confirmVariant="danger" />
+      <ConfirmModal open={confirmAction?.type === "refund"} onClose={() => setConfirmAction(null)} onConfirm={() => setConfirmAction(null)} title="Refund Credits" message={`Refund ${confirmAction?.job?.credits_used} credits to ${confirmAction?.job?.user_name}?`} confirmLabel="Refund Credits" confirmVariant="primary" />
+      <ConfirmModal open={confirmAction?.type === "delete_source"} onClose={() => setConfirmAction(null)} onConfirm={() => setConfirmAction(null)} title="Delete Source Video" message={`Delete the source video "${confirmAction?.job?.video_name}" permanently? This cannot be undone.`} confirmLabel="Delete Video" confirmVariant="danger" />
+      <ConfirmModal open={confirmAction?.type === "delete_clips"} onClose={() => setConfirmAction(null)} onConfirm={() => setConfirmAction(null)} title="Delete Generated Clips" message="Delete all generated clips for this job? This cannot be undone." confirmLabel="Delete Clips" confirmVariant="danger" />
     </div>
   );
 }

@@ -1,12 +1,15 @@
 "use client";
-import { useState, useMemo } from "react";
-import { mockGenerations } from "../data/mockGenerations";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import Icon from "../../components/Icon";
 
 export default function AdminAiVideoPage() {
+  const [allGenerations, setAllGenerations] = useState([]);
   const [search, setSearch] = useState("");
   const [alertMsg, setAlertMsg] = useState(null);
+  useEffect(() => {
+    fetch("/api/admin/generations").then((r) => r.json()).then((d) => setAllGenerations(d.data || [])).catch(() => {});
+  }, []);
 
   const showAlert = (msg) => {
     setAlertMsg(msg);
@@ -14,13 +17,13 @@ export default function AdminAiVideoPage() {
   };
 
   const generations = useMemo(() => {
-    let list = mockGenerations.filter((g) => g.tool === "AI Video");
+    let list = allGenerations.filter((g) => g.tool === "AI Video");
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter((g) => g.user_name.toLowerCase().includes(q) || g.prompt.toLowerCase().includes(q));
+      list = list.filter((g) => (g.user_name || "").toLowerCase().includes(q) || g.prompt.toLowerCase().includes(q));
     }
     return list;
-  }, [search]);
+  }, [search, allGenerations]);
 
   return (
     <div className="min-h-full bg-background text-white p-6"><div className="space-y-5 animate-fade-in-up">

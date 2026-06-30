@@ -1,6 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
-import { mockLogs } from "../data/mockLogs";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import FilterSelect from "../components/FilterSelect";
 import SearchInput from "../components/SearchInput";
@@ -83,13 +82,17 @@ function isInDateRange(dateStr, range) {
 }
 
 export default function AdminLogsPage() {
+  const [logs, setLogs] = useState([]);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [severityFilter, setSeverityFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
+  useEffect(() => {
+    fetch("/api/admin/logs").then((r) => r.json()).then((d) => setLogs(d.data || [])).catch(() => {});
+  }, []);
 
   const filtered = useMemo(() => {
-    return mockLogs.filter((log) => {
+    return logs.filter((log) => {
       if (search) {
         const q = search.toLowerCase();
         if (!log.details.toLowerCase().includes(q)) return false;

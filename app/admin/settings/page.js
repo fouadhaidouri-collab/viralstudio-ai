@@ -1,13 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
 import StatusBadge from "../components/StatusBadge";
 
 const defaultSettings = {
-  general: { app_name: "ViralStudio AI", logo: null, default_language: "en", default_currency: "USD", maintenance_mode: false, signup_enabled: true },
-  credits: { default_credits: 100, minimum_purchase: 10, credit_value: 0.05, auto_refund_failed: true },
-  api: { fal_ai: "sk-...", openrouter: "sk-...", elevenlabs: "sk-...", stripe: "sk-...", paypal: "..." },
+  general: { app_name: "", logo: null, default_language: "en", default_currency: "USD", maintenance_mode: false, signup_enabled: true },
+  credits: { default_credits: 0, minimum_purchase: 10, credit_value: 0.05, auto_refund_failed: true },
+  api: { fal_ai: "", openrouter: "", elevenlabs: "", stripe: "", paypal: "" },
   storage: { provider: "Supabase", max_upload_size: 500, allowed_file_types: "mp4,mov,avi,jpg,png,gif,mp3,wav", auto_delete_old: false },
   branding: { primary_color: "#a855f7", accent_color: "#22d3ee", button_style: "gradient", dark_mode_default: true, arabic_rtl_enabled: true },
 };

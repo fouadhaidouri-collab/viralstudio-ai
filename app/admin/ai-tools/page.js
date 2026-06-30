@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { mockTools } from "../data/mockTools";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import PlanBadge from "../components/PlanBadge";
 import ActionMenu from "../components/ActionMenu";
@@ -18,7 +17,10 @@ const creditCostModeLabels = {
 };
 
 export default function AdminAiToolsPage() {
-  const [tools, setTools] = useState(mockTools);
+  const [tools, setTools] = useState([]);
+  useEffect(() => {
+    fetch("/api/admin/tools").then((r) => r.json()).then((d) => setTools(d.data || [])).catch(() => {});
+  }, []);
   const [search, setSearch] = useState("");
   const [editingTool, setEditingTool] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);

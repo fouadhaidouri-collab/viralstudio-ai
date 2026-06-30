@@ -1,6 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
-import { mockSupportTickets } from "../data/mockSupportTickets";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -28,7 +27,10 @@ const STATUS_OPTIONS = [
 ];
 
 export default function AdminSupportPage() {
-  const [tickets, setTickets] = useState(mockSupportTickets);
+  const [tickets, setTickets] = useState([]);
+  useEffect(() => {
+    fetch("/api/admin/support").then((r) => r.json()).then((d) => setTickets(d.data || [])).catch(() => {});
+  }, []);
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");

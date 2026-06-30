@@ -1,30 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
 import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
-
-const mockChatSettings = {
-  system_prompt: 'You are ViralStudio AI, a helpful assistant specialized in content creation, social media marketing, viral video strategies, and AI-powered content generation. Provide concise, actionable advice.',
-  default_model: 'OpenRouter Auto',
-  credit_cost_per_message: 1,
-  max_messages: { Free: 50, Creator: 500, Pro: 2000, Agency: 10000 },
-  enabled: true,
-};
-
-const mockChatModels = [
-  { id: 'cm_001', name: 'OpenRouter Auto', provider: 'OpenRouter', api_model: 'openrouter/auto', status: 'active' },
-  { id: 'cm_002', name: 'GPT-4o Mini', provider: 'OpenRouter', api_model: 'openrouter/gpt-4o-mini', status: 'active' },
-  { id: 'cm_003', name: 'Claude 3 Haiku', provider: 'OpenRouter', api_model: 'openrouter/claude-3-haiku', status: 'inactive' },
-];
-
-const mockPresets = [
-  { id: 'preset_001', name: 'Content Strategy', description: 'Strategic planning for social media content calendars' },
-  { id: 'preset_002', name: 'Script Optimizer', description: 'Optimize video scripts for maximum engagement' },
-  { id: 'preset_003', name: 'Brand Voice', description: 'Develop and maintain consistent brand voice across content' },
-];
 
 function SectionCard({ title, subtitle, icon, children, className = "" }) {
   return (
@@ -55,11 +35,21 @@ function Toast({ message, visible }) {
 }
 
 export default function ChatAIAdmin() {
-  const [settings, setSettings] = useState(mockChatSettings);
-  const [models, setModels] = useState(mockChatModels);
-  const [systemPrompt, setSystemPrompt] = useState(settings.system_prompt);
-  const [creditCost, setCreditCost] = useState(settings.credit_cost_per_message);
+  const [settings, setSettings] = useState({ enabled: true, system_prompt: '', default_model: '', credit_cost_per_message: 1, max_messages: { Free: 50, Creator: 500, Pro: 2000, Agency: 10000 } });
+  const [models, setModels] = useState([]);
+  const [presets, setPresets] = useState([]);
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [creditCost, setCreditCost] = useState(1);
   const [toastVisible, setToastVisible] = useState(false);
+  useEffect(() => {
+    fetch("/api/admin/chat-settings").then((r) => r.json()).then((d) => {
+      if (d.settings?.system_prompt) setSettings(d.settings);
+      if (d.settings?.system_prompt) setSystemPrompt(d.settings.system_prompt);
+      if (d.settings?.credit_cost_per_message) setCreditCost(d.settings.credit_cost_per_message);
+      if (d.models) setModels(d.models);
+      if (d.presets) setPresets(d.presets);
+    }).catch(() => {});
+  }, []);
 
   const showToast = () => {
     setToastVisible(true);
@@ -182,7 +172,7 @@ export default function ChatAIAdmin() {
               </tr>
             </thead>
             <tbody>
-              {mockPresets.map(preset => (
+              {presets.map(preset => (
                 <tr key={preset.id} className="border-b border-surface-border/10 last:border-0 hover:bg-surface-container-low/50 transition-colors">
                   <td className="py-2.5 pr-4">
                     <span className="font-medium text-white">{preset.name}</span>

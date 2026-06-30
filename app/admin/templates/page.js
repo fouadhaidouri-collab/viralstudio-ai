@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { mockTemplates } from "../data/mockTemplates";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -20,7 +19,10 @@ const emptyTemplate = {
 };
 
 export default function AdminTemplatesPage() {
-  const [templates, setTemplates] = useState(mockTemplates);
+  const [templates, setTemplates] = useState([]);
+  useEffect(() => {
+    fetch("/api/admin/templates").then((r) => r.json()).then((d) => setTemplates(d.data || [])).catch(() => {});
+  }, []);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [toolFilter, setToolFilter] = useState("");

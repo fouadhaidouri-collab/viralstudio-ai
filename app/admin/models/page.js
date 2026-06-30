@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo, Fragment } from "react";
-import { mockModels } from "../data/mockModels";
+import { useState, useMemo, Fragment, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import PlanBadge from "../components/PlanBadge";
 import ActionMenu from "../components/ActionMenu";
@@ -37,7 +36,10 @@ const emptyModel = {
 };
 
 export default function AdminModelsPage() {
-  const [models, setModels] = useState(mockModels);
+  const [models, setModels] = useState([]);
+  useEffect(() => {
+    fetch("/api/admin/models").then((r) => r.json()).then((d) => setModels(d.data || [])).catch(() => {});
+  }, []);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [providerFilter, setProviderFilter] = useState("");

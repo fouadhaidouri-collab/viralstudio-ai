@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { mockPlans } from "../data/mockPlans";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -19,7 +18,10 @@ const emptyPlan = {
 };
 
 export default function AdminPlansPage() {
-  const [plans, setPlans] = useState(mockPlans);
+  const [plans, setPlans] = useState([]);
+  useEffect(() => {
+    fetch("/api/admin/plans").then((r) => r.json()).then((d) => setPlans(d.data || [])).catch(() => {});
+  }, []);
   const [showModal, setShowModal] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
   const [form, setForm] = useState(emptyPlan);

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import ActionMenu from "../components/ActionMenu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -8,27 +8,21 @@ import PageHeader from "../components/PageHeader";
 import EmptyState from "../components/EmptyState";
 import Icon from "../../components/Icon";
 
-const mockFrameworks = [
-  { id: 'hk_001', name: 'Pattern Interrupt', description: 'Break the viewer\'s scrolling pattern with an unexpected statement or question.', prompt_template: 'Most people think X, but the truth is...', languages: ['en', 'ar', 'fr'], status: 'active', example_output: 'Most people think you need 10K followers to make money online, but the truth is...' },
-  { id: 'hk_002', name: 'Secret/Forbidden', description: 'Tap into curiosity by revealing something hidden or exclusive.', prompt_template: 'Here\'s what they don\'t tell you about X...', languages: ['en', 'ar'], status: 'active', example_output: 'Here\'s what they don\'t tell you about the TikTok algorithm in 2026...' },
-  { id: 'hk_003', name: 'Negative Constraint', description: 'Use reverse psychology by telling viewers what NOT to do.', prompt_template: 'Stop doing X if you want Y...', languages: ['en', 'ar', 'fr', 'es'], status: 'active', example_output: 'Stop posting every day if you want your videos to go viral...' },
-  { id: 'hk_004', name: 'Listicle', description: 'Numbered lists create anticipation and structure.', prompt_template: 'X ways to Y in Z days...', languages: ['en', 'ar', 'fr', 'es', 'de'], status: 'active', example_output: '3 ways to get 1M views on TikTok in 30 days...' },
-  { id: 'hk_005', name: 'Dopamine Gap', description: 'Create a gap between what the viewer has and what they want.', prompt_template: 'Imagine being able to X in just Y minutes...', languages: ['en', 'ar'], status: 'active', example_output: 'Imagine being able to edit a viral video in just 5 minutes...' },
-  { id: 'hk_006', name: 'Trend Surfer', description: 'Ride the wave of current trends and news.', prompt_template: 'Everyone\'s talking about X, but here\'s what they\'re missing...', languages: ['en'], status: 'active', example_output: 'Everyone\'s talking about AI video, but here\'s what they\'re missing...' },
-  { id: 'hk_007', name: 'Loss Aversion', description: 'People fear losing more than they want to gain.', prompt_template: 'Don\'t let X hold you back from Y...', languages: ['en', 'ar', 'fr'], status: 'inactive', example_output: 'Don\'t let fear of starting hold you back from your first $10K month...' },
-  { id: 'hk_008', name: 'Social Proof', description: 'Leverage what others are doing or achieving.', prompt_template: 'X people are using Y to Z. Here\'s why...', languages: ['en', 'ar', 'fr', 'es'], status: 'active', example_output: '50,000 creators are using ViralStudio AI to generate content. Here\'s why...' },
-];
-
-const defaultForm = { name: '', description: '', prompt_template: '', languages: '', status: 'active', example_output: '' };
-
 export default function HookGeneratorAdmin() {
-  const [frameworks, setFrameworks] = useState(mockFrameworks);
+  const [frameworks, setFrameworks] = useState([]);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(defaultForm);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmTarget, setConfirmTarget] = useState(null);
+  useEffect(() => {
+    fetch("/api/admin/hook-frameworks").then((r) => r.json()).then((d) => setFrameworks(d.data || [])).catch(() => {});
+  }, []);
+
+const defaultForm = { name: '', description: '', prompt_template: '', languages: '', status: 'active', example_output: '' };
+
+
 
   const filtered = useMemo(() => {
     if (!search.trim()) return frameworks;
