@@ -59,7 +59,15 @@ export async function PATCH(req) {
       return Response.json({ credits: updated?.current_balance ?? 0 });
     }
     case "change_plan": {
-      return Response.json({ plan: value || "free" });
+      const plan = value || "free";
+      const existing = await get("SELECT * FROM user_subscriptions WHERE user_id = ? AND status = 'active'", [userId]);
+      if (existing) {
+        await run("UPDATE user_subscriptions SET plan_id = ?, updated_at = datetime('now') WHERE user_id = ? AND status = 'active'", [plan, userId]);
+      } else {
+        const subId = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        await run("INSERT INTO user_subscriptions (id, user_id, plan_id, status, starts_at, expires_at, auto_renew) VALUES (?, ?, ?, 'active', datetime('now'), datetime('now', '+1 year'), 1)", [subId, userId, plan]);
+      }
+      return Response.json({ plan });
     }
     default:
       return Response.json({ error: "Unknown action" }, { status: 400 });

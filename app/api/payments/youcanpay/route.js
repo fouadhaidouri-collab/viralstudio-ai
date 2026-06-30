@@ -1,4 +1,5 @@
 import { auth } from "../../../lib/auth";
+import { findUser } from "../../../lib/userStore";
 import { PLANS, getPlanPrice } from "../../../../lib/paymentTransactions";
 
 export async function POST(req) {
@@ -7,6 +8,8 @@ export async function POST(req) {
     if (!session?.user?.email) {
       return Response.json({ error: "Authentication required" }, { status: 401 });
     }
+    const user = await findUser(session.user.email);
+    if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
     const { planId, billingCycle } = await req.json();
     if (!planId || !billingCycle) {
@@ -39,7 +42,7 @@ export async function POST(req) {
       success_url: `${appUrl}/pricing?paid=success`,
       cancel_url: `${appUrl}/pricing`,
       metadata: JSON.stringify({
-        user_id: session.user.email,
+        user_id: user.id,
         plan_id: planId,
         billing_cycle: billingCycle,
       }),

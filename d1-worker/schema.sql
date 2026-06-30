@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT DEFAULT 'user',
   status TEXT DEFAULT 'active',
   email_verified INTEGER DEFAULT 0,
+  reset_token TEXT,
+  reset_token_expiry INTEGER,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   last_login TEXT
@@ -40,6 +42,8 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
   starts_at TEXT,
   expires_at TEXT,
   auto_renew INTEGER DEFAULT 1,
+  created_at TEXT,
+  updated_at TEXT,
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (plan_id) REFERENCES plans(id)
 );

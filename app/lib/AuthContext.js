@@ -25,8 +25,8 @@ export function AuthProvider({ children }) {
         email: session.user.email,
         name: session.user.name || session.user.email?.split("@")[0],
         photoURL: session.user.image || null,
-        credits: 1250,
-        plan: "Pro Plan",
+        credits: session.user.credits ?? 0,
+        plan: session.user.plan || "Free",
         memberSince: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
         provider: session.user.provider || "credentials",
       }
