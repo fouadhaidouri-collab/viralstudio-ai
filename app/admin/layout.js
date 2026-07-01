@@ -2,7 +2,6 @@
 import { useState } from "react";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminTopbar from "./components/AdminTopbar";
-import AdminGuard from "./components/AdminGuard";
 import { SidebarProvider } from "../components/SidebarContext";
 
 const pageTitles = {
@@ -29,20 +28,18 @@ export default function AdminLayout({ children }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <AdminGuard>
-      <SidebarProvider>
-        <div className="h-screen overflow-hidden bg-background text-white flex">
-          <AdminSidebar mobileOpen={mobileSidebarOpen} setMobileOpen={setMobileSidebarOpen} />
-          <div className="flex-1 flex flex-col min-w-0">
-            <AdminTopbar setMobileOpen={setMobileSidebarOpen} />
-              <div className="flex-1 overflow-y-auto smooth-scroll custom-scrollbar">
-                <div className="px-4 md:px-6 py-4 md:py-5 max-w-[1600px] mx-auto h-full">
-                  {children}
-                </div>
-              </div>
+    <SidebarProvider>
+      <div className="h-screen overflow-hidden bg-background text-white flex">
+        <AdminSidebar mobileOpen={mobileSidebarOpen} setMobileOpen={setMobileSidebarOpen} />
+        <div className="flex-1 flex flex-col min-w-0">
+          <AdminTopbar setMobileOpen={setMobileSidebarOpen} />
+          <div className="flex-1 overflow-y-auto smooth-scroll custom-scrollbar">
+            <div className="px-4 md:px-6 py-4 md:py-5 max-w-[1600px] mx-auto h-full">
+              {children}
+            </div>
           </div>
         </div>
-      </SidebarProvider>
-    </AdminGuard>
+      </div>
+    </SidebarProvider>
   );
 }
