@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import { verifyUser, createGoogleUser, getUserPlan, getUserCreditsBalance } from "./userStore";
+import { verifyUser, getUserPlan, getUserCreditsBalance } from "./userStore";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -17,21 +16,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return user;
       },
     }),
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID || "",
-      clientSecret: process.env.AUTH_GOOGLE_SECRET || "",
-    }),
   ],
   pages: {
     signIn: "/login",
   },
   callbacks: {
-    async signIn({ account, profile }) {
-      if (account?.provider === "google" && profile?.email) {
-        await createGoogleUser(profile.name || profile.email.split("@")[0], profile.email, profile.picture);
-      }
-      return true;
-    },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
@@ -64,5 +53,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   session: { strategy: "jwt" },
+  secret: process.env.AUTH_SECRET || "fa8b031c588479e50db6587f6308966761d06dfae672c23e2cdc3e41f9f5763e",
   trustHost: true,
 });

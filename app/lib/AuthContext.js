@@ -7,7 +7,6 @@ const AuthContext = createContext({
   user: null,
   login: () => {},
   signUp: () => {},
-  googleLogin: () => {},
   logout: () => {},
   isAuthenticated: false,
   loading: true,
@@ -62,18 +61,13 @@ export function AuthProvider({ children }) {
     return true;
   };
 
-  const googleLogin = async () => {
-    setLoginError("");
-    await signIn("google", { callbackUrl: "/" });
-  };
-
   const logout = async () => {
     await signOut({ redirect: false });
   };
 
   return (
     <AuthContext.Provider value={{
-      user, login, signUp, googleLogin, logout,
+      user, login, signUp, logout,
       isAuthenticated: status === "authenticated",
       loading: status === "loading",
       loginError, setLoginError,
