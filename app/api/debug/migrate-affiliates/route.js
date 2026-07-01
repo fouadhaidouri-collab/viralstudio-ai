@@ -5,13 +5,34 @@ export async function GET() {
     await run("ALTER TABLE affiliate_accounts ADD COLUMN created_at TEXT;");
   } catch (e) {}
   try {
-    await run("CREATE TABLE IF NOT EXISTS clicks (id TEXT PRIMARY KEY, affiliate_id TEXT NOT NULL, ip TEXT DEFAULT '', user_agent TEXT DEFAULT '', referrer TEXT DEFAULT '', created_at TEXT NOT NULL DEFAULT (datetime('now')));");
+    await run("ALTER TABLE clicks ADD COLUMN affiliate_id TEXT;");
   } catch (e) {}
   try {
-    await run("CREATE TABLE IF NOT EXISTS withdrawals (id TEXT PRIMARY KEY, affiliate_id TEXT NOT NULL, amount REAL NOT NULL, method TEXT NOT NULL, account_details TEXT DEFAULT '', status TEXT DEFAULT 'pending', created_at TEXT NOT NULL DEFAULT (datetime('now')), processed_at TEXT);");
+    await run("ALTER TABLE clicks ADD COLUMN ip TEXT DEFAULT '';");
   } catch (e) {}
   try {
-    await run("CREATE TABLE IF NOT EXISTS affiliate_referrals (id TEXT PRIMARY KEY, affiliate_id TEXT NOT NULL, referred_user_id TEXT, subscription_id TEXT, commission REAL DEFAULT 0, status TEXT DEFAULT 'pending', created_at TEXT NOT NULL DEFAULT (datetime('now')));");
+    await run("ALTER TABLE clicks ADD COLUMN user_agent TEXT DEFAULT '';");
   } catch (e) {}
-  return Response.json({ ok: true });
+  try {
+    await run("ALTER TABLE clicks ADD COLUMN referrer TEXT DEFAULT '';");
+  } catch (e) {}
+  try {
+    await run("ALTER TABLE clicks ADD COLUMN created_at TEXT NOT NULL DEFAULT (datetime('now'));");
+  } catch (e) {}
+  try {
+    await run("ALTER TABLE withdrawals ADD COLUMN created_at TEXT NOT NULL DEFAULT (datetime('now'));");
+  } catch (e) {}
+  try {
+    await run("ALTER TABLE withdrawals ADD COLUMN processed_at TEXT;");
+  } catch (e) {}
+  try {
+    await run("ALTER TABLE affiliate_referrals ADD COLUMN created_at TEXT NOT NULL DEFAULT (datetime('now'));");
+  } catch (e) {}
+  const tables = await query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+  const cols = [];
+  for (const t of tables) {
+    const info = await query(`PRAGMA table_info('${t.name}')`);
+    cols.push({ table: t.name, columns: info.map(c => c.name) });
+  }
+  return Response.json({ tables: tables.map(t => t.name), columns: cols });
 }
