@@ -8,6 +8,8 @@ import PageHeader from "../components/PageHeader";
 import EmptyState from "../components/EmptyState";
 import Icon from "../../components/Icon";
 
+const defaultForm = { name: '', description: '', prompt_template: '', languages: '', status: 'active', example_output: '' };
+
 export default function HookGeneratorAdmin() {
   const [frameworks, setFrameworks] = useState([]);
   const [search, setSearch] = useState("");
@@ -19,8 +21,6 @@ export default function HookGeneratorAdmin() {
   useEffect(() => {
     fetch("/api/admin/hook-frameworks").then((r) => r.json()).then((d) => setFrameworks(d.data || [])).catch(() => {});
   }, []);
-
-const defaultForm = { name: '', description: '', prompt_template: '', languages: '', status: 'active', example_output: '' };
 
 
 
