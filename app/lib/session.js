@@ -4,7 +4,20 @@ import { cookies } from "next/headers";
 const SECRET = process.env.AUTH_SECRET || "fa8b031c588479e50db6587f6308966761d06dfae672c23e2cdc3e41f9f5763e";
 
 function base64url(str) {
-  return Buffer.from(str).toString("base64url");
+  if (typeof str === "string") str = new TextEncoder().encode(str);
+  const bytes = new Uint8Array(str);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+
+function fromBase64url(str) {
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "=";
+  const binary = atob(str);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 function sign(payload) {
@@ -21,7 +34,7 @@ function verify(token) {
     const [header, body, sig] = parts;
     const expected = crypto.createHmac("sha256", SECRET).update(`${header}.${body}`).digest("base64url");
     if (sig !== expected) return null;
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString());
+    const payload = JSON.parse(fromBase64url(body));
     if (payload.exp && Date.now() / 1000 > payload.exp) return null;
     return payload;
   } catch {
