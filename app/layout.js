@@ -1,5 +1,4 @@
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "./lib/AuthContext";
 
 export const metadata = {
@@ -20,11 +19,9 @@ export default function RootLayout({ children }) {
         <style>{`*,*::before,*::after{border-width:0;border-style:solid;border-color:currentColor}hr{border-top-width:1px}`}</style>
       </head>
       <body className="h-full overflow-hidden">
-        <SessionProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </SessionProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

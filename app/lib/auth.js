@@ -12,8 +12,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const user = await verifyUser(credentials.email, credentials.password);
-        return user;
+        try {
+          const user = await verifyUser(credentials.email, credentials.password);
+          return user;
+        } catch (err) {
+          console.error("authorize error:", err);
+          return null;
+        }
       },
     }),
   ],
@@ -54,5 +59,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET || "fa8b031c588479e50db6587f6308966761d06dfae672c23e2cdc3e41f9f5763e",
-  trustHost: true,
 });
