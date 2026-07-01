@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
+import { useState, useEffect } from "react";
 import Icon from "./Icon";
 
 const homeItem = { href: "/", label: "Home", icon: "dashboard" };
@@ -13,12 +14,17 @@ const toolItems = [
   { href: "/ugc-engine", label: "UGC Engine", icon: "record_voice_over", soon: true },
   { href: "/hook-gen", label: "Hook Gen", icon: "auto_awesome", soon: true },
   { href: "/clipping", label: "Clipping", icon: "content_cut", soon: true },
-  { href: "/admin", label: "Admin Panel", icon: "shield" },
 ];
 
 function SidebarContent() {
   const pathname = usePathname();
   const { setMobileOpen } = useSidebar();
+  const [showAdmin, setShowAdmin] = useState(false);
+
+  useEffect(() => {
+    const host = window.location.hostname;
+    setShowAdmin(!host.endsWith("viralstudio-ai.com"));
+  }, []);
 
   const handleNav = () => setMobileOpen(false);
 
@@ -56,7 +62,7 @@ function SidebarContent() {
         <div className="pt-3 pb-1 px-4">
           <span className="sidebar-heading-text">AI Tools</span>
         </div>
-        {toolItems.map((item) => {
+        {[...toolItems, ...(showAdmin ? [{ href: "/admin", label: "Admin Panel", icon: "shield" }] : [])].map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
