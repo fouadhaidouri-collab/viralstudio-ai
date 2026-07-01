@@ -191,6 +191,37 @@ export default function AffiliatePage() {
             )}
           </div>
 
+          {/* Recent Visits */}
+          {data?.clicks_latest?.length > 0 && (
+          <div className="glass-card rounded-2xl border border-white/5 card-glow overflow-hidden mb-6">
+            <div className="px-5 py-4 border-b border-surface-border/50">
+              <h3 className="text-sm font-semibold text-white">Recent Visits</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-surface-container-higher/50">
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Date</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">IP</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Referrer</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">User Agent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.clicks_latest.slice(0, 20).map((c, i) => (
+                    <tr key={c.id || i} className="border-t border-surface-border/50">
+                      <td className="px-5 py-4 text-sm text-on-surface-variant whitespace-nowrap">{new Date(c.created_at).toLocaleString()}</td>
+                      <td className="px-5 py-4 text-sm text-white font-mono">{c.ip}</td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant max-w-[200px] truncate">{c.referrer || "-"}</td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant max-w-[250px] truncate" title={c.user_agent}>{c.user_agent?.slice(0, 60) || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          )}
+
           {/* Referrals Table */}
           <div className="glass-card rounded-2xl border border-white/5 card-glow overflow-hidden">
             <div className="px-5 py-4 border-b border-surface-border/50">

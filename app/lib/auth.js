@@ -1,8 +1,9 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { verifyUser, getUserPlan, getUserCreditsBalance } from "./userStore";
+import { getServerSession } from "./session";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       name: "credentials",
@@ -60,3 +61,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET || "fa8b031c588479e50db6587f6308966761d06dfae672c23e2cdc3e41f9f5763e",
 });
+
+export async function auth() {
+  const session = await getServerSession();
+  if (!session) return null;
+  return {
+    user: {
+      id: session.sub,
+      name: session.name,
+      email: session.email,
+    },
+  };
+}
