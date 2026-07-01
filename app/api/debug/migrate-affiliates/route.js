@@ -1,4 +1,4 @@
-import { run } from "../../lib/db";
+import { run } from "../../../../lib/db";
 
 export async function GET() {
   try {
