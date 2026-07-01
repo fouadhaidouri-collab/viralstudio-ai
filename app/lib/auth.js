@@ -63,13 +63,18 @@ export const { handlers, signIn, signOut } = NextAuth({
 });
 
 export async function auth() {
-  const session = await getServerSession();
-  if (!session) return null;
-  return {
-    user: {
-      id: session.sub,
-      name: session.name,
-      email: session.email,
-    },
-  };
+  try {
+    const session = await getServerSession();
+    if (!session) return null;
+    return {
+      user: {
+        id: session.sub,
+        name: session.name,
+        email: session.email,
+      },
+    };
+  } catch (err) {
+    console.error("auth error:", err);
+    return null;
+  }
 }
