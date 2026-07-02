@@ -96,14 +96,17 @@ export default function AdminAffiliatesPage() {
     fetchData();
   };
 
+  const getLink = (aff) => `https://viralstudio.ai/ref/${aff.code}`;
+
   const handleCopyLink = async (affiliate) => {
+    const link = getLink(affiliate);
     try {
-      await navigator.clipboard.writeText(affiliate.link);
+      await navigator.clipboard.writeText(link);
       setCopiedId(affiliate.id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
       const ta = document.createElement("textarea");
-      ta.value = affiliate.link;
+      ta.value = link;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
@@ -115,7 +118,7 @@ export default function AdminAffiliatesPage() {
 
   const handleExportReport = () => {
     const headers = ["Name", "Email", "Code", "Link", "Clicks", "Signups", "Paid Users", "Revenue", "Earnings", "Commission Rate", "Status"];
-    const rows = filtered.map((a) => [a.name, a.email, a.code, a.link, a.total_clicks, a.total_signups, a.total_paid_customers, a.total_earnings, a.total_earnings, `${a.commission_rate}%`, a.status]);
+    const rows = filtered.map((a) => [a.name, a.email, a.code, getLink(a), a.total_clicks, a.total_signups, a.total_paid_customers, a.total_earnings, a.total_earnings, `${a.commission_rate}%`, a.status]);
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);

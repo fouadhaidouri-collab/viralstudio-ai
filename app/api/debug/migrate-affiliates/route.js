@@ -4,6 +4,7 @@ export async function GET() {
   const results = {};
   const alters = [
     "ALTER TABLE affiliate_accounts ADD COLUMN created_at TEXT;",
+    "ALTER TABLE affiliate_accounts ADD COLUMN status TEXT DEFAULT 'active';",
     "ALTER TABLE clicks ADD COLUMN affiliate_id TEXT;",
     "ALTER TABLE clicks ADD COLUMN ip TEXT DEFAULT '';",
     "ALTER TABLE clicks ADD COLUMN user_agent TEXT DEFAULT '';",
