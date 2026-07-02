@@ -15,19 +15,19 @@ const PLANS_DATA = {
   team:   { name: "Team", monthly: 119, credits: 48552 },
 };
 
-function PayPalButtonGroup({ planId, billingCycle, onSuccess, onError }) {
+function PayPalButtonGroup({ planId, billingCycle, refCode, onSuccess, onError }) {
   const [{ isPending, isResolved }] = usePayPalScriptReducer();
 
   const createOrder = useCallback(async () => {
     const res = await fetch("/api/paypal/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId, billingCycle }),
+      body: JSON.stringify({ planId, billingCycle, refCode }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to create order");
     return data.orderId;
-  }, [planId, billingCycle]);
+  }, [planId, billingCycle, refCode]);
 
   const onApprove = useCallback(async (data) => {
     const res = await fetch("/api/paypal/capture-order", {
@@ -87,6 +87,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   const [step, setStep] = useState("payment");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(null);
+  const [refCode, setRefCode] = useState("");
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
   const plan = PLANS_DATA[planId] || { name: planId, monthly: 0, credits: 0 };
@@ -163,7 +164,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               Everything you need to create more, faster — pro-level tools, priority speed, secure payment, and cancel anytime.
             </p>
 
-            <div className="bg-white/[0.03] border border-white/5 rounded-xl px-5 py-3 mb-6 flex items-center justify-between">
+            <div className="bg-white/[0.03] border border-white/5 rounded-xl px-5 py-3 mb-4 flex items-center justify-between">
               <div>
                 <span className="text-sm font-semibold text-white">{planName} Plan</span>
                 <span className="text-[11px] text-on-surface-variant/50 ml-2 capitalize">{billingLabel}</span>
@@ -173,6 +174,16 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                 <span className="text-lg font-extrabold text-white">${amount}</span>
                 <span className="text-[11px] text-on-surface-variant/50 ml-1">USD</span>
               </div>
+            </div>
+
+            <div className="mb-4">
+              <input
+                type="text"
+                value={refCode}
+                onChange={(e) => setRefCode(e.target.value)}
+                placeholder="Referral code (optional)"
+                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors"
+              />
             </div>
 
             {error && (
@@ -194,6 +205,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                   <PayPalButtonGroup
                     planId={planId}
                     billingCycle={billingCycle}
+                    refCode={refCode}
                     onSuccess={handleSuccess}
                     onError={setError}
                   />

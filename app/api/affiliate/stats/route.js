@@ -1,6 +1,7 @@
 import { auth } from "../../../lib/auth";
 import { findUser } from "../../../lib/userStore";
 import { getOrCreateAffiliate, getClicksForAffiliate } from "../../../../lib/affiliateStore";
+import { query } from "../../../../lib/db";
 
 export async function GET() {
   try {
@@ -19,11 +20,18 @@ export async function GET() {
     const conversion_rate = affiliate.clicks > 0
       ? Math.round(((signups_count) / affiliate.clicks) * 10000) / 100
       : 0;
+    const paid = await query(
+      `SELECT COUNT(*) AS cnt FROM affiliate_referrals r
+       INNER JOIN payments p ON p.user_id = r.referred_user_id AND p.status = 'completed'
+       WHERE r.affiliate_id = ?`,
+      [affiliate.id]
+    );
+    const paid_count = paid[0]?.cnt || 0;
     return Response.json({
       affiliate,
       clicks_total: affiliate.clicks || 0,
       signups_total: signups_count,
-      paid_customers: affiliate.total_earnings > 0 ? affiliate.signups : 0,
+      paid_customers: paid_count,
       conversion_rate,
       total_earnings: affiliate.total_earnings || 0,
       pending: affiliate.available_balance || 0,

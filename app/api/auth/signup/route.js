@@ -3,7 +3,7 @@ import { getAffiliateByReferralCode, createReferral } from "../../../../lib/affi
 
 export async function POST(request) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password, ref_code } = await request.json();
     if (!name || !email || !password) {
       return Response.json({ error: "Name, email, and password are required" }, { status: 400 });
     }
@@ -11,7 +11,7 @@ export async function POST(request) {
       return Response.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
     const user = await createUser(name, email, password);
-    const refCode = request.cookies?.get?.("ref_code")?.value;
+    const refCode = request.cookies?.get?.("ref_code")?.value || ref_code;
     if (refCode) {
       const affiliate = await getAffiliateByReferralCode(refCode);
       if (affiliate && affiliate.user_id !== user.id) {

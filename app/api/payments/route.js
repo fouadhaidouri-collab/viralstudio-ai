@@ -15,7 +15,7 @@ export async function POST(req) {
       return Response.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { provider, planId, billingCycle } = await req.json();
+    const { provider, planId, billingCycle, refCode } = await req.json();
 
     if (!provider || !planId || !billingCycle) {
       return Response.json({ error: "Missing provider, planId, or billingCycle" }, { status: 400 });
@@ -75,6 +75,7 @@ export async function POST(req) {
           planId,
           billingCycle,
           credits: String(credits),
+          refCode: refCode || "",
         },
         success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pay/success?transactionId=${tx.id}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pay/cancel?transactionId=${tx.id}`,
@@ -118,7 +119,7 @@ export async function POST(req) {
               reference_id: tx.id,
               description: `${PLANS[planId].name} Plan - ${annual ? "Annual" : "Monthly"}`,
               amount: { currency_code: "USD", value: amount.toFixed(2) },
-              custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits }),
+              custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits, refCode: refCode || "" }),
             },
           ],
           payment_source: {
@@ -158,7 +159,7 @@ export async function POST(req) {
         currency: "USD",
         order_id: tx.id,
         customer: { name: session.user.name || "", email: session.user.email },
-        metadata: { transactionId: tx.id, userId, planId, billingCycle, credits: String(credits) },
+        metadata: { transactionId: tx.id, userId, planId, billingCycle, credits: String(credits), refCode: refCode || "" },
         url: {
           success: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pay/success?transactionId=${tx.id}`,
           cancel: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pay/cancel?transactionId=${tx.id}`,

@@ -14,7 +14,7 @@ export async function POST(req) {
       return Response.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { planId, billingCycle } = await req.json();
+    const { planId, billingCycle, refCode } = await req.json();
 
     if (!planId || !billingCycle) {
       return Response.json({ error: "Missing planId or billingCycle" }, { status: 400 });
@@ -77,7 +77,7 @@ export async function POST(req) {
             reference_id: tx.id,
             description: `${PLANS[planId].name} Plan - ${annual ? "Annual" : "Monthly"}`,
             amount: { currency_code: "USD", value: amount.toFixed(2) },
-            custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits }),
+            custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits, refCode: refCode || "" }),
           },
         ],
       }),

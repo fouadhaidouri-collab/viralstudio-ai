@@ -4,7 +4,7 @@ import {
   addCreditLedgerEntry,
 } from "../../../../lib/paymentTransactions";
 import { addUserCredits } from "../../../../lib/pricing";
-import { processCommissionForPayment } from "../../../../lib/affiliateStore";
+import { getAffiliateByReferralCode, createReferral, processCommissionForPayment } from "../../../../lib/affiliateStore";
 
 export async function POST(req) {
   try {
@@ -72,7 +72,19 @@ export async function POST(req) {
           provider: "youcanpay",
         });
         console.log(`YouCanPay: Added ${credits} credits to user ${tx.user_id}`);
-        await processCommissionForPayment(tx.user_id, null, tx.amount);
+        let commissionProcessed = await processCommissionForPayment(tx.user_id, null, tx.amount);
+        if (!commissionProcessed) {
+          const refCode = metadata?.refCode;
+          if (refCode) {
+            const affiliate = await getAffiliateByReferralCode(refCode);
+            if (affiliate && affiliate.user_id !== tx.user_id) {
+              const referral = await createReferral({ affiliate_id: affiliate.id, referred_user_id: tx.user_id });
+              if (referral && !referral.error) {
+                await processCommissionForPayment(tx.user_id, null, tx.amount);
+              }
+            }
+          }
+        }
       } else {
         console.log(`YouCanPay webhook: Transaction ${tx.id} already processed`);
       }
