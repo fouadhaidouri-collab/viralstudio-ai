@@ -13,6 +13,7 @@ export async function GET() {
     "ALTER TABLE withdrawals ADD COLUMN created_at TEXT DEFAULT (datetime('now'));",
     "ALTER TABLE withdrawals ADD COLUMN processed_at TEXT;",
     "ALTER TABLE affiliate_referrals ADD COLUMN created_at TEXT DEFAULT (datetime('now'));",
+    "ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0;",
   ];
   for (const sql of alters) {
     try {

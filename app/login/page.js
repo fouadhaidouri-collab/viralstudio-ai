@@ -23,7 +23,7 @@ export default function LoginPage() {
     if (isAuthenticated) router.replace("/");
   }, [isAuthenticated, router]);
 
-  const handleSendCode = async () => {
+  const handleCreateAccount = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
       setLoginError("All fields are required");
       return;
@@ -35,14 +35,25 @@ export default function LoginPage() {
     setSendingCode(true);
     setLoginError("");
     try {
-      const res = await fetch("/api/auth/send-code", {
+      const signupRes = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), password, ref_code: refCode.trim() }),
+      });
+      const signupData = await signupRes.json();
+      if (!signupRes.ok) {
+        setLoginError(signupData.error || "Failed to create account");
+        setSendingCode(false);
+        return;
+      }
+      const codeRes = await fetch("/api/auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || "Failed to send code");
+      const codeData = await codeRes.json();
+      if (!codeRes.ok) {
+        setLoginError(codeData.error || "Failed to send verification code");
         setSendingCode(false);
         return;
       }
@@ -60,8 +71,23 @@ export default function LoginPage() {
       setLoginError("Please enter the verification code");
       return;
     }
-    const ok = await signUp(name.trim(), email.trim(), password, refCode.trim(), code.trim());
-    if (ok) router.push("/");
+    setLoginError("");
+    try {
+      const res = await fetch("/api/auth/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), code: code.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setLoginError(data.error || "Verification failed");
+        return;
+      }
+      const loginOk = await login(email.trim(), password);
+      if (loginOk) router.push("/");
+    } catch {
+      setLoginError("Server error. Please try again.");
+    }
   };
 
   const handleSignIn = async (e) => {
@@ -150,8 +176,8 @@ export default function LoginPage() {
               <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Referral Code (optional)</label>
               <input type="text" value={refCode} onChange={(e) => setRefCode(e.target.value)} placeholder="Enter referral code" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
             </div>
-            <button onClick={handleSendCode} disabled={sendingCode} className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98]">
-              {sendingCode ? "Sending code..." : "Create Account"}
+            <button onClick={handleCreateAccount} disabled={sendingCode} className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98]">
+              {sendingCode ? "Creating account..." : "Create Account"}
             </button>
           </div>
         ) : (
@@ -180,7 +206,7 @@ export default function LoginPage() {
               />
             </div>
             <button type="submit" className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98]">
-              Verify & Create Account
+              Verify & Login
             </button>
             <div className="text-center">
               <button
@@ -193,7 +219,20 @@ export default function LoginPage() {
               <span className="text-xs text-on-surface-variant mx-2">·</span>
               <button
                 type="button"
-                onClick={handleSendCode}
+                onClick={async () => {
+                  setLoginError("");
+                  setSendingCode(true);
+                  try {
+                    const res = await fetch("/api/auth/send-code", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email: email.trim() }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) setLoginError(data.error || "Failed to resend");
+                  } catch { setLoginError("Server error"); }
+                  setSendingCode(false);
+                }}
                 className="text-xs text-primary hover:text-primary/80 transition-colors"
               >
                 Resend code

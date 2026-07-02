@@ -20,10 +20,15 @@ function SidebarContent() {
   const pathname = usePathname();
   const { setMobileOpen } = useSidebar();
   const [showAdmin, setShowAdmin] = useState(false);
+  const [credits, setCredits] = useState(null);
 
   useEffect(() => {
     const host = window.location.hostname;
     setShowAdmin(!host.endsWith("viralstudio-ai.com"));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
   }, []);
 
   const handleNav = () => setMobileOpen(false);
@@ -87,7 +92,7 @@ function SidebarContent() {
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-accent-cyan to-primary flex items-center justify-center shrink-0">
             <Icon name="auto_awesome" className="text-white" size={12} />
           </div>
-          <span className="sidebar-credits-text">AI Credits: <span className="text-yellow-400 font-bold">0</span></span>
+          <span className="sidebar-credits-text">AI Credits: <span className="text-yellow-400 font-bold">{credits ?? 0}</span></span>
         </div>
       </div>
     </aside>

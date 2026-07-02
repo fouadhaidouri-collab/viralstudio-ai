@@ -17,7 +17,6 @@ export default function AdminAffiliatesPage() {
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [profitFilter, setProfitFilter] = useState("all");
   const [disableAffiliateId, setDisableAffiliateId] = useState(null);
   const [commissionAffiliate, setCommissionAffiliate] = useState(null);
@@ -49,11 +48,10 @@ export default function AdminAffiliatesPage() {
     return affiliates.filter((a) => {
       const q = search.toLowerCase();
       const matchesSearch = !search || a.name?.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q) || a.code?.toLowerCase().includes(q) || a.id?.toLowerCase().includes(q);
-      const matchesStatus = !statusFilter || a.status === statusFilter;
-      const matchesProfit = profitFilter === "all" || (profitFilter === "profit" && (a.total_earnings || 0) > 0) || (profitFilter === "active" && a.status === "active");
-      return matchesSearch && matchesStatus && matchesProfit;
+      const matchesProfit = profitFilter === "all" || (profitFilter === "profit" && (a.total_earnings || 0) > 0);
+      return matchesSearch && matchesProfit;
     });
-  }, [affiliates, search, statusFilter, profitFilter]);
+  }, [affiliates, search, profitFilter]);
 
   const pendingWithdrawals = withdrawals.filter((w) => w.status === "pending");
 
@@ -268,21 +266,10 @@ export default function AdminAffiliatesPage() {
               <FilterSelect
                 value={profitFilter}
                 onChange={setProfitFilter}
-                placeholder="All"
+                placeholder="Filter"
                 options={[
                   { value: "all", label: "All" },
-                  { value: "profit", label: "Brought Profit" },
-                  { value: "active", label: "Active" },
-                ]}
-              />
-              <FilterSelect
-                value={statusFilter}
-                onChange={setStatusFilter}
-                placeholder="All Statuses"
-                options={[
-                  { value: "active", label: "Active" },
-                  { value: "inactive", label: "Inactive" },
-                  { value: "pending", label: "Pending" },
+                  { value: "profit", label: "Profit" },
                 ]}
               />
             </div>

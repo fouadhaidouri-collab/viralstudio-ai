@@ -8,11 +8,6 @@ export async function POST(req) {
       return Response.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const existing = await get("SELECT id FROM users WHERE email = ?", [email]);
-    if (existing) {
-      return Response.json({ error: "An account with this email already exists" }, { status: 409 });
-    }
-
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 

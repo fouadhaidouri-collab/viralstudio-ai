@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const username = email.split("@")[0];
   const photoURL = user?.photoURL || gravatarUrl(email);
   const [realCredits, setRealCredits] = useState(null);
-  const creditsDisplay = (realCredits ?? user?.credits ?? 1250).toLocaleString();
+  const creditsDisplay = (realCredits ?? user?.credits ?? 0).toLocaleString();
   const plan = user?.plan || "Free";
   const planIcon = plan === "Free" ? "person" : "workspace_premium";
   const planColor = plan === "Free" ? "text-on-surface-variant bg-surface-container-high border-surface-border/40" : "text-primary bg-primary/15 border-primary/20";
