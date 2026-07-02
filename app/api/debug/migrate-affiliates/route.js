@@ -27,5 +27,10 @@ export async function GET() {
   } catch (e) {
     results["CREATE notifications table"] = e.message;
   }
+  try {
+    await run("CREATE TABLE IF NOT EXISTS email_verifications (email TEXT PRIMARY KEY, code TEXT NOT NULL, expires_at TEXT NOT NULL, attempts INTEGER DEFAULT 0, created_at TEXT NOT NULL DEFAULT (datetime('now')));");
+  } catch (e) {
+    results["CREATE email_verifications table"] = e.message;
+  }
   return Response.json({ results });
 }
