@@ -205,6 +205,7 @@ export default function AdminAffiliatesPage() {
     { key: "affiliate_code", label: "Affiliate Code", render: (row) => <span className="text-xs font-mono text-secondary font-semibold">{row.affiliate_code}</span> },
     { key: "amount", label: "Amount", render: (row) => <span className="text-xs font-semibold text-white">${row.amount.toFixed(2)}</span> },
     { key: "method", label: "Method", render: (row) => <span className="text-xs text-on-surface-variant">{row.method}</span> },
+    { key: "account_details", label: "Payment Details", render: (row) => <span className="text-xs text-on-surface-variant max-w-[180px] truncate block" title={row.account_details}>{row.account_details || "-"}</span> },
     { key: "status", label: "Status", render: (row) => <StatusBadge status={row.status} /> },
     {
       key: "created_at",

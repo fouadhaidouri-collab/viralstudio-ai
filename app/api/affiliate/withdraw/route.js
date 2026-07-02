@@ -14,13 +14,16 @@ export async function POST(req) {
   if (!amount || !method) {
     return Response.json({ error: "Amount and method are required" }, { status: 400 });
   }
-  const affiliate = await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
-  if (amount > (affiliate.available_balance || 0)) {
-    return Response.json({ error: "Insufficient pending balance" }, { status: 400 });
+  if (!account_details) {
+    return Response.json({ error: "Please provide your payment details (email, wallet address, or bank info)" }, { status: 400 });
   }
-  const wd = await createWithdrawal({ affiliate_id: affiliate.id, amount, method, account_details: account_details || "" });
+  const affiliate = await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
+  const wd = await createWithdrawal({ affiliate_id: affiliate.id, amount, method, account_details });
   if (!wd) {
     return Response.json({ error: "Withdrawal failed" }, { status: 500 });
+  }
+  if (wd.error) {
+    return Response.json({ error: wd.error }, { status: 400 });
   }
   return Response.json({ withdrawal: wd }, { status: 201 });
 }

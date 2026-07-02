@@ -17,6 +17,7 @@ export default function AffiliatePage() {
   const [copied, setCopied] = useState(false);
   const [withdrawMethod, setWithdrawMethod] = useState("PayPal");
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawDetails, setWithdrawDetails] = useState("");
   const [withdrawStatus, setWithdrawStatus] = useState("");
 
   useEffect(() => {
@@ -39,11 +40,14 @@ export default function AffiliatePage() {
   const handleWithdraw = async () => {
     const amt = parseFloat(withdrawAmount);
     if (!amt || amt <= 0) return;
+    if (amt < 100) { setWithdrawStatus("Minimum withdrawal is $100"); setTimeout(() => setWithdrawStatus(""), 3000); return; }
+    if (amt > 10000) { setWithdrawStatus("Maximum withdrawal is $10,000"); setTimeout(() => setWithdrawStatus(""), 3000); return; }
+    if (!withdrawDetails) { setWithdrawStatus(`Please enter your ${withdrawMethod} details`); setTimeout(() => setWithdrawStatus(""), 3000); return; }
     setWithdrawStatus("processing");
     const res = await fetch("/api/affiliate/withdraw", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: amt, method: withdrawMethod }),
+      body: JSON.stringify({ amount: amt, method: withdrawMethod, account_details: withdrawDetails }),
     });
     if (res.ok) {
       setWithdrawStatus("success");
@@ -160,7 +164,7 @@ export default function AffiliatePage() {
             <div className="flex gap-3 mb-4">
               <select
                 value={withdrawMethod}
-                onChange={(e) => setWithdrawMethod(e.target.value)}
+                onChange={(e) => { setWithdrawMethod(e.target.value); setWithdrawDetails(""); }}
                 className="w-[180px] px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none"
               >
                 <option>PayPal</option>
@@ -170,10 +174,23 @@ export default function AffiliatePage() {
               <input
                 type="number"
                 step="0.01"
-                placeholder="Amount"
+                placeholder="Amount ($100 - $10,000)"
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
                 className="flex-1 px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none"
+              />
+            </div>
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder={
+                  withdrawMethod === "PayPal" ? "PayPal Email" :
+                  withdrawMethod === "USDT (TRC20)" ? "USDT (TRC20) Wallet Address" :
+                  "Bank Account Details (Account name, IBAN, Routing#)"
+                }
+                value={withdrawDetails}
+                onChange={(e) => setWithdrawDetails(e.target.value)}
+                className="w-full px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none"
               />
             </div>
             <button
@@ -187,7 +204,10 @@ export default function AffiliatePage() {
               <p className="text-xs text-red-400 mt-2">{withdrawStatus}</p>
             )}
             {data && (
-              <p className="text-xs text-on-surface-variant mt-2">Available: ${data.pending.toFixed(2)}</p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-xs text-on-surface-variant">Available: <span className="text-white font-semibold">${data.pending.toFixed(2)}</span></p>
+                <p className="text-xs text-on-surface-variant">Min $100 · Max $10,000 · Once per 30 days</p>
+              </div>
             )}
           </div>
 

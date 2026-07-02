@@ -21,5 +21,10 @@ export async function GET() {
       results[sql] = e.message;
     }
   }
+  try {
+    await run("CREATE TABLE IF NOT EXISTS notifications (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL, message TEXT, is_read INTEGER DEFAULT 0, created_at TEXT NOT NULL DEFAULT (datetime('now')));");
+  } catch (e) {
+    results["CREATE notifications table"] = e.message;
+  }
   return Response.json({ results });
 }
