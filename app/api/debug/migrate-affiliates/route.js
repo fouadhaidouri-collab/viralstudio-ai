@@ -33,5 +33,10 @@ export async function GET() {
   } catch (e) {
     results["CREATE email_verifications table"] = e.message;
   }
+  try {
+    await run("CREATE TABLE IF NOT EXISTS coupons (id TEXT PRIMARY KEY, code TEXT UNIQUE NOT NULL, discount_percent INTEGER NOT NULL, max_uses INTEGER DEFAULT 0, current_uses INTEGER DEFAULT 0, expires_at TEXT, is_active INTEGER DEFAULT 1, created_at TEXT NOT NULL DEFAULT (datetime('now')));");
+  } catch (e) {
+    results["CREATE coupons table"] = e.message;
+  }
   return Response.json({ results });
 }

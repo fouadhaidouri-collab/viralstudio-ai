@@ -111,6 +111,7 @@ const iconMap = {
   globe: Globe,
   trending_up: TrendingUp,
   webhook: Webhook,
+  card_giftcard: Gift,
   workspace_premium: Award,
 };
 

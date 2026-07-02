@@ -1,4 +1,5 @@
 import { auth } from "../../../lib/auth";
+import { get, run } from "../../../../lib/db";
 import {
   PLANS,
   getPlanPrice,
@@ -14,7 +15,7 @@ export async function POST(req) {
       return Response.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { planId, billingCycle, refCode } = await req.json();
+    const { planId, billingCycle, refCode, couponCode } = await req.json();
 
     if (!planId || !billingCycle) {
       return Response.json({ error: "Missing planId or billingCycle" }, { status: 400 });
@@ -24,9 +25,25 @@ export async function POST(req) {
       return Response.json({ error: "Invalid plan" }, { status: 400 });
     }
 
+    let discountPercent = 0;
+    if (couponCode) {
+      const coupon = await get("SELECT * FROM coupons WHERE code = ? AND is_active = 1", [couponCode]);
+      if (coupon) {
+        const expired = coupon.expires_at && new Date(coupon.expires_at) < new Date();
+        const maxed = coupon.max_uses > 0 && coupon.current_uses >= coupon.max_uses;
+        if (!expired && !maxed) {
+          discountPercent = coupon.discount_percent;
+          await run("UPDATE coupons SET current_uses = COALESCE(current_uses, 0) + 1 WHERE id = ?", [coupon.id]);
+        }
+      }
+    }
+
     const annual = billingCycle === "annual";
-    const amount = getPlanPrice(planId, annual);
+    let amount = getPlanPrice(planId, annual);
     const credits = getPlanCredits(planId, annual);
+    if (discountPercent > 0) {
+      amount = Math.round(amount * (100 - discountPercent)) / 100;
+    }
     const userId = session.user.email;
 
     const clientId = process.env.PAYPAL_CLIENT_ID;
@@ -77,7 +94,7 @@ export async function POST(req) {
             reference_id: tx.id,
             description: `${PLANS[planId].name} Plan - ${annual ? "Annual" : "Monthly"}`,
             amount: { currency_code: "USD", value: amount.toFixed(2) },
-            custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits, refCode: refCode || "" }),
+            custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits, refCode: refCode || "", couponCode: couponCode || "" }),
           },
         ],
       }),

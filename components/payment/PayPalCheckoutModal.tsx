@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import Icon from "../../app/components/Icon";
 import {
   PayPalScriptProvider,
   PayPalButtons,
@@ -15,19 +16,19 @@ const PLANS_DATA = {
   team:   { name: "Team", monthly: 119, credits: 48552 },
 };
 
-function PayPalButtonGroup({ planId, billingCycle, refCode, onSuccess, onError }) {
+function PayPalButtonGroup({ planId, billingCycle, refCode, couponCode, onSuccess, onError }) {
   const [{ isPending, isResolved }] = usePayPalScriptReducer();
 
   const createOrder = useCallback(async () => {
     const res = await fetch("/api/paypal/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId, billingCycle, refCode }),
+      body: JSON.stringify({ planId, billingCycle, refCode, couponCode }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to create order");
     return data.orderId;
-  }, [planId, billingCycle, refCode]);
+  }, [planId, billingCycle, refCode, couponCode]);
 
   const onApprove = useCallback(async (data) => {
     const res = await fetch("/api/paypal/capture-order", {
@@ -88,10 +89,16 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(null);
   const [refCode, setRefCode] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponValidating, setCouponValidating] = useState(false);
+  const [couponError, setCouponError] = useState("");
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
   const plan = PLANS_DATA[planId] || { name: planId, monthly: 0, credits: 0 };
   const planName = plan.name;
+
+  const discountMultiplier = (100 - couponDiscount) / 100;
 
   let amount, credits, billingLabel;
   if (billingCycle === "weekly") {
@@ -171,12 +178,22 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                 <p className="text-[10px] text-yellow-400 font-medium mt-0.5">{credits.toLocaleString()} credits/{billingCycle === "weekly" ? "week" : billingCycle === "annual" ? "year" : "month"}</p>
               </div>
               <div className="text-right">
-                <span className="text-lg font-extrabold text-white">${amount}</span>
-                <span className="text-[11px] text-on-surface-variant/50 ml-1">USD</span>
+                {couponDiscount > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-on-surface-variant/50 line-through">${amount}</span>
+                    <span className="text-lg font-extrabold text-green-400">${(amount * discountMultiplier).toFixed(0)}</span>
+                    <span className="text-[11px] text-on-surface-variant/50">USD</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-lg font-extrabold text-white">${amount}</span>
+                    <span className="text-[11px] text-on-surface-variant/50 ml-1">USD</span>
+                  </>
+                )}
               </div>
             </div>
 
-            <div className="mb-4">
+            <div className="space-y-3 mb-4">
               <input
                 type="text"
                 value={refCode}
@@ -184,6 +201,56 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                 placeholder="Referral code (optional)"
                 className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors"
               />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                  placeholder="Coupon code"
+                  className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors uppercase tracking-wider"
+                />
+                <button
+                  onClick={async () => {
+                    if (!couponCode.trim()) return;
+                    setCouponValidating(true);
+                    setCouponError("");
+                    setCouponDiscount(0);
+                    try {
+                      const res = await fetch("/api/coupons/validate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ code: couponCode, planId, billingCycle }),
+                      });
+                      const data = await res.json();
+                      if (!res.ok) {
+                        setCouponError(data.error || "Invalid coupon");
+                      } else {
+                        setCouponDiscount(data.discount_percent);
+                      }
+                    } catch {
+                      setCouponError("Server error");
+                    }
+                    setCouponValidating(false);
+                  }}
+                  disabled={couponValidating || !couponCode.trim()}
+                  className="px-4 py-3 rounded-xl text-xs font-semibold bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-all whitespace-nowrap disabled:opacity-40"
+                >
+                  {couponValidating ? "..." : "Apply"}
+                </button>
+              </div>
+              {couponDiscount > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <Icon name="check_circle" className="text-green-400 shrink-0" size={14} />
+                  <span className="text-xs text-green-400">{couponCode} applied — {couponDiscount}% off</span>
+                  <button onClick={() => { setCouponCode(""); setCouponDiscount(0); setCouponError(""); }} className="ml-auto text-[10px] text-on-surface-variant hover:text-white transition-all">Remove</button>
+                </div>
+              )}
+              {couponError && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <Icon name="error" className="text-red-400 shrink-0" size={14} />
+                  <span className="text-xs text-red-400">{couponError}</span>
+                </div>
+              )}
             </div>
 
             {error && (
@@ -206,6 +273,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                     planId={planId}
                     billingCycle={billingCycle}
                     refCode={refCode}
+                    couponCode={couponDiscount > 0 ? couponCode : ""}
                     onSuccess={handleSuccess}
                     onError={setError}
                   />
