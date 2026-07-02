@@ -194,13 +194,6 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
             </div>
 
             <div className="space-y-3 mb-4">
-              <input
-                type="text"
-                value={refCode}
-                onChange={(e) => setRefCode(e.target.value)}
-                placeholder="Referral code (optional)"
-                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors"
-              />
               <div className="flex gap-2">
                 <input
                   type="text"
