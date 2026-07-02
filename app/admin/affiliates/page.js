@@ -18,6 +18,7 @@ export default function AdminAffiliatesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [profitFilter, setProfitFilter] = useState("all");
   const [disableAffiliateId, setDisableAffiliateId] = useState(null);
   const [commissionAffiliate, setCommissionAffiliate] = useState(null);
   const [commissionRate, setCommissionRate] = useState(15);
@@ -47,11 +48,12 @@ export default function AdminAffiliatesPage() {
   const filtered = useMemo(() => {
     return affiliates.filter((a) => {
       const q = search.toLowerCase();
-      const matchesSearch = !search || a.name?.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q) || a.code?.toLowerCase().includes(q);
+      const matchesSearch = !search || a.name?.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q) || a.code?.toLowerCase().includes(q) || a.id?.toLowerCase().includes(q);
       const matchesStatus = !statusFilter || a.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesProfit = profitFilter === "all" || (profitFilter === "profit" && (a.total_earnings || 0) > 0) || (profitFilter === "active" && a.status === "active");
+      return matchesSearch && matchesStatus && matchesProfit;
     });
-  }, [affiliates, search, statusFilter]);
+  }, [affiliates, search, statusFilter, profitFilter]);
 
   const pendingWithdrawals = withdrawals.filter((w) => w.status === "pending");
 
@@ -139,6 +141,7 @@ export default function AdminAffiliatesPage() {
         </div>
       ),
     },
+    { key: "id", label: "ID", render: (row) => <span className="text-xs text-on-surface-variant font-mono">{row.id}</span> },
     { key: "email", label: "Email", render: (row) => <span className="text-xs text-on-surface-variant">{row.email}</span> },
     {
       key: "code",
@@ -258,7 +261,17 @@ export default function AdminAffiliatesPage() {
 
           <div className="glass-card rounded-xl overflow-hidden">
             <div className="p-4 border-b border-surface-border/50 flex flex-col sm:flex-row gap-3 flex-wrap">
-              <SearchInput value={search} onChange={setSearch} placeholder="Search by name, email, or code..." className="flex-1 min-w-[200px]" />
+              <SearchInput value={search} onChange={setSearch} placeholder="Search by name, email, code, or ID..." className="flex-1 min-w-[200px]" />
+              <FilterSelect
+                value={profitFilter}
+                onChange={setProfitFilter}
+                placeholder="All"
+                options={[
+                  { value: "all", label: "All" },
+                  { value: "profit", label: "Brought Profit" },
+                  { value: "active", label: "Active" },
+                ]}
+              />
               <FilterSelect
                 value={statusFilter}
                 onChange={setStatusFilter}
