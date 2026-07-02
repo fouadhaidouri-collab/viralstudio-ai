@@ -176,7 +176,7 @@ export default function AdminCouponsPage() {
   }
 
   return (
-    <div className="min-h-full bg-background text-white p-6">
+    <div className="min-h-full bg-background text-white p-6 flex flex-col">
       <PageHeader
         title="Coupons"
         subtitle="Create and manage promo codes"
@@ -186,17 +186,17 @@ export default function AdminCouponsPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 shrink-0">
         <StatCard title="Total Coupons" value={stats.total} icon="gift" color="primary" />
         <StatCard title="Active" value={stats.active} icon="check_circle" color="green" />
         <StatCard title="Total Uses" value={stats.totalUses} icon="trending_up" color="secondary" />
       </div>
 
-      <div className="glass-card rounded-xl overflow-hidden">
+      <div className="glass-card rounded-xl overflow-hidden flex-1">
         {coupons.length === 0 ? (
-          <EmptyState icon="gift" title="No coupons yet" description="Click Create Coupon to get started." />
+          <div className="h-full"><EmptyState icon="gift" title="No coupons yet" description="Click Create Coupon to get started." /></div>
         ) : (
-          <DataTable columns={columns} data={coupons} />
+          <div className="h-full"><DataTable columns={columns} data={coupons} /></div>
         )}
       </div>
 
