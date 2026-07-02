@@ -23,7 +23,6 @@ const menuGroups = [
     heading: "Business",
     items: [
       { href: "/admin/affiliates", label: "Affiliates", icon: "share" },
-      { href: "/admin/coupons", label: "Coupons", icon: "gift" },
     ],
   },
 
