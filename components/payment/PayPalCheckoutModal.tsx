@@ -93,6 +93,10 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponValidating, setCouponValidating] = useState(false);
   const [couponError, setCouponError] = useState("");
+  const [refCodeInput, setRefCodeInput] = useState("");
+  const [refCodeApplied, setRefCodeApplied] = useState("");
+  const [refCodeValidating, setRefCodeValidating] = useState(false);
+  const [refCodeError, setRefCodeError] = useState("");
 
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
@@ -127,6 +131,9 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
       setStep("payment");
       setError("");
       setSuccess(null);
+      setRefCodeInput("");
+      setRefCodeApplied("");
+      setRefCodeError("");
     }
   }, [isOpen]);
 
@@ -247,6 +254,59 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
               )}
             </div>
 
+            <div className="space-y-3 mb-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={refCodeInput}
+                  onChange={(e) => setRefCodeInput(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                  placeholder="Referral code"
+                  className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors uppercase tracking-wider"
+                />
+                <button
+                  onClick={async () => {
+                    if (!refCodeInput.trim()) return;
+                    setRefCodeValidating(true);
+                    setRefCodeError("");
+                    setRefCodeApplied("");
+                    try {
+                      const res = await fetch("/api/affiliates/validate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ code: refCodeInput }),
+                      });
+                      const data = await res.json();
+                      if (!res.ok) {
+                        setRefCodeError(data.error || "Invalid referral code");
+                      } else {
+                        setRefCodeApplied(refCodeInput);
+                      }
+                    } catch {
+                      setRefCodeError("Server error");
+                    }
+                    setRefCodeValidating(false);
+                  }}
+                  disabled={refCodeValidating || !refCodeInput.trim()}
+                  className="px-4 py-3 rounded-xl text-xs font-semibold bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-all whitespace-nowrap disabled:opacity-40"
+                >
+                  {refCodeValidating ? "..." : "Apply"}
+                </button>
+              </div>
+              {refCodeApplied && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <Icon name="check_circle" className="text-blue-400 shrink-0" size={14} />
+                  <span className="text-xs text-blue-400">{refCodeApplied} applied</span>
+                  <button onClick={() => { setRefCodeInput(""); setRefCodeApplied(""); setRefCodeError(""); }} className="ml-auto text-[10px] text-on-surface-variant hover:text-white transition-all">Remove</button>
+                </div>
+              )}
+              {refCodeError && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <Icon name="error" className="text-red-400 shrink-0" size={14} />
+                  <span className="text-xs text-red-400">{refCodeError}</span>
+                </div>
+              )}
+            </div>
+
             {error && (
               <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
                 {error}
@@ -266,7 +326,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                   <PayPalButtonGroup
                     planId={planId}
                     billingCycle={billingCycle}
-                    refCode=""
+                    refCode={refCodeApplied}
                     couponCode={couponDiscount > 0 ? couponCode : ""}
                     onSuccess={handleSuccess}
                     onError={setError}
