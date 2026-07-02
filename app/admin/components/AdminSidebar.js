@@ -26,12 +26,7 @@ const menuGroups = [
       { href: "/admin/affiliates", label: "Affiliates", icon: "share" },
     ],
   },
-  {
-    heading: "",
-    items: [
-      { href: "/", label: "Back to Dashboard", icon: "arrow_back" },
-    ],
-  },
+
 ];
 
 export default function AdminSidebar({ mobileOpen, setMobileOpen }) {
