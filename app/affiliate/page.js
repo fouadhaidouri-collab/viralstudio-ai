@@ -20,7 +20,7 @@ export default function AffiliatePage() {
   const [withdrawDetails, setWithdrawDetails] = useState("");
   const [withdrawStatus, setWithdrawStatus] = useState("");
 
-  const couponCode = data?.affiliate?.referral_code || "......";
+  const couponCode = data?.affiliate?.referral_code || "";
   const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
 
   useEffect(() => {
