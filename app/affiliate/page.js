@@ -19,6 +19,7 @@ export default function AffiliatePage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawDetails, setWithdrawDetails] = useState("");
   const [withdrawStatus, setWithdrawStatus] = useState("");
+  const [withdrawals, setWithdrawals] = useState([]);
 
   const couponCode = data?.affiliate?.referral_code || "";
   const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
@@ -26,6 +27,7 @@ export default function AffiliatePage() {
   useEffect(() => {
     fetch("/api/affiliate/stats").then((r) => r.json()).then(setData).catch(() => {});
     fetch("/api/affiliate/referrals").then((r) => r.json()).then((d) => setReferrals(d.referrals || [])).catch(() => {});
+    fetch("/api/affiliate/withdrawals").then((r) => r.json()).then((d) => setWithdrawals(d.withdrawals || [])).catch(() => {});
   }, []);
 
   const copyLink = () => {
@@ -213,6 +215,45 @@ export default function AffiliatePage() {
               </div>
             )}
           </div>
+
+          {/* Withdrawal History */}
+          {withdrawals.length > 0 && (
+          <div className="glass-card rounded-2xl border border-white/5 card-glow overflow-hidden mb-6">
+            <div className="px-5 py-4 border-b border-surface-border/50">
+              <h3 className="text-sm font-semibold text-white">Withdrawal History</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-surface-container-higher/50">
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Date</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Amount</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Method</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map((w, i) => (
+                    <tr key={w.id || i} className="border-t border-surface-border/50">
+                      <td className="px-5 py-4 text-sm text-on-surface-variant whitespace-nowrap">{new Date(w.created_at).toLocaleDateString()}</td>
+                      <td className="px-5 py-4 text-sm text-white font-semibold">${w.amount.toFixed(2)}</td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant">{w.method}</td>
+                      <td className="px-5 py-4 text-sm">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                          w.status === "completed" ? "bg-green-500/10 text-green-400" :
+                          w.status === "rejected" ? "bg-red-500/10 text-red-400" :
+                          "bg-yellow-500/10 text-yellow-400"
+                        }`}>
+                          {w.status.charAt(0).toUpperCase() + w.status.slice(1)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          )}
 
           {/* Recent Visits */}
           {data?.clicks_latest?.length > 0 && (

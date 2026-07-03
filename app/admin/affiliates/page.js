@@ -94,6 +94,15 @@ export default function AdminAffiliatesPage() {
     fetchData();
   };
 
+  const handleWithdrawReject = async (id) => {
+    await fetch("/api/admin/affiliates-update", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "withdrawal", id, status: "rejected" }),
+    });
+    fetchData();
+  };
+
   const getLink = (aff) => `https://viralstudio-ai.com/ref/${aff.code}`;
 
   const handleCopyLink = async (affiliate) => {
@@ -219,14 +228,12 @@ export default function AdminAffiliatesPage() {
     {
       key: "actions",
       label: "",
-      width: "60px",
+      width: "120px",
       render: (row) => row.status === "pending" ? (
-        <button
-          onClick={() => handleWithdrawApprove(row.id)}
-          className="text-xs font-semibold text-green-400 hover:text-green-300 transition-all"
-        >
-          Approve
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => handleWithdrawApprove(row.id)} className="text-xs font-semibold text-green-400 hover:text-green-300 transition-all">Approve</button>
+          <button onClick={() => handleWithdrawReject(row.id)} className="text-xs font-semibold text-red-400 hover:text-red-300 transition-all">Reject</button>
+        </div>
       ) : null,
     },
   ];
