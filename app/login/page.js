@@ -134,7 +134,7 @@ export default function LoginPage() {
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
             </div>
             <div>
-              <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Referral Code (optional)</label>
+              <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Coupon Code (optional)</label>
               <input type="text" value={refCode} onChange={(e) => setRefCode(e.target.value)} placeholder="Enter referral code" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
             </div>
             <button onClick={handleCreateAccount} disabled={loading} className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98]">

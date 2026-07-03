@@ -5,7 +5,7 @@ export async function POST(req) {
   try {
     const { code } = await req.json();
     if (!code || !code.trim()) {
-      return NextResponse.json({ error: "Referral code is required" }, { status: 400 });
+      return NextResponse.json({ error: "Coupon code is required" }, { status: 400 });
     }
     const affiliate = await getAffiliateByReferralCode(code.trim().toUpperCase());
     if (!affiliate) {

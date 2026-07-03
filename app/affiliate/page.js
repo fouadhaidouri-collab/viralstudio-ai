@@ -114,7 +114,7 @@ export default function AffiliatePage() {
                   <div className="text-sm font-medium text-white">{email}</div>
                 </div>
                 <div className="px-5 py-4 bg-surface-container-low rounded-xl border border-surface-border/40">
-                  <div className="text-[11px] text-on-surface-variant mb-1">Referral Code</div>
+                  <div className="text-[11px] text-on-surface-variant mb-1">Coupon Code</div>
                   <div className="text-sm font-bold text-primary tracking-wider uppercase">{email.split("@")[0]}20</div>
                 </div>
               </div>
