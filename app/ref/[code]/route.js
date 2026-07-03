@@ -17,7 +17,9 @@ export async function GET(req, { params }) {
         { sql: "INSERT INTO clicks (id, affiliate_id, ip, user_agent, referrer, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))", params: [clickId, affiliate.id, ip, ua, referrer] },
         { sql: "UPDATE affiliate_accounts SET clicks = COALESCE(clicks, 0) + 1 WHERE id = ?", params: [affiliate.id] },
       ]);
-    } catch (_) {}
+    } catch (e) {
+      console.error("Click tracking failed:", e.message);
+    }
     const res = NextResponse.redirect(new URL("/login", req.url));
     res.cookies.set("ref_code", code, { maxAge: 60 * 60 * 24 * 30, path: "/" });
     return res;
