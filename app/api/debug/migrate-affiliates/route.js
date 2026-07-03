@@ -2,6 +2,20 @@ import { run } from "../../../../lib/db";
 
 export async function GET() {
   const results = {};
+  const creates = [
+    "CREATE TABLE IF NOT EXISTS affiliate_accounts (id TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE, referral_code TEXT UNIQUE NOT NULL, commission_percent REAL DEFAULT 20, total_earnings REAL DEFAULT 0, available_balance REAL DEFAULT 0, paid_balance REAL DEFAULT 0, clicks INTEGER DEFAULT 0, signups INTEGER DEFAULT 0, status TEXT DEFAULT 'active', created_at TEXT DEFAULT (datetime('now')));",
+    "CREATE TABLE IF NOT EXISTS clicks (id TEXT PRIMARY KEY, affiliate_id TEXT, ip TEXT DEFAULT '', user_agent TEXT DEFAULT '', referrer TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')));",
+    "CREATE TABLE IF NOT EXISTS affiliate_referrals (id TEXT PRIMARY KEY, affiliate_id TEXT NOT NULL, referred_user_id TEXT NOT NULL UNIQUE, subscription_id TEXT, commission REAL DEFAULT 0, status TEXT DEFAULT 'pending', created_at TEXT DEFAULT (datetime('now')));",
+    "CREATE TABLE IF NOT EXISTS withdrawals (id TEXT PRIMARY KEY, affiliate_id TEXT NOT NULL, amount REAL NOT NULL, method TEXT NOT NULL, account_details TEXT DEFAULT '', status TEXT DEFAULT 'pending', created_at TEXT DEFAULT (datetime('now')), processed_at TEXT);",
+  ];
+  for (const sql of creates) {
+    try {
+      await run(sql);
+      results[sql] = "ok";
+    } catch (e) {
+      results[sql] = e.message;
+    }
+  }
   const alters = [
     "ALTER TABLE affiliate_accounts ADD COLUMN created_at TEXT;",
     "ALTER TABLE affiliate_accounts ADD COLUMN status TEXT DEFAULT 'active';",
