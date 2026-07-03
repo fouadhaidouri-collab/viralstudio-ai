@@ -21,9 +21,5 @@
   },
   "observability": {
     "enabled": true
-  },
-  "routes": [
-    { "pattern": "viralstudio-ai.com", "custom_domain": true },
-    { "pattern": "www.viralstudio-ai.com", "custom_domain": true }
-  ]
+  }
 }
