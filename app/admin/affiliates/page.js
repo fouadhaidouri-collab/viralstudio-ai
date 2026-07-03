@@ -94,7 +94,7 @@ export default function AdminAffiliatesPage() {
     fetchData();
   };
 
-  const getLink = (aff) => `https://viralstudio.ai/ref/${aff.code}`;
+  const getLink = (aff) => `https://viralstudio-ai.com/ref/${aff.code}`;
 
   const handleCopyLink = async (affiliate) => {
     const link = getLink(affiliate);
