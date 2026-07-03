@@ -20,19 +20,22 @@ export default function AffiliatePage() {
   const [withdrawDetails, setWithdrawDetails] = useState("");
   const [withdrawStatus, setWithdrawStatus] = useState("");
 
+  const couponCode = data?.affiliate?.referral_code || "......";
+  const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
+
   useEffect(() => {
     fetch("/api/affiliate/stats").then((r) => r.json()).then(setData).catch(() => {});
     fetch("/api/affiliate/referrals").then((r) => r.json()).then((d) => setReferrals(d.referrals || [])).catch(() => {});
   }, []);
 
   const copyLink = () => {
-    navigator.clipboard.writeText(`https://viralstudio.ai/ref/${email.split("@")[0]}`);
+    navigator.clipboard.writeText(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(`${email.split("@")[0].toUpperCase()}20`);
+    navigator.clipboard.writeText(couponCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -115,7 +118,7 @@ export default function AffiliatePage() {
                 </div>
                 <div className="px-5 py-4 bg-surface-container-low rounded-xl border border-surface-border/40">
                   <div className="text-[11px] text-on-surface-variant mb-1">Coupon Code</div>
-                  <div className="text-sm font-bold text-primary tracking-wider uppercase">{email.split("@")[0]}20</div>
+                  <div className="text-sm font-bold text-primary tracking-wider uppercase">{couponCode}</div>
                 </div>
               </div>
             </div>
@@ -132,7 +135,7 @@ export default function AffiliatePage() {
             <div className="flex">
               <input
                 readOnly
-                value={`https://viralstudio.ai/ref/${email.split("@")[0]}`}
+                value={referralLink}
                 className="flex-1 px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-l-xl outline-none"
               />
               <button onClick={copyLink} className="w-[120px] primary-gradient text-white font-semibold text-sm rounded-r-xl hover:opacity-90 transition-all">

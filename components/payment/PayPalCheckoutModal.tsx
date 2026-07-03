@@ -93,6 +93,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponValidating, setCouponValidating] = useState(false);
   const [couponError, setCouponError] = useState("");
+  const [refCode, setRefCode] = useState("");
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
   const plan = PLANS_DATA[planId] || { name: planId, monthly: 0, credits: 0 };
@@ -126,6 +127,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
       setStep("payment");
       setError("");
       setSuccess(null);
+      setRefCode("");
     }
   }, [isOpen]);
 
@@ -219,6 +221,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                         setCouponError(data.error || "Invalid coupon");
                       } else {
                         setCouponDiscount(data.discount_percent);
+                        if (data.is_affiliate) setRefCode(couponCode);
                       }
                     } catch {
                       setCouponError("Server error");
@@ -235,7 +238,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                 <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
                   <Icon name="check_circle" className="text-green-400 shrink-0" size={14} />
                   <span className="text-xs text-green-400">{couponCode} applied — {couponDiscount}% off</span>
-                  <button onClick={() => { setCouponCode(""); setCouponDiscount(0); setCouponError(""); }} className="ml-auto text-[10px] text-on-surface-variant hover:text-white transition-all">Remove</button>
+                   <button onClick={() => { setCouponCode(""); setCouponDiscount(0); setCouponError(""); setRefCode(""); }} className="ml-auto text-[10px] text-on-surface-variant hover:text-white transition-all">Remove</button>
                 </div>
               )}
               {couponError && (
@@ -265,7 +268,7 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
                   <PayPalButtonGroup
                     planId={planId}
                     billingCycle={billingCycle}
-                    refCode=""
+                    refCode={refCode}
                     couponCode={couponDiscount > 0 ? couponCode : ""}
                     onSuccess={handleSuccess}
                     onError={setError}
