@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getAffiliateByCode, recordClick } from "../../../lib/affiliateStore";
+import { get, run } from "../../../lib/db";
+import { recordClick } from "../../../lib/affiliateStore";
 
 export async function GET(req, { params }) {
   try {
     const { code } = await params;
-    const affiliate = await getAffiliateByCode(code);
+    const affiliate = await get("SELECT * FROM affiliate_accounts WHERE referral_code = ?", [code]);
     if (!affiliate) {
       return NextResponse.redirect(new URL("/", req.url));
     }
