@@ -13,7 +13,7 @@ export async function POST(req) {
     const res = NextResponse.json({ ok: true, user });
     res.cookies.set("next-auth.session-token", token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 2592000,
       path: "/",

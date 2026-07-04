@@ -56,7 +56,7 @@ export async function setSessionCookie(user) {
   const cookieStore = await cookies();
   cookieStore.set("next-auth.session-token", token, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 2592000,
     path: "/",
