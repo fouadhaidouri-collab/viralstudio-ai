@@ -5,7 +5,7 @@ export async function GET(req, { params }) {
   try {
     const { code } = await params;
     const affiliate = await get("SELECT * FROM affiliate_accounts WHERE referral_code = ?", [code]);
-    const destination = new URL("/pricing", req.url);
+    const destination = new URL("/", req.url);
     if (!affiliate) {
       return NextResponse.redirect(destination);
     }
