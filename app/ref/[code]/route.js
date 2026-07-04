@@ -5,8 +5,9 @@ export async function GET(req, { params }) {
   try {
     const { code } = await params;
     const affiliate = await get("SELECT * FROM affiliate_accounts WHERE referral_code = ?", [code]);
+    const destination = new URL("/pricing", req.url);
     if (!affiliate) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(destination);
     }
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     const ua = req.headers.get("user-agent") || "";
@@ -20,7 +21,7 @@ export async function GET(req, { params }) {
     } catch (e) {
       console.error("Click tracking failed:", e.message);
     }
-    const res = NextResponse.redirect(new URL("/login", req.url));
+    const res = NextResponse.redirect(destination);
     res.cookies.set("ref_code", code, { maxAge: 60 * 60 * 24 * 30, path: "/" });
     return res;
   } catch (err) {
