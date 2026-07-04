@@ -76,8 +76,7 @@ export default function AffiliatePage() {
     { label: "Signups", value: data.signups_total.toLocaleString() },
     { label: "Paid Customers", value: data.paid_customers.toLocaleString() },
     { label: "Conversion", value: `${data.conversion_rate}%` },
-    { label: "Pending", value: `$${data.pending.toFixed(2)}` },
-    { label: "Profit", value: `$${data.paid.toFixed(2)}`, green: true },
+    { label: "Total Profit", value: `$${data.paid.toFixed(2)}`, green: true },
     { label: "Commission", value: `${data.commission_rate}%` },
   ] : [];
 
