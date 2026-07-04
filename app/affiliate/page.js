@@ -49,19 +49,24 @@ export default function AffiliatePage() {
     if (amt > 10000) { setWithdrawStatus("Maximum withdrawal is $10,000"); setTimeout(() => setWithdrawStatus(""), 3000); return; }
     if (!withdrawDetails) { setWithdrawStatus(`Please enter your ${withdrawMethod} details`); setTimeout(() => setWithdrawStatus(""), 3000); return; }
     setWithdrawStatus("processing");
-    const res = await fetch("/api/affiliate/withdraw", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: amt, method: withdrawMethod, account_details: withdrawDetails }),
-    });
-    if (res.ok) {
-      setWithdrawStatus("success");
-      setWithdrawAmount("");
-      fetch("/api/affiliate/stats").then((r) => r.json()).then(setData).catch(() => {});
-      setTimeout(() => setWithdrawStatus(""), 3000);
-    } else {
-      const err = await res.json();
-      setWithdrawStatus(err.error || "error");
+    try {
+      const res = await fetch("/api/affiliate/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amt, method: withdrawMethod, account_details: withdrawDetails }),
+      });
+      if (res.ok) {
+        setWithdrawStatus("success");
+        setWithdrawAmount("");
+        fetch("/api/affiliate/stats").then((r) => r.json()).then(setData).catch(() => {});
+        setTimeout(() => setWithdrawStatus(""), 3000);
+      } else {
+        const err = await res.json().catch(() => ({ error: "Request failed" }));
+        setWithdrawStatus(err.error || "error");
+        setTimeout(() => setWithdrawStatus(""), 3000);
+      }
+    } catch (e) {
+      setWithdrawStatus("Network error. Please try again.");
       setTimeout(() => setWithdrawStatus(""), 3000);
     }
   };
