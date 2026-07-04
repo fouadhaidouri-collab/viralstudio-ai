@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const protectedPaths = ["/", "/ai-video", "/ai-image", "/chat-ai", "/ugc-engine", "/hook-gen", "/clipping", "/profile", "/affiliate"];
+const protectedPaths = ["/ai-video", "/ai-image", "/chat-ai", "/ugc-engine", "/hook-gen", "/clipping", "/profile", "/affiliate"];
 const publicPaths = ["/login", "/signup", "/forgot-password", "/landing"];
 
 export function middleware(request) {
