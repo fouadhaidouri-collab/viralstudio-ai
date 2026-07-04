@@ -1,19 +1,24 @@
 import { NextResponse } from "next/server";
-import { get, query, run } from "@/lib/db";
+import { query } from "@/lib/db";
 
 export async function GET() {
   const results = {};
   try {
-    const tables = await query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
-    results.tables = tables;
+    const affs = await query(
+      `SELECT a.id, a.user_id, a.referral_code AS code, a.commission_percent AS commission_rate,
+              a.total_earnings, a.available_balance, a.paid_balance,
+              a.clicks AS total_clicks, a.signups AS total_signups,
+              a.created_at, COALESCE(a.status, 'active') AS status,
+              u.name, u.email,
+              (SELECT COUNT(*) FROM payments p WHERE p.user_id = a.user_id AND p.status = 'completed') AS total_paid_customers
+       FROM affiliate_accounts a
+       LEFT JOIN users u ON a.user_id = u.id
+       ORDER BY a.created_at DESC`
+    );
+    results.affiliates = affs;
   } catch (e) {
-    results.tablesError = e.message;
-  }
-  try {
-    const aff = await get("SELECT * FROM affiliate_accounts WHERE referral_code = ?", ["FOUADHAIDOURI20"]);
-    results.affiliate = aff;
-  } catch (e) {
-    results.affiliateError = e.message;
+    results.error = e.message;
+    results.stack = e.stack;
   }
   return NextResponse.json(results);
 }
