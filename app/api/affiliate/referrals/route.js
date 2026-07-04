@@ -16,7 +16,7 @@ export async function GET() {
     const referrals = await query(
       `SELECT r.id, r.referred_user_id, r.commission AS commission_earned, r.status, r.created_at,
               u.name AS referred_name, u.email AS referred_email,
-              p.plan_id AS plan, p.amount
+              p.amount
        FROM affiliate_referrals r
        LEFT JOIN users u ON r.referred_user_id = u.id
        LEFT JOIN payments p ON p.user_id = r.referred_user_id AND p.status = 'completed'
