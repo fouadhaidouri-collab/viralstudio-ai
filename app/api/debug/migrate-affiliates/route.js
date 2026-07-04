@@ -24,6 +24,7 @@ export async function GET() {
     "ALTER TABLE clicks ADD COLUMN user_agent TEXT DEFAULT '';",
     "ALTER TABLE clicks ADD COLUMN referrer TEXT DEFAULT '';",
     "ALTER TABLE clicks ADD COLUMN created_at TEXT DEFAULT (datetime('now'));",
+    "ALTER TABLE withdrawals ADD COLUMN affiliate_id TEXT;",
     "ALTER TABLE withdrawals ADD COLUMN created_at TEXT DEFAULT (datetime('now'));",
     "ALTER TABLE withdrawals ADD COLUMN processed_at TEXT;",
     "ALTER TABLE affiliate_referrals ADD COLUMN created_at TEXT DEFAULT (datetime('now'));",
