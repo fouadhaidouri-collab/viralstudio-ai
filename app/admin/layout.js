@@ -19,6 +19,7 @@ const pageTitles = {
   "/admin/plans": "Plans & Pricing",
   "/admin/payments": "Payments",
   "/admin/affiliates": "Affiliates",
+  "/admin/withdrawal-requests": "Withdrawal Requests",
   "/admin/support": "Support",
   "/admin/logs": "Logs",
   "/admin/settings": "Settings",

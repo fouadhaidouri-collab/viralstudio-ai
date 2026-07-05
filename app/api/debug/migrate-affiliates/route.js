@@ -53,5 +53,13 @@ export async function GET() {
   } catch (e) {
     results["CREATE coupons table"] = e.message;
   }
+  try {
+    await run(
+      "CREATE TABLE IF NOT EXISTS withdrawal_requests (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount REAL NOT NULL, payment_method TEXT NOT NULL, payment_account TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', admin_note TEXT DEFAULT '', created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))"
+    );
+    results["CREATE withdrawal_requests table"] = "ok";
+  } catch (e) {
+    results["CREATE withdrawal_requests table"] = e.message;
+  }
   return Response.json({ results });
 }

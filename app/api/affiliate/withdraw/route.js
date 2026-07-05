@@ -1,6 +1,6 @@
 import { auth } from "../../../lib/auth";
 import { findUser } from "../../../lib/userStore";
-import { getOrCreateAffiliate, createWithdrawal } from "../../../../lib/affiliateStore";
+import { getOrCreateAffiliate, createWithdrawalRequest } from "../../../../lib/affiliateStore";
 
 export async function POST(req) {
   try {
@@ -16,14 +16,11 @@ export async function POST(req) {
       return Response.json({ error: "Amount and method are required" }, { status: 400 });
     }
     if (!account_details) {
-      return Response.json({ error: "Please provide your payment details (email, wallet address, or bank info)" }, { status: 400 });
+      return Response.json({ error: "Please provide your payment details" }, { status: 400 });
     }
-    const affiliate = await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
-    const wd = await createWithdrawal({ affiliate_id: affiliate.id, amount, method, account_details });
-    if (!wd) {
-      return Response.json({ error: "Withdrawal failed" }, { status: 500 });
-    }
-    if (wd.error) {
+    await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
+    const wd = await createWithdrawalRequest({ user_id: user.id, amount, payment_method: method, payment_account: account_details });
+    if (wd?.error) {
       return Response.json({ error: wd.error }, { status: 400 });
     }
     return Response.json({ withdrawal: wd }, { status: 201 });
