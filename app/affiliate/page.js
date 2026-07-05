@@ -63,6 +63,7 @@ export default function AffiliatePage() {
         setWithdrawStatus("success");
         setWithdrawAmount("");
         fetch("/api/affiliate/stats").then((r) => r.json()).then(setData).catch(() => {});
+        fetch("/api/affiliate/withdrawals").then((r) => r.json()).then((d) => setWithdrawals(d.withdrawals || [])).catch(() => {});
         setTimeout(() => setWithdrawStatus(""), 3000);
       } else {
         const err = await res.json().catch(() => ({ error: "Request failed" }));
