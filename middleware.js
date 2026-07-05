@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const protectedPaths = ["/ugc-engine", "/hook-gen", "/clipping", "/profile", "/affiliate"];
+const protectedPaths = ["/ugc-engine", "/hook-gen", "/clipping", "/profile", "/affiliate", "/admin"];
 const publicPaths = ["/login", "/signup", "/forgot-password", "/landing"];
 
 export function middleware(request) {
