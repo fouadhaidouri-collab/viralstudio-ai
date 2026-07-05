@@ -20,6 +20,7 @@ export default function AffiliatePage() {
   const [withdrawDetails, setWithdrawDetails] = useState("");
   const [withdrawStatus, setWithdrawStatus] = useState("");
   const [withdrawals, setWithdrawals] = useState([]);
+  const [withdrawDetail, setWithdrawDetail] = useState(null);
 
   const couponCode = data?.affiliate?.referral_code || "";
   const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
@@ -220,11 +221,13 @@ export default function AffiliatePage() {
           </div>
 
           {/* Withdrawal History */}
-          {withdrawals.length > 0 && (
           <div className="glass-card rounded-2xl border border-white/5 card-glow overflow-hidden mb-6">
             <div className="px-5 py-4 border-b border-surface-border/50">
               <h3 className="text-sm font-semibold text-white">Withdrawal History</h3>
             </div>
+            {withdrawals.length === 0 ? (
+              <div className="px-5 py-8 text-center text-sm text-on-surface-variant">No withdrawal requests yet.</div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -232,30 +235,63 @@ export default function AffiliatePage() {
                     <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Date</th>
                     <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Amount</th>
                     <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Method</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Account</th>
                     <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant">Status</th>
+                    <th className="text-left px-5 py-4 text-xs font-semibold text-on-surface-variant"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {withdrawals.map((w, i) => (
                     <tr key={w.id || i} className="border-t border-surface-border/50">
                       <td className="px-5 py-4 text-sm text-on-surface-variant whitespace-nowrap">{new Date(w.created_at).toLocaleDateString()}</td>
-                      <td className="px-5 py-4 text-sm text-white font-semibold">${w.amount.toFixed(2)}</td>
-                      <td className="px-5 py-4 text-sm text-on-surface-variant">{w.method}</td>
+                      <td className="px-5 py-4 text-sm text-white font-semibold">${Number(w.amount).toFixed(2)}</td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant">{w.payment_method || w.method}</td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant max-w-[150px] truncate" title={w.payment_account}>{w.payment_account || "-"}</td>
                       <td className="px-5 py-4 text-sm">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                          w.status === "completed" ? "bg-green-500/10 text-green-400" :
+                          w.status === "approved" || w.status === "completed" ? "bg-green-500/10 text-green-400" :
                           w.status === "rejected" ? "bg-red-500/10 text-red-400" :
                           "bg-yellow-500/10 text-yellow-400"
                         }`}>
                           {w.status.charAt(0).toUpperCase() + w.status.slice(1)}
                         </span>
                       </td>
+                      <td className="px-5 py-4 text-sm">
+                        <button onClick={() => setWithdrawDetail(w)} className="text-xs font-semibold text-secondary hover:text-primary transition-all">View</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+            )}
           </div>
+
+          {withdrawDetail && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setWithdrawDetail(null)}>
+              <div className="bg-surface-container border border-surface-border/80 rounded-2xl max-w-sm w-full mx-4 animate-dropdown-open" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-5 pb-3">
+                  <h3 className="text-sm font-bold text-white">Withdrawal Details</h3>
+                  <button onClick={() => setWithdrawDetail(null)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high hover:bg-surface-container-higher transition-all">
+                    <span className="text-on-surface-variant text-lg leading-none">&times;</span>
+                  </button>
+                </div>
+                <div className="px-5 pb-5 space-y-3">
+                  <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Amount</span><span className="text-xs text-white font-semibold">${Number(withdrawDetail.amount).toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Method</span><span className="text-xs text-white">{withdrawDetail.payment_method || withdrawDetail.method}</span></div>
+                  <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Account</span><span className="text-xs text-white break-all max-w-[200px] text-right">{withdrawDetail.payment_account || withdrawDetail.account_details}</span></div>
+                  <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Status</span>
+                    <span className={`text-xs font-semibold ${
+                      withdrawDetail.status === "approved" || withdrawDetail.status === "completed" ? "text-green-400" :
+                      withdrawDetail.status === "rejected" ? "text-red-400" :
+                      "text-yellow-400"
+                    }`}>{withdrawDetail.status.charAt(0).toUpperCase() + withdrawDetail.status.slice(1)}</span>
+                  </div>
+                  <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Date</span><span className="text-xs text-white">{new Date(withdrawDetail.created_at).toLocaleString()}</span></div>
+                  {withdrawDetail.admin_note && <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Admin Note</span><span className="text-xs text-white max-w-[200px] text-right">{withdrawDetail.admin_note}</span></div>}
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Recent Visits */}
