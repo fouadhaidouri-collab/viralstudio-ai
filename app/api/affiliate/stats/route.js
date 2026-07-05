@@ -35,7 +35,7 @@ export async function GET() {
       conversion_rate,
       total_earnings: affiliate.total_earnings || 0,
       pending: affiliate.available_balance || 0,
-      paid: affiliate.paid_balance || 0,
+      paid: affiliate.total_earnings || 0,
       commission_rate: affiliate.commission_percent || 30,
       clicks_latest: clicks,
     });
