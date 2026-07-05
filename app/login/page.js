@@ -44,7 +44,7 @@ export default function LoginPage() {
         return;
       }
       const loginOk = await login(email.trim(), password);
-      if (loginOk) router.push("/");
+      if (loginOk) window.location.href = "/";
     } catch {
       setLoginError("Server error. Please try again.");
     }
@@ -58,7 +58,7 @@ export default function LoginPage() {
       return;
     }
     const ok = await login(email.trim(), password);
-    if (ok) router.push("/");
+    if (ok) window.location.href = "/";
   };
 
   return (
