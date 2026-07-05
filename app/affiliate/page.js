@@ -100,7 +100,7 @@ export default function AffiliatePage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-white">Affiliate Dashboard</h1>
-            <p className="text-sm text-on-surface-variant mt-1">Invite creators and earn {data?.commission_rate || 30}% commission on every successful payment.</p>
+             <p className="text-sm text-on-surface-variant mt-1">Invite creators and earn {data?.commission_rate || 20}% commission on every successful payment.</p>
           </div>
 
           {/* Profile Info */}
