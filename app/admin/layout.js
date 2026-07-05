@@ -33,7 +33,7 @@ export default function AdminLayout({ children }) {
         <AdminSidebar mobileOpen={mobileSidebarOpen} setMobileOpen={setMobileSidebarOpen} />
         <div className="flex-1 flex flex-col min-w-0">
           <AdminTopbar setMobileOpen={setMobileSidebarOpen} />
-          <div className="flex-1 overflow-y-auto smooth-scroll custom-scrollbar">
+          <div className="flex-1 overflow-y-auto smooth-scroll custom-scrollbar h-full bg-background">
             <div className="px-4 md:px-6 py-4 md:py-5 max-w-[1600px] mx-auto min-h-full">
               {children}
             </div>
