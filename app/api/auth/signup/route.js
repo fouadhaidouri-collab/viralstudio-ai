@@ -29,6 +29,6 @@ export async function POST(request) {
     if (err.message === "User already exists") {
       return Response.json({ error: "An account with this email already exists" }, { status: 409 });
     }
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return Response.json({ error: err.message || "Internal server error" }, { status: 500 });
   }
 }
