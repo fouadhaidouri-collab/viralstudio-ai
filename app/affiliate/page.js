@@ -21,6 +21,9 @@ export default function AffiliatePage() {
   const [withdrawStatus, setWithdrawStatus] = useState("");
   const [withdrawals, setWithdrawals] = useState([]);
   const [withdrawDetail, setWithdrawDetail] = useState(null);
+  const [editingWdr, setEditingWdr] = useState(null);
+  const [editMethod, setEditMethod] = useState("");
+  const [editAccount, setEditAccount] = useState("");
 
   const couponCode = data?.affiliate?.referral_code || "";
   const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
@@ -257,7 +260,15 @@ export default function AffiliatePage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-sm">
-                        <button onClick={() => setWithdrawDetail(w)} className="text-xs font-semibold text-secondary hover:text-primary transition-all">View</button>
+                        <div className="flex gap-2">
+                          {w.status === "pending" && (
+                            <>
+                              <button onClick={() => { setEditingWdr(w); setEditMethod(w.payment_method || w.method); setEditAccount(w.payment_account || ""); }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
+                              <button onClick={async () => { if (!confirm("Cancel this withdrawal request?")) return; await fetch(`/api/affiliate/withdrawals/${w.id}`, { method: "DELETE" }); fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{}); fetch("/api/affiliate/stats").then(r=>r.json()).then(setData).catch(()=>{}); }} className="text-xs font-semibold text-red-400 hover:text-red-300 transition-all">Cancel</button>
+                            </>
+                          )}
+                          <button onClick={() => setWithdrawDetail(w)} className="text-xs font-semibold text-secondary hover:text-primary transition-all">View</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -266,6 +277,38 @@ export default function AffiliatePage() {
             </div>
             )}
           </div>
+
+          {editingWdr && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setEditingWdr(null)}>
+              <div className="bg-surface-container border border-surface-border/80 rounded-2xl max-w-sm w-full mx-4 animate-dropdown-open" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-5 pb-3">
+                  <h3 className="text-sm font-bold text-white">Edit Withdrawal</h3>
+                  <button onClick={() => setEditingWdr(null)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high hover:bg-surface-container-higher transition-all">
+                    <span className="text-on-surface-variant text-lg leading-none">&times;</span>
+                  </button>
+                </div>
+                <div className="px-5 pb-5 space-y-3">
+                  <p className="text-xs text-on-surface-variant">Update your withdrawal details for request <span className="text-white font-mono">{editingWdr.id.slice(0, 12)}...</span></p>
+                  <select value={editMethod} onChange={(e) => setEditMethod(e.target.value)} className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none">
+                    <option>PayPal</option>
+                    <option>USDT (TRC20)</option>
+                    <option>Bank Transfer</option>
+                  </select>
+                  <input type="text" value={editAccount} onChange={(e) => setEditAccount(e.target.value)} placeholder={
+                    editMethod === "PayPal" ? "PayPal Email" :
+                    editMethod === "USDT (TRC20)" ? "USDT (TRC20) Wallet Address" :
+                    "Bank Account Details"
+                  } className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                  <button onClick={async () => {
+                    if (!editAccount) return;
+                    await fetch(`/api/affiliate/withdrawals/${editingWdr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ payment_method: editMethod, payment_account: editAccount }) });
+                    setEditingWdr(null);
+                    fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{});
+                  }} className="w-full primary-gradient text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-all">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {withdrawDetail && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setWithdrawDetail(null)}>
