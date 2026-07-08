@@ -328,7 +328,7 @@ export default function AffiliatePage() {
                   <p className="text-xs text-on-surface-variant">Update your withdrawal details for request <span className="text-white font-mono">{editingWdr.id.slice(0, 12)}...</span></p>
                   <select value={editMethod} onChange={(e) => setEditMethod(e.target.value)} className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none">
                     <option>PayPal</option>
-                    <option>USDT (TRC20)</option>
+                    <option>Crypto</option>
                     <option>Bank Transfer</option>
                   </select>
                   {editMethod === "PayPal" && (
