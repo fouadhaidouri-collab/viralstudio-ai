@@ -77,11 +77,13 @@ export default function ProfilePage() {
       <Sidebar />
       <TopBar />
       <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
-        <div className="max-w-full mx-auto px-4 md:px-8 py-6 md:py-10">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-10">
 
           {/* Profile Header */}
-          <div className="glass-card rounded-2xl p-6 md:p-8 border border-white/5 card-glow mb-6" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            <div className="flex items-start gap-5">
+          <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 mb-6 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.04), transparent)' }}>
+            <div className="absolute top-0 right-0 w-64 h-64 opacity-[0.04]" style={{ background: 'radial-gradient(circle, #a855f7, transparent 70%)' }} />
+            <div className="absolute bottom-0 left-0 w-48 h-48 opacity-[0.03]" style={{ background: 'radial-gradient(circle, #6366f1, transparent 70%)' }} />
+            <div className="relative z-10 flex items-start gap-5">
               <div className="relative shrink-0">
                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)' }}>
                   <div className="w-full h-full rounded-full bg-surface overflow-hidden">
@@ -93,7 +95,7 @@ export default function ProfilePage() {
               <div className="min-w-0 flex-1">
                 <h1 className="text-xl md:text-2xl font-bold text-white truncate">{name}</h1>
                 <p className="text-sm text-on-surface-variant mt-0.5">{email} · @{username}</p>
-                <div className="flex items-center gap-3 mt-1.5">
+                <div className="flex items-center gap-3 mt-2">
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border ${planColor}`}>
                     <Icon name={planIcon} size={12} /> {plan}
                   </span>
@@ -125,61 +127,78 @@ export default function ProfilePage() {
           </div>
 
           {tab === "overview" && (
-            <div className="space-y-5">
+            <div className="space-y-6">
 
               {/* Credits Card */}
-              <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.06), rgba(99,102,241,0.03), transparent)' }}>
-                <div className="absolute top-0 right-0 w-40 h-40 opacity-5" style={{ background: 'radial-gradient(circle, #a855f7, transparent 70%)' }} />
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-on-surface-variant">Available Credits</span>
-                    <Icon name="bolt" className="text-yellow-400" size={18} />
+              <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(99,102,241,0.05), rgba(0,0,0,0.2))' }}>
+                <div className="absolute top-0 right-0 w-48 h-48 opacity-[0.06]" style={{ background: 'radial-gradient(circle, #a855f7, transparent 70%)' }} />
+                <div className="absolute bottom-0 left-0 w-36 h-36 opacity-[0.04]" style={{ background: 'radial-gradient(circle, #6366f1, transparent 70%)' }} />
+                <div className="relative z-10 flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-on-surface-variant">Available Credits</span>
+                    </div>
+                    <div className="text-4xl md:text-5xl font-bold text-white tracking-tight">{creditsDisplay}</div>
                   </div>
-                  <div className="text-3xl md:text-4xl font-bold text-white">{creditsDisplay}</div>
+                  <div className="w-14 h-14 rounded-2xl bg-yellow-400/10 flex items-center justify-center">
+                    <Icon name="bolt" className="text-yellow-400" size={28} />
+                  </div>
                 </div>
               </div>
 
               {/* Quick Actions */}
-              <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                <h2 className="text-sm font-semibold text-white mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button onClick={() => router.push("/affiliate")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <Icon name="edit" className="text-primary" size={18} />
+              <div className="rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
+                <h2 className="text-sm font-semibold text-white mb-5">Quick Actions</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button onClick={() => router.push("/affiliate")} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/40 hover:bg-surface-container-high hover:translate-y-[-1px] transition-all text-left group shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/10 transition-all">
+                      <Icon name="edit" className="text-primary" size={20} />
                     </div>
                     <div>
                       <div className="text-sm font-medium text-white">Affiliate</div>
                     </div>
+                    <div className="ml-auto text-on-surface-variant/30 group-hover:text-primary/50 transition-all">
+                      <Icon name="chevron_right" size={18} />
+                    </div>
                   </button>
                   {!isGoogleUser && (
-                    <button onClick={() => setTab("security")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <Icon name="lock" className="text-primary" size={18} />
+                    <button onClick={() => setTab("security")} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/40 hover:bg-surface-container-high hover:translate-y-[-1px] transition-all text-left group shadow-sm">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/10 transition-all">
+                        <Icon name="lock" className="text-primary" size={20} />
                       </div>
                       <div>
                         <div className="text-sm font-medium text-white">Reset Password</div>
                         <div className="text-[11px] text-on-surface-variant">Change your password</div>
                       </div>
+                      <div className="ml-auto text-on-surface-variant/30 group-hover:text-primary/50 transition-all">
+                        <Icon name="chevron_right" size={18} />
+                      </div>
                     </button>
                   )}
                   {!isGoogleUser && (
-                    <button onClick={() => router.push("/forgot-password")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <Icon name="refresh" className="text-primary" size={18} />
+                    <button onClick={() => router.push("/forgot-password")} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/40 hover:bg-surface-container-high hover:translate-y-[-1px] transition-all text-left group shadow-sm">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/10 transition-all">
+                        <Icon name="refresh" className="text-primary" size={20} />
                       </div>
                       <div>
                         <div className="text-sm font-medium text-white">Recover Password</div>
                         <div className="text-[11px] text-on-surface-variant">استيراد كلمة السر</div>
                       </div>
+                      <div className="ml-auto text-on-surface-variant/30 group-hover:text-primary/50 transition-all">
+                        <Icon name="chevron_right" size={18} />
+                      </div>
                     </button>
                   )}
-                  <button onClick={() => router.push("/pricing")} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/30 hover:bg-surface-container-high transition-all text-left group">
-                    <div className="w-10 h-10 rounded-lg bg-yellow-400/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <Icon name="bolt" className="text-yellow-400" size={18} />
+                  <button onClick={() => router.push("/pricing")} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-yellow-400/40 hover:bg-surface-container-high hover:translate-y-[-1px] transition-all text-left group shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-yellow-400/20 to-yellow-400/5 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-yellow-400/10 transition-all">
+                      <Icon name="bolt" className="text-yellow-400" size={20} />
                     </div>
                     <div>
                       <div className="text-sm font-medium text-white">Buy Credits</div>
                       <div className="text-[11px] text-on-surface-variant">Top up your balance</div>
+                    </div>
+                    <div className="ml-auto text-on-surface-variant/30 group-hover:text-yellow-400/50 transition-all">
+                      <Icon name="chevron_right" size={18} />
                     </div>
                   </button>
                 </div>
@@ -188,12 +207,12 @@ export default function ProfilePage() {
           )}
 
           {tab === "security" && (
-            <div className="space-y-5">
+            <div className="space-y-6">
 
               {/* Email Section */}
-              <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
+              <div className="rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                     <Icon name="mail" className="text-primary" size={18} />
                   </div>
                   <div>
@@ -201,19 +220,19 @@ export default function ProfilePage() {
                     <p className="text-[11px] text-on-surface-variant">Your current login email</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-xl border border-surface-border/40">
+                <div className="flex items-center justify-between px-5 py-3.5 bg-surface-container-low rounded-xl border border-surface-border/40">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                    <span className="text-sm text-white truncate">{email}</span>
+                    <div className="w-2 h-2 rounded-full bg-green-500 shrink-0 shadow-sm shadow-green-500/50" />
+                    <span className="text-sm text-white truncate font-medium">{email}</span>
                   </div>
-                  <button className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0 ml-3">Change</button>
+                  <button className="shrink-0 ml-3 px-4 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all">Change</button>
                 </div>
               </div>
 
               {!isGoogleUser && (
-                <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                       <Icon name="lock" className="text-primary" size={18} />
                     </div>
                     <div>
@@ -221,22 +240,22 @@ export default function ProfilePage() {
                       <p className="text-[11px] text-on-surface-variant">Set a strong password to protect your account</p>
                     </div>
                   </div>
-                  <form onSubmit={handleChangePassword} className="space-y-3">
-                    {cpError && <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">{cpError}</div>}
-                    {cpMessage && <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs">{cpMessage}</div>}
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    {cpError && <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2"><Icon name="error" size={14} className="shrink-0" />{cpError}</div>}
+                    {cpMessage && <div className="p-3.5 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs flex items-center gap-2"><Icon name="check_circle" size={14} className="shrink-0" />{cpMessage}</div>}
                     <div>
                       <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Current Password</label>
-                      <input type="password" value={cpCurrent} onChange={(e) => setCpCurrent(e.target.value)} placeholder="Enter current password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                      <input type="password" value={cpCurrent} onChange={(e) => setCpCurrent(e.target.value)} placeholder="Enter current password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
                     </div>
                     <div>
                       <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">New Password</label>
-                      <input type="password" value={cpNew} onChange={(e) => setCpNew(e.target.value)} placeholder="Enter new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                      <input type="password" value={cpNew} onChange={(e) => setCpNew(e.target.value)} placeholder="Enter new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
                     </div>
                     <div>
                       <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Confirm New Password</label>
-                      <input type="password" value={cpConfirm} onChange={(e) => setCpConfirm(e.target.value)} placeholder="Confirm new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors" />
+                      <input type="password" value={cpConfirm} onChange={(e) => setCpConfirm(e.target.value)} placeholder="Confirm new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
                     </div>
-                    <button type="submit" disabled={cpLoading} className="w-full primary-gradient text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                    <button type="submit" disabled={cpLoading} className="w-full primary-gradient text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
                       {cpLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="lock" size={14} />}
                       Update Password
                     </button>
@@ -245,16 +264,16 @@ export default function ProfilePage() {
               )}
 
               {!isGoogleUser && (
-                <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon name="refresh" className="text-primary" size={18} />
+                <div className="rounded-2xl p-6 md:p-8 border border-white/5 hover:border-primary/20 transition-all" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.04), transparent)' }}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
+                      <Icon name="refresh" className="text-primary" size={20} />
                     </div>
                     <div className="flex-1">
                       <h2 className="text-sm font-semibold text-white">Recover Password</h2>
                       <p className="text-[11px] text-on-surface-variant">استيراد كلمة السر — Send recovery link to your email</p>
                     </div>
-                    <button onClick={() => router.push("/forgot-password")} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0">Send Link</button>
+                    <button onClick={() => router.push("/forgot-password")} className="shrink-0 px-5 py-2 rounded-xl text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all">Send Link</button>
                   </div>
                 </div>
               )}
