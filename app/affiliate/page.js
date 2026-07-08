@@ -25,9 +25,14 @@ export default function AffiliatePage() {
   const [withdrawStatus, setWithdrawStatus] = useState("");
   const [withdrawals, setWithdrawals] = useState([]);
   const [withdrawDetail, setWithdrawDetail] = useState(null);
+  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return p.network + " - " + p.wallet; return p.email || acct || "-"; } catch { return acct || "-"; } };
   const [editingWdr, setEditingWdr] = useState(null);
   const [editMethod, setEditMethod] = useState("");
   const [editAccount, setEditAccount] = useState("");
+  const [editBankName, setEditBankName] = useState("");
+  const [editIban, setEditIban] = useState("");
+  const [editNetwork, setEditNetwork] = useState("");
+  const [editWallet, setEditWallet] = useState("");
 
   const couponCode = data?.affiliate?.referral_code || "";
   const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
@@ -268,7 +273,7 @@ export default function AffiliatePage() {
                       <td className="px-5 py-4 text-sm text-on-surface-variant whitespace-nowrap">{new Date(w.created_at).toLocaleDateString()}</td>
                       <td className="px-5 py-4 text-sm text-white font-semibold">${Number(w.amount).toFixed(2)}</td>
                       <td className="px-5 py-4 text-sm text-on-surface-variant">{w.payment_method || w.method}</td>
-                      <td className="px-5 py-4 text-sm text-on-surface-variant max-w-[150px] truncate" title={w.payment_account}>{w.payment_account || "-"}</td>
+                      <td className="px-5 py-4 text-sm text-on-surface-variant max-w-[150px] truncate" title={formatAccount(w.payment_account)}>{formatAccount(w.payment_account)}</td>
                       <td className="px-5 py-4 text-sm">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                           w.status === "approved" || w.status === "completed" ? "bg-green-500/10 text-green-400" :
@@ -282,7 +287,7 @@ export default function AffiliatePage() {
                         <div className="flex gap-2">
                           {w.status === "pending" && (
                             <>
-                              <button onClick={() => { setEditingWdr(w); setEditMethod(w.payment_method || w.method); setEditAccount(w.payment_account || ""); }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
+                              <button onClick={() => { setEditingWdr(w); setEditMethod(w.payment_method || w.method); const pa = w.payment_account || ""; try { const p = JSON.parse(pa); if (p.iban) { setEditBankName(p.name || ""); setEditIban(p.iban); setEditAccount(""); } else if (p.wallet) { setEditNetwork(p.network || ""); setEditWallet(p.wallet); setEditAccount(""); } else { setEditAccount(p.email || pa); } } catch { setEditAccount(pa); } }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
                               <button onClick={async () => { if (!confirm("Cancel this withdrawal request?")) return; await fetch(`/api/affiliate/withdrawals/${w.id}`, { method: "DELETE" }); fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{}); fetch("/api/affiliate/stats").then(r=>r.json()).then(setData).catch(()=>{}); }} className="text-xs font-semibold text-red-400 hover:text-red-300 transition-all">Cancel</button>
                             </>
                           )}
@@ -313,14 +318,27 @@ export default function AffiliatePage() {
                     <option>USDT (TRC20)</option>
                     <option>Bank Transfer</option>
                   </select>
-                  <input type="text" value={editAccount} onChange={(e) => setEditAccount(e.target.value)} placeholder={
-                    editMethod === "PayPal" ? "PayPal Email" :
-                    editMethod === "USDT (TRC20)" ? "USDT (TRC20) Wallet Address" :
-                    "Bank Account Details"
-                  } className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                  {editMethod === "PayPal" && (
+                    <input type="text" value={editAccount} onChange={(e) => setEditAccount(e.target.value)} placeholder="PayPal Email" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                  )}
+                  {editMethod === "Bank Transfer" && (
+                    <>
+                      <input type="text" value={editBankName} onChange={(e) => setEditBankName(e.target.value)} placeholder="Account Holder Name" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                      <input type="text" value={editIban} onChange={(e) => setEditIban(e.target.value)} placeholder="IBAN / RIB" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                    </>
+                  )}
+                  {editMethod === "USDT (TRC20)" && (
+                    <>
+                      <input type="text" value={editNetwork} onChange={(e) => setEditNetwork(e.target.value)} placeholder="Network" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                      <input type="text" value={editWallet} onChange={(e) => setEditWallet(e.target.value)} placeholder="Wallet Address" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                    </>
+                  )}
                   <button onClick={async () => {
-                    if (!editAccount) return;
-                    await fetch(`/api/affiliate/withdrawals/${editingWdr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ payment_method: editMethod, payment_account: editAccount }) });
+                    let account = "";
+                    if (editMethod === "PayPal") { if (!editAccount) return; account = editAccount; }
+                    else if (editMethod === "Bank Transfer") { if (!editBankName || !editIban) return; account = JSON.stringify({ name: editBankName, iban: editIban }); }
+                    else if (editMethod === "USDT (TRC20)") { if (!editNetwork || !editWallet) return; account = JSON.stringify({ network: editNetwork, wallet: editWallet }); }
+                    await fetch(`/api/affiliate/withdrawals/${editingWdr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ payment_method: editMethod, payment_account: account }) });
                     setEditingWdr(null);
                     fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{});
                   }} className="w-full primary-gradient text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-all">Save Changes</button>
@@ -341,7 +359,7 @@ export default function AffiliatePage() {
                 <div className="px-5 pb-5 space-y-3">
                   <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Amount</span><span className="text-xs text-white font-semibold">${Number(withdrawDetail.amount).toFixed(2)}</span></div>
                   <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Method</span><span className="text-xs text-white">{withdrawDetail.payment_method || withdrawDetail.method}</span></div>
-                  <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Account</span><span className="text-xs text-white break-all max-w-[200px] text-right">{(function(){try{const p=JSON.parse(withdrawDetail.payment_account||withdrawDetail.account_details||"{}");if(p.iban)return p.name+" - "+p.iban;if(p.wallet)return p.network+" - "+p.wallet;return p.email||withdrawDetail.payment_account||withdrawDetail.account_details||"-"}catch(){return withdrawDetail.payment_account||withdrawDetail.account_details||"-"}})()}</span></div>
+                  <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Account</span><span className="text-xs text-white break-all max-w-[200px] text-right">{formatAccount(withdrawDetail.payment_account || withdrawDetail.account_details)}</span></div>
                   <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Status</span>
                     <span className={`text-xs font-semibold ${
                       withdrawDetail.status === "approved" || withdrawDetail.status === "completed" ? "text-green-400" :

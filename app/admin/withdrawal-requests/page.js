@@ -11,6 +11,7 @@ export default function AdminWithdrawalRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState(null);
+  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return p.network + " - " + p.wallet; return p.email || acct || "-"; } catch { return acct || "-"; } };
 
   const fetchData = async () => {
     try {
@@ -73,7 +74,7 @@ export default function AdminWithdrawalRequestsPage() {
     {
       key: "payment_account",
       label: "Account",
-      render: (row) => <span className="text-xs text-on-surface-variant max-w-[160px] truncate block" title={row.payment_account}>{row.payment_account}</span>,
+      render: (row) => <span className="text-xs text-on-surface-variant max-w-[160px] truncate block" title={formatAccount(row.payment_account)}>{formatAccount(row.payment_account)}</span>,
     },
     { key: "status", label: "Status", render: (row) => <StatusBadge status={row.status} /> },
     {
@@ -142,7 +143,7 @@ export default function AdminWithdrawalRequestsPage() {
               <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Email</span><span className="text-xs text-white">{details.user_email}</span></div>
               <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Amount</span><span className="text-xs text-white font-semibold">${details.amount.toFixed(2)}</span></div>
               <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Method</span><span className="text-xs text-white">{details.payment_method}</span></div>
-              <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Account</span><span className="text-xs text-white break-all max-w-[200px] text-right">{details.payment_account}</span></div>
+              <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Account</span><span className="text-xs text-white break-all max-w-[200px] text-right">{formatAccount(details.payment_account)}</span></div>
               <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Status</span><StatusBadge status={details.status} /></div>
               <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Date</span><span className="text-xs text-white">{new Date(details.created_at).toLocaleString()}</span></div>
               {details.admin_note && <div className="flex justify-between"><span className="text-xs text-on-surface-variant">Admin Note</span><span className="text-xs text-white max-w-[200px] text-right">{details.admin_note}</span></div>}
