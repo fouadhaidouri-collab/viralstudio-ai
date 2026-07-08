@@ -11,7 +11,7 @@ export default function AdminWithdrawalRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState(null);
-  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return p.network + " - " + p.wallet; return p.email || acct || "-"; } catch { return acct || "-"; } };
+  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return (p.coin||"") + " (" + (p.network||"") + ") - " + p.wallet; return p.email || acct || "-"; } catch { return acct || "-"; } };
 
   const fetchData = async () => {
     try {

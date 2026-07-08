@@ -25,7 +25,7 @@ export default function AffiliatePage() {
   const [withdrawStatus, setWithdrawStatus] = useState("");
   const [withdrawals, setWithdrawals] = useState([]);
   const [withdrawDetail, setWithdrawDetail] = useState(null);
-  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return p.network + " - " + p.wallet; return p.email || acct || "-"; } catch { return acct || "-"; } };
+  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return (p.coin||"") + " (" + p.network + ") - " + p.wallet; return p.email || acct || "-"; } catch { return acct || "-"; } };
   const [editingWdr, setEditingWdr] = useState(null);
   const [editMethod, setEditMethod] = useState("");
   const [editAccount, setEditAccount] = useState("");
@@ -67,9 +67,9 @@ export default function AffiliatePage() {
     } else if (withdrawMethod === "Bank Transfer") {
       if (!withdrawBankName || !withdrawIban) { setWithdrawStatus("Please fill all bank details"); setTimeout(() => setWithdrawStatus(""), 3000); return; }
       accountDetails = JSON.stringify({ name: withdrawBankName, iban: withdrawIban });
-    } else if (withdrawMethod === "USDT (TRC20)") {
-      if (!withdrawNetwork || !withdrawWallet) { setWithdrawStatus("Please fill all crypto details"); setTimeout(() => setWithdrawStatus(""), 3000); return; }
-      accountDetails = JSON.stringify({ network: withdrawNetwork, wallet: withdrawWallet });
+    } else if (withdrawMethod === "Crypto") {
+      if (!withdrawNetwork || !withdrawWallet || !withdrawDetails) { setWithdrawStatus("Please fill all crypto details"); setTimeout(() => setWithdrawStatus(""), 3000); return; }
+      accountDetails = JSON.stringify({ coin: withdrawNetwork, network: withdrawWallet, wallet: withdrawDetails });
     }
     setWithdrawStatus("processing");
     try {
@@ -200,7 +200,7 @@ export default function AffiliatePage() {
                 className="w-[180px] px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none"
               >
                 <option>PayPal</option>
-                <option>USDT (TRC20)</option>
+                <option>Crypto</option>
                 <option>Bank Transfer</option>
               </select>
               <input
@@ -222,10 +222,23 @@ export default function AffiliatePage() {
                   <input type="text" placeholder="IBAN / RIB" value={withdrawIban} onChange={(e) => setWithdrawIban(e.target.value)} className="w-full px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
                 </>
               )}
-              {withdrawMethod === "USDT (TRC20)" && (
+              {withdrawMethod === "Crypto" && (
                 <>
-                  <input type="text" placeholder="Network" value={withdrawNetwork} onChange={(e) => setWithdrawNetwork(e.target.value)} className="w-full px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
-                  <input type="text" placeholder="Wallet Address" value={withdrawWallet} onChange={(e) => setWithdrawWallet(e.target.value)} className="w-full px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                  <select value={withdrawNetwork} onChange={(e) => setWithdrawNetwork(e.target.value)} className="w-full px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none">
+                    <option value="">Coin *</option>
+                    <option value="USDT">USDT</option>
+                    <option value="BTC">BTC</option>
+                    <option value="ETH">ETH</option>
+                    <option value="SOL">SOL</option>
+                  </select>
+                  <select value={withdrawWallet} onChange={(e) => setWithdrawWallet(e.target.value)} className="w-full px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none">
+                    <option value="">Network *</option>
+                    <option value="TRC20">TRC20</option>
+                    <option value="ERC20">ERC20</option>
+                    <option value="BEP20">BEP20</option>
+                    <option value="SOL">SOL</option>
+                  </select>
+                  <input type="text" value={withdrawDetails} onChange={(e) => setWithdrawDetails(e.target.value)} placeholder="Wallet Address *" className="w-full px-4 py-3.5 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
                 </>
               )}
             </div>
@@ -287,7 +300,7 @@ export default function AffiliatePage() {
                         <div className="flex gap-2">
                           {w.status === "pending" && (
                             <>
-                              <button onClick={() => { setEditingWdr(w); setEditMethod(w.payment_method || w.method); const pa = w.payment_account || ""; try { const p = JSON.parse(pa); if (p.iban) { setEditBankName(p.name || ""); setEditIban(p.iban); setEditAccount(""); } else if (p.wallet) { setEditNetwork(p.network || ""); setEditWallet(p.wallet); setEditAccount(""); } else { setEditAccount(p.email || pa); } } catch { setEditAccount(pa); } }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
+                              <button onClick={() => { setEditingWdr(w); setEditMethod(w.payment_method || w.method); const pa = w.payment_account || ""; try { const p = JSON.parse(pa); if (p.iban) { setEditBankName(p.name || ""); setEditIban(p.iban); setEditAccount(""); } else if (p.coin) { setEditNetwork(p.coin); setEditWallet(p.network || ""); setEditAccount(p.wallet || ""); } else if (p.wallet) { setEditNetwork(p.coin || ""); setEditWallet(p.network || p.wallet); setEditAccount(p.wallet || ""); } else { setEditAccount(p.email || pa); } } catch { setEditAccount(pa); } }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
                               <button onClick={async () => { if (!confirm("Cancel this withdrawal request?")) return; await fetch(`/api/affiliate/withdrawals/${w.id}`, { method: "DELETE" }); fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{}); fetch("/api/affiliate/stats").then(r=>r.json()).then(setData).catch(()=>{}); }} className="text-xs font-semibold text-red-400 hover:text-red-300 transition-all">Cancel</button>
                             </>
                           )}
@@ -327,17 +340,30 @@ export default function AffiliatePage() {
                       <input type="text" value={editIban} onChange={(e) => setEditIban(e.target.value)} placeholder="IBAN / RIB" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
                     </>
                   )}
-                  {editMethod === "USDT (TRC20)" && (
+                  {editMethod === "Crypto" && (
                     <>
-                      <input type="text" value={editNetwork} onChange={(e) => setEditNetwork(e.target.value)} placeholder="Network" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
-                      <input type="text" value={editWallet} onChange={(e) => setEditWallet(e.target.value)} placeholder="Wallet Address" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
+                      <select value={editNetwork} onChange={(e) => setEditNetwork(e.target.value)} className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none">
+                        <option value="">Coin *</option>
+                        <option value="USDT">USDT</option>
+                        <option value="BTC">BTC</option>
+                        <option value="ETH">ETH</option>
+                        <option value="SOL">SOL</option>
+                      </select>
+                      <select value={editWallet} onChange={(e) => setEditWallet(e.target.value)} className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none">
+                        <option value="">Network *</option>
+                        <option value="TRC20">TRC20</option>
+                        <option value="ERC20">ERC20</option>
+                        <option value="BEP20">BEP20</option>
+                        <option value="SOL">SOL</option>
+                      </select>
+                      <input type="text" value={editAccount} onChange={(e) => setEditAccount(e.target.value)} placeholder="Wallet Address *" className="w-full px-4 py-3 bg-surface-container-lowest border border-surface-border/60 text-white text-sm rounded-xl outline-none" />
                     </>
                   )}
                   <button onClick={async () => {
                     let account = "";
                     if (editMethod === "PayPal") { if (!editAccount) return; account = editAccount; }
                     else if (editMethod === "Bank Transfer") { if (!editBankName || !editIban) return; account = JSON.stringify({ name: editBankName, iban: editIban }); }
-                    else if (editMethod === "USDT (TRC20)") { if (!editNetwork || !editWallet) return; account = JSON.stringify({ network: editNetwork, wallet: editWallet }); }
+                    else if (editMethod === "Crypto") { if (!editNetwork || !editWallet || !editAccount) return; account = JSON.stringify({ coin: editNetwork, network: editWallet, wallet: editAccount }); }
                     await fetch(`/api/affiliate/withdrawals/${editingWdr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ payment_method: editMethod, payment_account: account }) });
                     setEditingWdr(null);
                     fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{});
