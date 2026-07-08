@@ -182,7 +182,7 @@ export default function ProfilePage() {
                       </div>
                       <div>
                         <div className="text-sm font-medium text-white">Recover Password</div>
-                        <div className="text-[11px] text-on-surface-variant">استيراد كلمة السر</div>
+                        <div className="text-[11px] text-on-surface-variant">Recover your password</div>
                       </div>
                       <div className="ml-auto text-on-surface-variant/30 group-hover:text-primary/50 transition-all">
                         <Icon name="chevron_right" size={18} />
@@ -271,7 +271,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex-1">
                       <h2 className="text-sm font-semibold text-white">Recover Password</h2>
-                      <p className="text-[11px] text-on-surface-variant">استيراد كلمة السر — Send recovery link to your email</p>
+                      <p className="text-[11px] text-on-surface-variant">Send recovery link to your email</p>
                     </div>
                     <button onClick={() => router.push("/forgot-password")} className="shrink-0 px-5 py-2 rounded-xl text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all">Send Link</button>
                   </div>
