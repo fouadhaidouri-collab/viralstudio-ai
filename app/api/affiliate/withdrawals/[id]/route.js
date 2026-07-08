@@ -2,8 +2,9 @@ import { auth } from "../../../../lib/auth";
 import { findUser } from "../../../../lib/userStore";
 import { updateWithdrawalRequestByUser, cancelWithdrawalRequest } from "../../../../../lib/affiliateStore";
 
-export async function PUT(req, { params }) {
+export async function PUT(req, { params: paramsPromise }) {
   try {
+    const params = await paramsPromise;
     const session = await auth();
     if (!session?.user?.email) return Response.json({ error: "Unauthorized" }, { status: 401 });
     const user = await findUser(session.user.email);
@@ -17,8 +18,9 @@ export async function PUT(req, { params }) {
   }
 }
 
-export async function DELETE(req, { params }) {
+export async function DELETE(req, { params: paramsPromise }) {
   try {
+    const params = await paramsPromise;
     const session = await auth();
     if (!session?.user?.email) return Response.json({ error: "Unauthorized" }, { status: 401 });
     const user = await findUser(session.user.email);
