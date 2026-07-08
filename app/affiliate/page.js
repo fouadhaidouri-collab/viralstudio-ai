@@ -25,7 +25,7 @@ export default function AffiliatePage() {
   const [withdrawStatus, setWithdrawStatus] = useState("");
   const [withdrawals, setWithdrawals] = useState([]);
   const [withdrawDetail, setWithdrawDetail] = useState(null);
-  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return (p.coin||"") + " (" + p.network + ") - " + p.wallet; return p.email || acct || "-"; } catch { return acct || "-"; } };
+  const formatAccount = (acct) => { try { const p = JSON.parse(acct || "{}"); if (p.iban) return p.name + " - " + p.iban; if (p.wallet) return ((p.coin||"USDT") + " (" + (p.network||"TRC20") + ") - " + p.wallet); return p.email || acct || "-"; } catch { return acct || "-"; } };
   const [editingWdr, setEditingWdr] = useState(null);
   const [editMethod, setEditMethod] = useState("");
   const [editAccount, setEditAccount] = useState("");
@@ -300,7 +300,7 @@ export default function AffiliatePage() {
                         <div className="flex gap-2">
                           {w.status === "pending" && (
                             <>
-                              <button onClick={() => { setEditingWdr(w); setEditMethod(w.payment_method || w.method); const pa = w.payment_account || ""; try { const p = JSON.parse(pa); if (p.iban) { setEditBankName(p.name || ""); setEditIban(p.iban); setEditAccount(""); } else if (p.coin) { setEditNetwork(p.coin); setEditWallet(p.network || ""); setEditAccount(p.wallet || ""); } else if (p.wallet) { setEditNetwork(p.coin || ""); setEditWallet(p.network || p.wallet); setEditAccount(p.wallet || ""); } else { setEditAccount(p.email || pa); } } catch { setEditAccount(pa); } }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
+                              <button onClick={() => { setEditingWdr(w); const meth = (w.payment_method || w.method || "").replace("USDT (TRC20)","Crypto"); setEditMethod(meth); const pa = w.payment_account || ""; try { const p = JSON.parse(pa); if (p.iban) { setEditBankName(p.name || ""); setEditIban(p.iban); setEditAccount(""); } else if (p.coin) { setEditNetwork(p.coin); setEditWallet((p.network||"").toUpperCase()); setEditAccount(p.wallet || ""); } else if (p.wallet) { setEditNetwork(p.coin || "USDT"); setEditWallet((p.network||p.wallet||"").toUpperCase()); setEditAccount(p.wallet || ""); } else { setEditAccount(p.email || pa); } } catch { setEditAccount(pa); } }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
                               <button onClick={async () => { if (!confirm("Cancel this withdrawal request?")) return; await fetch(`/api/affiliate/withdrawals/${w.id}`, { method: "DELETE" }); fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{}); fetch("/api/affiliate/stats").then(r=>r.json()).then(setData).catch(()=>{}); }} className="text-xs font-semibold text-red-400 hover:text-red-300 transition-all">Cancel</button>
                             </>
                           )}
