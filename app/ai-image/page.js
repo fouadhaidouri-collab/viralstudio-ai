@@ -2,12 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createPortal } from "react-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import { useAuth } from "../lib/AuthContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
+import ModelSelector from "../components/ModelSelector";
 import Icon from "../components/Icon";
 
 function AspectIcon({ label, size = "text-sm" }) {
@@ -41,79 +41,35 @@ const calcModelCredits = (unitPrice, quantity, settings) => {
   return Math.max(credits, minCredits);
 };
 
-function ImageModelDropdown({ value, options, onChange, pricingMap, creditSettings }) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
-  const ref = useRef(null);
-  const btnRef = useRef(null);
+const imageProviderMeta = {
+  OpenAI: { icon: "psychology", color: "#10b981" },
+  Recraft: { icon: "auto_awesome", color: "#f59e0b" },
+  Google: { icon: "videocam", color: "#7c3aed" },
+  xAI: { icon: "psychology", color: "#06b6d4" },
+};
 
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const toggle = () => {
-    if (!open && btnRef.current) {
-      const r = btnRef.current.getBoundingClientRect();
-      setPos({ bottom: window.innerHeight - r.top + 7, left: Math.max(10, r.left) });
-    }
-    setOpen(!open);
-  };
-
-  return (
-    <div ref={ref} className="w-full">
-      <button
-        ref={btnRef}
-        onClick={toggle}
-        className="w-full flex items-center justify-between gap-1.5 bg-surface-container-lowest border border-surface-border rounded-xl hover:border-primary/50 transition-all px-2.5 py-1.5"
-      >
-          <span className="flex items-center gap-1.5 truncate min-w-0">
-            <span className="text-[11px] flex-shrink-0" role="img">{value.icon}</span>
-            <span className="font-semibold text-white text-[11px] truncate">{value.label}</span>
-            {(() => {
-              const p = pricingMap?.[value.label];
-              const c = calcModelCredits(p?.unitPrice ?? 0.05, 1, creditSettings);
-              return c != null && <span className="text-[9px] text-yellow-400 font-medium shrink-0">{c} credit</span>;
-            })()}
-          </span>
-        <Icon name="expand_more" className={`text-[10px] text-on-surface-variant shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-      </button>
-      {open && typeof document !== "undefined" && createPortal(
-        <div
-          className="fixed animate-dropdown-open z-[99999]"
-          onMouseDown={(e) => e.stopPropagation()}
-          style={{ bottom: pos.bottom, left: pos.left, width: "300px", borderRadius: "24px", background: "#0e0e0e", border: "1px solid rgba(139,92,246,0.15)", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.06)" }}
-        >
-          <div className="py-2" style={{ maxHeight: "500px", overflowY: "auto", overflowX: "hidden" }}>
-            {options.map((opt) => {
-              const selected = opt.label === value.label;
-              return (
-                <button
-                  key={opt.label}
-                  onClick={() => { onChange(opt); setOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-5 transition-all duration-150 ${selected ? "" : "hover:bg-white/[0.04]"}`}
-                  style={{ paddingTop: "12px", paddingBottom: "12px", background: selected ? "rgba(139,92,246,0.15)" : "transparent" }}
-                >
-                  <span className="text-base flex-shrink-0" role="img">{opt.icon}</span>
-                  <span className="text-xs font-semibold" style={{ color: selected ? "#a78bfa" : "#ffffff" }}>{opt.label}</span>
-                  {(() => {
-                    const p = pricingMap?.[opt.label];
-                    const c = calcModelCredits(p?.unitPrice ?? 0.05, 1, creditSettings);
-                    return c != null && (
-                      <span className="text-[9px] text-yellow-400 shrink-0 whitespace-nowrap font-medium">{c} credit</span>
-                    );
-                  })()}
-                  {selected && <Icon name="check" className="text-xs ml-auto text-primary" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>,
-        document.body
-      )}
-    </div>
-  );
+function buildImageProviders(models, pricingMap, creditSettings) {
+  const cheapest = models.slice().sort((a, b) => {
+    const pa = pricingMap?.[a.label]?.unitPrice ?? 0.05;
+    const pb = pricingMap?.[b.label]?.unitPrice ?? 0.05;
+    return pa - pb;
+  })[0];
+  const groups = {};
+  for (const m of models) {
+    if (!groups[m.provider]) groups[m.provider] = [];
+    let badge = null;
+    let badgeColor = null;
+    if (m.label === cheapest.label) { badge = "Cheapest"; badgeColor = "#facc15"; }
+    else if (models.indexOf(m) >= models.length - 2) { badge = "New"; badgeColor = "#8b5cf6"; }
+    else { badge = "Best Quality"; badgeColor = "#f97316"; }
+    groups[m.provider].push({ ...m, badge, badgeColor });
+  }
+  return Object.entries(groups).map(([name, mods]) => ({
+    name,
+    icon: imageProviderMeta[name]?.icon || "smart_toy",
+    color: imageProviderMeta[name]?.color || "#a855f7",
+    models: mods,
+  }));
 }
 
 function Dropdown({ label, value, options, onChange, compact }) {
@@ -393,10 +349,7 @@ export default function AIImagePage() {
               )}
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <div>
-                  <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium">Model</div>
-                  <ImageModelDropdown value={selectedModel} options={imageModels} onChange={setSelectedModel} pricingMap={pricing} creditSettings={creditSettings} />
-                </div>
+                <ModelSelector label="Model" providers={buildImageProviders(imageModels, pricing, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => { const p = pricing?.[m.label]; return calcModelCredits(p?.unitPrice ?? 0.05, 1, creditSettings); }} compact />
 
                 <div className="grid grid-cols-3 gap-2">
                   <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
