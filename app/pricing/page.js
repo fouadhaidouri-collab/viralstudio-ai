@@ -42,7 +42,6 @@ const plans = [
       "5M Getty Images & Storyblocks",
       "10,200 AI credits/year",
       "Up to 2,000 images",
-      "Up to 12.5 min video",
       "Up to 40 min avatar video",
       "No watermark",
       "Basic AI tools",
