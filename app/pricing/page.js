@@ -62,7 +62,6 @@ const plans = [
       "1 user",
       "600 min of video",
       "20 GB storage",
-      "5 brand kits",
       "120 min AI voices (29 languages)",
       "18M Getty Images & Storyblocks",
       "14,280 AI credits/year",
