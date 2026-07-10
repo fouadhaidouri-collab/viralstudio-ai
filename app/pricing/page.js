@@ -63,11 +63,8 @@ const plans = [
       "18M Getty Images & Storyblocks",
       "14,280 AI credits/year",
       "Up to 20,000 images",
-      "Up to 125 min video",
       "Up to 400 min avatar video",
       "Custom avatars",
-      "Voice cloning",
-      "Advanced AI tools",
     ],
   },
   {
