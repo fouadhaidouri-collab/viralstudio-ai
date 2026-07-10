@@ -158,11 +158,6 @@ export default function AIVideoPage() {
   const updateConfig = (key, value) => {
     setModelConfigs(prev => ({ ...prev, [model.label]: { ...(prev[model.label] || {}), [key]: value } }));
   };
-  const providers = buildVideoProviders(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings);
-  const calcCredits = (m) => {
-    const p = pricing?.[m.label];
-    return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings);
-  };
   const [videoCount, setVideoCount] = useState(1);
   const [images, setImages] = useState([]);
   const [generating, setGenerating] = useState(false);
@@ -170,6 +165,11 @@ export default function AIVideoPage() {
   const [videoError, setVideoError] = useState(null);
   const [pricing, setPricing] = useState({});
   const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
+  const providers = buildVideoProviders(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings);
+  const calcCredits = (m) => {
+    const p = pricing?.[m.label];
+    return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings);
+  };
   const [credits, setCredits] = useState(0);
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
