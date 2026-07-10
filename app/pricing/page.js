@@ -85,8 +85,6 @@ const plans = [
       "Up to 48,000 images",
       "Up to 300 min video",
       "Up to 960 min avatar video",
-      "Collaborative workspace",
-      "Team onboarding & training",
     ],
   },
 ];
