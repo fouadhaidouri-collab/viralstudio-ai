@@ -50,18 +50,18 @@ const calcModelCredits = (unitPrice, quantity, settings) => {
   return Math.max(credits, minCredits);
 };
 
-const providerMeta = {
-  Google: { icon: "videocam", color: "#7c3aed" },
-  xAI: { icon: "psychology", color: "#06b6d4" },
-  ByteDance: { icon: "directions_run", color: "#f59e0b" },
+const familyMeta = {
+  Veo: { icon: "videocam", color: "#7c3aed" },
+  Grok: { icon: "psychology", color: "#06b6d4" },
+  Seedance: { icon: "directions_run", color: "#f59e0b" },
   Kling: { icon: "smart_display", color: "#ef4444" },
   Runway: { icon: "run_circle", color: "#10b981" },
   Luma: { icon: "flare", color: "#8b5cf6" },
   Pika: { icon: "pets", color: "#ec4899" },
-  Alibaba: { icon: "emoji_nature", color: "#14b8a6" },
+  "Happy Horse": { icon: "emoji_nature", color: "#14b8a6" },
 };
 
-function buildVideoProviders(models, pricingMap, duration, resolution, creditSettings) {
+function buildVideoFamilies(models, pricingMap, duration, resolution, creditSettings) {
   const cheapest = models.slice().sort((a, b) => {
     const pa = pricingMap?.[a.label]?.unitPrice ?? 0.05;
     const pb = pricingMap?.[b.label]?.unitPrice ?? 0.05;
@@ -74,23 +74,21 @@ function buildVideoProviders(models, pricingMap, duration, resolution, creditSet
   })[0];
   const groups = {};
   for (const m of models) {
-    if (!groups[m.provider]) groups[m.provider] = [];
-    const durOpts = m.options.duration || [];
-    const minDur = durOpts.length > 0 ? Math.min(...durOpts.map(d => parseInt(d))) : null;
-    const maxDur = durOpts.length > 0 ? Math.max(...durOpts.map(d => parseInt(d))) : null;
+    const fam = m.family || m.provider || "Other";
+    if (!groups[fam]) groups[fam] = [];
     let badge = null;
     let badgeColor = null;
     if (m.label === fastest.label) { badge = "Fastest"; badgeColor = "#10b981"; }
     else if (m.label === cheapest.label) { badge = "Cheapest"; badgeColor = "#facc15"; }
     else if (models.indexOf(m) >= models.length - 2) { badge = "New"; badgeColor = "#8b5cf6"; }
+    else if (models.length <= 1) { badge = null; }
     else { badge = "Best Quality"; badgeColor = "#f97316"; }
-    const durStr = minDur && maxDur ? (minDur === maxDur ? `${minDur}s` : `${minDur}-${maxDur}s`) : null;
-    groups[m.provider].push({ ...m, badge, badgeColor, duration: durStr });
+    groups[fam].push({ ...m, badge, badgeColor });
   }
   return Object.entries(groups).map(([name, mods]) => ({
     name,
-    icon: providerMeta[name]?.icon || "smart_toy",
-    color: providerMeta[name]?.color || "#a855f7",
+    icon: familyMeta[name]?.icon || "smart_toy",
+    color: familyMeta[name]?.color || "#a855f7",
     models: mods,
   }));
 }
@@ -165,7 +163,7 @@ export default function AIVideoPage() {
   const [videoError, setVideoError] = useState(null);
   const [pricing, setPricing] = useState({});
   const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
-  const providers = buildVideoProviders(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings);
+  const providers = buildVideoFamilies(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings);
   const calcCredits = (m) => {
     const p = pricing?.[m.label];
     return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings);
