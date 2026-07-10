@@ -83,7 +83,7 @@ function buildVideoFamilies(models, pricingMap, duration, resolution, creditSett
     else if (m.label === cheapest.label) { badge = "Premium"; badgeColor = "#a855f7"; }
     else if (m.label.includes("Fast") || m.label.includes("Lite")) { badge = null; }
     else if (m.family === "Kling" && m.label === "Kling 3.0 Pro") { badge = "Best Quality"; badgeColor = "#f97316"; }
-    else if (m.family === "Seedance" && m.label.includes("Reference")) { badge = null; }
+    else if (m.family === "Seedance" && (m.label.includes("Fast") || m.label.includes("Reference"))) { badge = null; }
     else if (m.family === "Runway") { badge = "Best Quality"; badgeColor = "#f97316"; }
     else if (m.family === "Luma") { badge = null; }
     else if (m.family === "Pika") { badge = null; }
