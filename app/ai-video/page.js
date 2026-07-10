@@ -52,13 +52,16 @@ const calcModelCredits = (unitPrice, quantity, settings) => {
 
 const familyMeta = {
   Veo: { icon: "videocam", color: "#7c3aed" },
+  Google: { icon: "videocam", color: "#4285F4" },
   Grok: { icon: "psychology", color: "#06b6d4" },
+  xAI: { icon: "psychology", color: "#06b6d4" },
   Seedance: { icon: "directions_run", color: "#f59e0b" },
   Kling: { icon: "smart_display", color: "#ef4444" },
   Runway: { icon: "run_circle", color: "#10b981" },
   Luma: { icon: "flare", color: "#8b5cf6" },
   Pika: { icon: "pets", color: "#ec4899" },
   "Happy Horse": { icon: "emoji_nature", color: "#14b8a6" },
+  Hailuo: { icon: "waves", color: "#3b82f6" },
 };
 
 function buildVideoFamilies(models, pricingMap, duration, resolution, creditSettings) {
@@ -79,8 +82,8 @@ function buildVideoFamilies(models, pricingMap, duration, resolution, creditSett
     let badge = null;
     let badgeColor = null;
     if (m.label === fastest.label) { badge = "Fastest"; badgeColor = "#10b981"; }
-    else if (m.label === cheapest.label) { badge = "Cheapest"; badgeColor = "#facc15"; }
-    else if (models.indexOf(m) >= models.length - 2) { badge = "New"; badgeColor = "#8b5cf6"; }
+    else if (m.label === cheapest.label) { badge = "Premium"; badgeColor = "#a855f7"; }
+    else if (models.indexOf(m) >= models.length - 2) { badge = "New"; badgeColor = "#22c55e"; }
     else if (models.length <= 1) { badge = null; }
     else { badge = "Best Quality"; badgeColor = "#f97316"; }
     groups[fam].push({ ...m, badge, badgeColor });
