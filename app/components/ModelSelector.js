@@ -13,14 +13,8 @@ function getVersion(label, family) {
 const brandLogos = {
   Veo: (
     <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#7c3aed" />
+      <rect x="1" y="1" width="22" height="22" rx="5" fill="#4285F4" />
       <polygon points="9,6 9,18 18,12" fill="white" />
-    </svg>
-  ),
-  Google: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="white" />
-      <text x="12" y="16" textAnchor="middle" fontSize="13" fontWeight="700" fill="#4285F4" fontFamily="Arial">G</text>
     </svg>
   ),
   Grok: (
@@ -30,16 +24,11 @@ const brandLogos = {
       <circle cx="12" cy="12" r="1.5" fill="white" />
     </svg>
   ),
-  xAI: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#06b6d4" />
-      <text x="12" y="16" textAnchor="middle" fontSize="13" fontWeight="700" fill="white" fontFamily="Arial">x</text>
-    </svg>
-  ),
   Seedance: (
     <svg viewBox="0 0 24 24" width="24" height="24">
       <rect x="1" y="1" width="22" height="22" rx="5" fill="#f59e0b" />
-      <text x="12" y="16" textAnchor="middle" fontSize="13" fontWeight="700" fill="white" fontFamily="Arial">S</text>
+      <path d="M7,16 Q12,6 14,10 Q16,14 12,18" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="14" cy="8" r="1.2" fill="white" />
     </svg>
   ),
   Kling: (
@@ -69,18 +58,19 @@ const brandLogos = {
       <polygon points="9,7 17,12 9,17" fill="white" />
     </svg>
   ),
-  "Happy Horse": (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#14b8a6" />
-      <path d="M7,16 Q7,8 12,8 Q17,8 17,16" fill="none" stroke="white" strokeWidth="1.5" />
-      <circle cx="10" cy="10" r="1" fill="white" />
-      <path d="M17,12 L19,10 L19,14 Z" fill="white" />
-    </svg>
-  ),
   Hailuo: (
     <svg viewBox="0 0 24 24" width="24" height="24">
       <rect x="1" y="1" width="22" height="22" rx="5" fill="#3b82f6" />
-      <path d="M4,16 Q8,8 12,12 Q16,16 20,8" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M5,16 C8,6 12,6 16,16" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="10.5" cy="9" r="1.2" fill="white" />
+    </svg>
+  ),
+  "Happy Horse": (
+    <svg viewBox="0 0 24 24" width="24" height="24">
+      <rect x="1" y="1" width="22" height="22" rx="5" fill="#14b8a6" />
+      <path d="M8,16 C8,9 16,9 16,16" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="10.5" cy="10" r="1" fill="white" />
+      <path d="M16,11 L19,8 L19,14 Z" fill="white" opacity="0.8" />
     </svg>
   ),
 };

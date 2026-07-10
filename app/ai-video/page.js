@@ -51,17 +51,15 @@ const calcModelCredits = (unitPrice, quantity, settings) => {
 };
 
 const familyMeta = {
-  Veo: { icon: "videocam", color: "#7c3aed" },
-  Google: { icon: "videocam", color: "#4285F4" },
+  Veo: { icon: "videocam", color: "#4285F4" },
   Grok: { icon: "psychology", color: "#06b6d4" },
-  xAI: { icon: "psychology", color: "#06b6d4" },
   Seedance: { icon: "directions_run", color: "#f59e0b" },
   Kling: { icon: "smart_display", color: "#ef4444" },
   Runway: { icon: "run_circle", color: "#10b981" },
   Luma: { icon: "flare", color: "#8b5cf6" },
   Pika: { icon: "pets", color: "#ec4899" },
-  "Happy Horse": { icon: "emoji_nature", color: "#14b8a6" },
   Hailuo: { icon: "waves", color: "#3b82f6" },
+  "Happy Horse": { icon: "emoji_nature", color: "#14b8a6" },
 };
 
 function buildVideoFamilies(models, pricingMap, duration, resolution, creditSettings) {
@@ -83,9 +81,14 @@ function buildVideoFamilies(models, pricingMap, duration, resolution, creditSett
     let badgeColor = null;
     if (m.label === fastest.label) { badge = "Fastest"; badgeColor = "#10b981"; }
     else if (m.label === cheapest.label) { badge = "Premium"; badgeColor = "#a855f7"; }
-    else if (models.indexOf(m) >= models.length - 2) { badge = "New"; badgeColor = "#22c55e"; }
-    else if (models.length <= 1) { badge = null; }
-    else { badge = "Best Quality"; badgeColor = "#f97316"; }
+    else if (m.label.includes("Fast") || m.label.includes("Lite")) { badge = null; }
+    else if (m.family === "Kling" && m.label === "Kling 3.0 Pro") { badge = "Best Quality"; badgeColor = "#f97316"; }
+    else if (m.family === "Seedance" && m.label.includes("Reference")) { badge = null; }
+    else if (m.family === "Runway") { badge = "Best Quality"; badgeColor = "#f97316"; }
+    else if (m.family === "Luma") { badge = null; }
+    else if (m.family === "Pika") { badge = null; }
+    else if (m.label === "Hailuo 02 Standard") { badge = "New"; badgeColor = "#22c55e"; }
+    else if (m.label === "Happy Horse") { badge = "Popular"; badgeColor = "#f97316"; }
     groups[fam].push({ ...m, badge, badgeColor });
   }
   return Object.entries(groups).map(([name, mods]) => ({
