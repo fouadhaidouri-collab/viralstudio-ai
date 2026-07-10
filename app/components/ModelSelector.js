@@ -10,70 +10,32 @@ function getVersion(label, family) {
   return label.slice(idx + family.length).trim();
 }
 
-const brandLogos = {
-  Veo: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#4285F4" />
-      <polygon points="9,6 9,18 18,12" fill="white" />
-    </svg>
-  ),
-  Grok: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#06b6d4" />
-      <circle cx="12" cy="12" r="5" fill="none" stroke="white" strokeWidth="1.8" />
-      <circle cx="12" cy="12" r="1.5" fill="white" />
-    </svg>
-  ),
-  Seedance: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#f59e0b" />
-      <path d="M7,16 Q12,6 14,10 Q16,14 12,18" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="14" cy="8" r="1.2" fill="white" />
-    </svg>
-  ),
-  Kling: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#ef4444" />
-      <text x="12" y="16" textAnchor="middle" fontSize="13" fontWeight="700" fill="white" fontFamily="Arial">K</text>
-    </svg>
-  ),
-  Runway: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#10b981" />
-      <rect x="6" y="8" width="12" height="2" rx="1" fill="white" />
-      <rect x="6" y="11" width="10" height="2" rx="1" fill="white" />
-      <rect x="6" y="14" width="8" height="2" rx="1" fill="white" />
-    </svg>
-  ),
-  Luma: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#8b5cf6" />
-      <polygon points="12,5 19,12 12,19 5,12" fill="none" stroke="white" strokeWidth="1.8" />
-      <circle cx="12" cy="12" r="2.5" fill="white" />
-    </svg>
-  ),
-  Pika: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#ec4899" />
-      <polygon points="9,7 17,12 9,17" fill="white" />
-    </svg>
-  ),
-  Hailuo: (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#3b82f6" />
-      <path d="M5,16 C8,6 12,6 16,16" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="10.5" cy="9" r="1.2" fill="white" />
-    </svg>
-  ),
-  "Happy Horse": (
-    <svg viewBox="0 0 24 24" width="24" height="24">
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#14b8a6" />
-      <path d="M8,16 C8,9 16,9 16,16" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="10.5" cy="10" r="1" fill="white" />
-      <path d="M16,11 L19,8 L19,14 Z" fill="white" opacity="0.8" />
-    </svg>
-  ),
+const logoMap = {
+  Veo: "veo.png",
+  Grok: "grok.png",
+  Seedance: "seedance.jpg",
+  Kling: "kling.png",
+  Runway: "runway.jpg",
+  Luma: "luma.jpg",
+  Pika: "pika.png",
+  Hailuo: "hailuo.jpg",
+  "Happy Horse": "happy-horse.png",
 };
+
+function BrandLogo({ name, size = 24 }) {
+  const src = logoMap[name];
+  if (!src) return null;
+  return (
+    <img
+      src={`/logos/${src}`}
+      alt={name}
+      width={size}
+      height={size}
+      className="rounded-lg shrink-0"
+      style={{ width: size, height: size, objectFit: "cover" }}
+    />
+  );
+}
 
 const badgeEmojis = {
   "New": "🟢",
@@ -134,11 +96,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
         className={`w-full flex items-center justify-between gap-1.5 bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 rounded-xl hover:border-primary/40 hover:from-primary/[0.08] hover:to-primary/[0.02] transition-all duration-200 shadow-sm ${compact ? 'px-2.5 py-1.5' : 'px-3.5 py-3 text-sm'}`}
       >
         <span className="flex items-center gap-2 truncate min-w-0">
-          {brandLogos[selectedModel.family || selectedModel.provider] || (
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${selectedModel.color}20` }}>
-              <Icon name={selectedModel.icon} className="text-sm" style={{ color: selectedModel.color }} />
-            </div>
-          )}
+          <BrandLogo name={selectedModel.family || selectedModel.provider} />
           <span className="font-semibold text-white text-[11px] truncate">{selectedModel.label}</span>
           {calcCredits?.(selectedModel) != null && (
             <span className="text-[9px] text-yellow-400 font-medium shrink-0">({calcCredits(selectedModel)} credit)</span>
@@ -179,13 +137,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                     borderRight: isActive ? `2px solid ${p.color}` : "2px solid transparent",
                   }}
                 >
-                  <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0">
-                    {brandLogos[p.name] || (
-                      <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${p.color}20` }}>
-                        <Icon name={p.icon} size={14} style={{ color: p.color }} />
-                      </div>
-                    )}
-                  </div>
+                  <BrandLogo name={p.name} />
                   <span className="text-xs font-semibold">{p.name}</span>
                 </button>
               );
@@ -194,13 +146,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
 
           <div className="flex-1 overflow-y-auto py-3 px-3 custom-scrollbar">
             <div className="flex items-center gap-2 mb-3 px-1.5">
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0">
-                {brandLogos[activeProvider] || (
-                  <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${activeGroup?.color}20` }}>
-                    <Icon name={activeGroup?.icon} size={14} style={{ color: activeGroup?.color }} />
-                  </div>
-                )}
-              </div>
+              <BrandLogo name={activeProvider} />
               <span className="text-[11px] font-bold text-white uppercase tracking-wider">{activeProvider}</span>
             </div>
             <div className="space-y-2">
@@ -229,11 +175,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                     }}
                   >
                     <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                      {brandLogos[model.family || model.provider] || (
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${model.color}20` }}>
-                          <Icon name={model.icon} size={14} style={{ color: model.color }} />
-                        </div>
-                      )}
+                      <BrandLogo name={model.family || model.provider} />
                     </div>
                     <div className="flex-1 text-left min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
