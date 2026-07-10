@@ -14,7 +14,6 @@ const pageTitles = {
   "/admin/clipping": "Clipping Jobs",
   "/admin/ugc": "UGC Engine",
   "/admin/hooks": "Hook Generator",
-  "/admin/chat": "Chat AI",
   "/admin/templates": "Templates",
   "/admin/plans": "Plans & Pricing",
   "/admin/payments": "Payments",

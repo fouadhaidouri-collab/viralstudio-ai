@@ -37,15 +37,6 @@ const features = [
     btn: "Launch Video Lab",
   },
   {
-    href: "/chat-ai",
-    title: "Chat AI",
-    desc: "Intelligent assistant that helps you brainstorm, script, and refine your content strategy.",
-    icon: "chat",
-    color: "text-yellow-400",
-    bg: "bg-yellow-400/10",
-    btn: "Start Chatting",
-  },
-  {
     href: "/ai-image",
     title: "AI Images",
     desc: "Ultra-realistic 8K image generation for thumbnails, covers, and conceptual art.",

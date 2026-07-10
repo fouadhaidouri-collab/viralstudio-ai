@@ -9,7 +9,6 @@ import Icon from "./Icon";
 const homeItem = { href: "/", label: "Home", icon: "dashboard" };
 const toolItems = [
   { href: "/ai-video", label: "AI Video", icon: "movie" },
-  { href: "/chat-ai", label: "Chat AI", icon: "chat" },
   { href: "/ai-image", label: "Image Lab", icon: "image" },
   { href: "/ugc-engine", label: "UGC Engine", icon: "record_voice_over", soon: true },
   { href: "/hook-gen", label: "Hook Gen", icon: "auto_awesome", soon: true },

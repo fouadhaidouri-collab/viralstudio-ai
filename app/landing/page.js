@@ -79,8 +79,6 @@ export default function LandingPage() {
                 {[
                   { icon: "🎬", color: "rgba(168,85,247,0.12)", text: "#a855f7", title: "AI Video Studio", desc: "Generate high-quality cinematic clips from text prompts, with professional transitions and effects." },
                   { icon: "📷", color: "rgba(6,182,212,0.12)", text: "#06b6d4", title: "Image Lab", desc: "Ultra-realistic 8K image generation for thumbnails, covers, and conceptual art in any style." },
-                  { icon: "🧠", color: "rgba(250,204,21,0.12)", text: "#facc15", title: "Chat AI Assistant", desc: "Intelligent assistant that helps you brainstorm, script, and refine your content strategy." },
-
                 ].map((f) => (
                   <div key={f.title} className="rounded-2xl p-6 md:p-7 transition-all hover:translate-y-[-3px]" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4" style={{ background: f.color, color: f.text }}>{f.icon}</div>
