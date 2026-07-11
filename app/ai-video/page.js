@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
@@ -99,7 +99,7 @@ function buildVideoFamilies(models, pricingMap, duration, resolution, creditSett
   }));
 }
 
-function Dropdown({ label, value, options, onChange, compact, verified, schemaField, schemaAlt, caps, onVerify }) {
+function Dropdown({ label, value, options, onChange, compact }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -111,12 +111,7 @@ function Dropdown({ label, value, options, onChange, compact, verified, schemaFi
 
   return (
     <div ref={ref} className="relative w-full">
-      <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5 font-semibold flex items-center gap-1.5" style={{ fontFamily: 'Geist, sans-serif' }}>
-        {label}
-        {verified === true && <span title="Verified from fal.ai" className="text-[9px] text-green-400">✓</span>}
-        {verified === false && <span title="Differs from fal.ai schema" className="text-[9px] text-yellow-400">⚠</span>}
-        {verified === null && caps?.fetched && <span title="Option field not in fal.ai schema" className="text-[9px] text-white/30">?</span>}
-      </div>
+      <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5 font-semibold" style={{ fontFamily: 'Geist, sans-serif' }}>{label}</div>
       <button
         onClick={() => setOpen(!open)}
         className={`w-full flex items-center justify-between gap-2 bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 rounded-xl hover:border-primary/40 hover:from-primary/[0.08] hover:to-primary/[0.02] transition-all duration-200 shadow-sm ${compact ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-sm'}`}
@@ -137,15 +132,12 @@ function Dropdown({ label, value, options, onChange, compact, verified, schemaFi
         <div className="absolute bottom-full left-0 right-0 mb-2 bg-surface-container/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto py-1.5">
           {options.map((opt) => {
             const optVal = typeof opt === "string" ? opt : opt.label;
-            const optVerified = caps?.fetched && schemaField && onVerify ? onVerify(schemaField, optVal, schemaAlt) : null;
             return (
               <button
                 key={optVal}
                 onClick={() => { onChange(opt); setOpen(false); }}
                 className={`w-full text-left px-3 py-2.5 text-sm transition-all duration-150 flex items-center gap-2 ${value === optVal ? "text-white bg-primary/15 border-l-2 border-primary" : "text-on-surface hover:bg-white/[0.06] hover:text-white border-l-2 border-transparent"}`}
               >
-                {optVerified === true && <span className="text-[9px] text-green-400 shrink-0">✓</span>}
-                {optVerified === false && <span className="text-[9px] text-yellow-400 shrink-0">⚠</span>}
                 {typeof opt !== "string" && (opt.label?.includes(":") ? <AspectIcon label={opt.label} /> : <Icon name={opt.icon} className="text-base" style={{color: opt.color || "#d2bbff"}} />)}
                 {optVal}
               </button>
@@ -174,7 +166,6 @@ export default function AIVideoPage() {
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
   const [modelCapabilities, setModelCapabilities] = useState({});
-  const [verifyingModel, setVerifyingModel] = useState(false);
   const fileInputRef = useRef();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
   const { setMobileOpen } = useSidebar();
@@ -182,18 +173,6 @@ export default function AIVideoPage() {
   const caps = videoModelCapabilities[model.label] || videoModelCapabilities["Veo 3.1 Fast"];
   const defaultDurations = caps.durations.length > 0 ? caps.durations : ["5 seconds"];
   const realCaps = modelCapabilities[model.fal_model] || null;
-  const schemaOpts = useCallback((...names) => {
-    const opts = realCaps?.schema?.options || {};
-    for (const n of names) {
-      if (opts[n]) return opts[n];
-    }
-    return null;
-  }, [realCaps]);
-  const getVerifiedOpts = useCallback((fieldName, altNames) => {
-    const candidates = [fieldName, ...(altNames || [])];
-    return schemaOpts(...candidates);
-  }, [schemaOpts]);
-  // Use real fal.ai schema options when available, otherwise fall back to hardcoded caps
   const availableAspectRatios = useMemo(() => {
     const mc = modelCapabilities[model.fal_model];
     const realOpts = mc?.schema?.options?.aspect_ratio;
@@ -282,27 +261,13 @@ export default function AIVideoPage() {
     if (!model.fal_model) return;
     const key = model.fal_model;
     if (modelCapabilities[key]?.fetched) return;
-    setVerifyingModel(true);
     fetch(`/api/fal/model-capabilities?endpoint_id=${encodeURIComponent(key)}`)
       .then(r => r.json())
       .then(data => {
         setModelCapabilities(prev => ({ ...prev, [key]: { ...data, fetched: true } }));
       })
-      .catch(() => {})
-      .finally(() => setVerifyingModel(false));
+      .catch(() => {});
   }, [model.fal_model]);
-
-  const isVerified = useCallback((fieldName, value, altNames) => {
-    const candidates = [fieldName, ...(altNames || [])];
-    const opts = schemaOpts(...candidates);
-    if (!opts || !Array.isArray(opts)) return null;
-    if (fieldName === "aspect_ratio") {
-      const normalized = value.replace(/\s+/g, "");
-      return opts.some(o => o.replace(/\s+/g, "") === normalized);
-    }
-    const valStr = String(value).toLowerCase();
-    return opts.some(o => String(o).toLowerCase() === valStr);
-  }, [schemaOpts]);
 
   useEffect(() => {
     const c = videoModelCapabilities[model.label];
@@ -334,26 +299,6 @@ export default function AIVideoPage() {
     if (changed) setModelConfigs(prev => ({ ...prev, [model.label]: updated }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.label]);
-
-  // Reset config options when real fal.ai capabilities are fetched and differ
-  useEffect(() => {
-    if (!realCaps?.fetched) return;
-    const existing = modelConfigs[model.label];
-    if (!existing) return;
-    let changed = false;
-    const updated = { ...existing };
-    if (existing.aspectRatio && !availableAspectRatios.some(a => a.label === existing.aspectRatio.label)) {
-      if (availableAspectRatios.length > 0) { updated.aspectRatio = availableAspectRatios[0]; changed = true; }
-    }
-    if (!availableResolutions.includes(existing.resolution)) {
-      if (availableResolutions.length > 0) { updated.resolution = availableResolutions[0]; changed = true; }
-    }
-    if (!availableDurations.includes(existing.duration)) {
-      if (availableDurations.length > 0) { updated.duration = availableDurations[0]; changed = true; }
-    }
-    if (changed) setModelConfigs(prev => ({ ...prev, [model.label]: updated }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [realCaps?.fetched]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -513,29 +458,13 @@ export default function AIVideoPage() {
               )}
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <div className="flex items-end gap-2">
-                  <div className="flex-1">
-                    <ModelSelector label="AI Model" providers={providers} selectedModel={model} onSelect={setModel} calcCredits={calcCredits} calcStartingCredits={calcStartingCredits} compact />
-                  </div>
-                  {verifyingModel && (
-                    <div className="shrink-0 pb-1.5 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                      <svg className="animate-spin h-3 w-3 text-blue-400" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                      <span className="text-[10px] text-blue-400 font-medium">Verifying...</span>
-                    </div>
-                  )}
-                  {realCaps?.fetched && !realCaps?.schemaError && null}
-                  {realCaps?.fetched && realCaps?.schemaError && (
-                    <div className="shrink-0 pb-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                      <span className="text-[10px] text-yellow-400 font-medium" title={realCaps.schemaError}>⚠ Schema unavailable</span>
-                    </div>
-                  )}
-                </div>
+                <ModelSelector label="AI Model" providers={providers} selectedModel={model} onSelect={setModel} calcCredits={calcCredits} calcStartingCredits={calcStartingCredits} compact />
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {availableAspectRatios.length > 0 && (
-                    <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} verified={realCaps?.fetched ? isVerified("aspect_ratio", currentConfig.aspectRatio.label) : null} schemaField="aspect_ratio" caps={realCaps} onVerify={isVerified} />
+                    <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
                   )}
-                  <Dropdown label="Resolution" value={currentConfig.resolution} options={availableResolutions} onChange={(v) => updateConfig("resolution", v)} verified={realCaps?.fetched ? isVerified("resolution", currentConfig.resolution, ["video_resolution", "output_resolution"]) : null} schemaField="resolution" schemaAlt={["video_resolution", "output_resolution"]} caps={realCaps} onVerify={isVerified} />
-                  <Dropdown label="Duration" value={currentConfig.duration} options={availableDurations} onChange={(v) => updateConfig("duration", v)} verified={realCaps?.fetched ? isVerified("duration", currentConfig.duration, ["num_seconds", "duration_s", "duration_seconds"]) : null} schemaField="duration" schemaAlt={["num_seconds", "duration_s", "duration_seconds"]} caps={realCaps} onVerify={isVerified} />
+                  <Dropdown label="Resolution" value={currentConfig.resolution} options={availableResolutions} onChange={(v) => updateConfig("resolution", v)} />
+                  <Dropdown label="Duration" value={currentConfig.duration} options={availableDurations} onChange={(v) => updateConfig("duration", v)} />
                   <Dropdown label="Quantity" value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} />
                 </div>
                 <button
@@ -552,8 +481,8 @@ export default function AIVideoPage() {
                       const qty = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
                       const c = calcModelCredits(unitPrice, qty, creditSettings);
                       const rawSecs = secFromDuration(currentConfig.duration) * videoCount;
-                      const falCost = unitPrice * rawSecs * resolutionMultiplier(currentConfig.resolution);
-                      return <span className="text-yellow-300/90 font-semibold">({c} credits{unitPrice > 0 ? <> · <span className="text-green-400/80">${falCost.toFixed(3)}</span></> : ""})</span>;
+                      const falCost = unitPrice * rawSecs;
+                      return <span className="text-yellow-300/90 font-semibold">({c} credits · <span className="text-green-400/80">${falCost.toFixed(3)}</span>)</span>;
                     })()}</>
                   )}
                 </button>
