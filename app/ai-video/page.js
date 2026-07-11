@@ -430,32 +430,6 @@ export default function AIVideoPage() {
                   <Dropdown label="Duration" value={currentConfig.duration} options={availableDurations} onChange={(v) => updateConfig("duration", v)} />
                   <Dropdown label="Quantity" value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} />
                 </div>
-                {(() => {
-                  const p = pricing?.[model.label];
-                  const unitPrice = p?.unitPrice;
-                  const durMul = durationMultiplier(currentConfig.duration);
-                  const resMul = resolutionMultiplier(currentConfig.resolution);
-                  const qty = videoCount * durMul * resMul;
-                  const totalCredits = calcModelCredits(unitPrice ?? 0.05, qty, creditSettings);
-                  return (
-                    <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs">
-                      <div className="flex items-center gap-3 text-white/60">
-                        <Icon name="bolt" className="text-yellow-400 text-sm" />
-                        <span>{currentConfig.resolution} · {currentConfig.duration}</span>
-                        <span className="text-white/30">|</span>
-                        <span>×{videoCount}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {unitPrice != null && (
-                          <span className="text-white/40 text-[10px]">${unitPrice.toFixed(4)}/s</span>
-                        )}
-                        <span className="font-semibold text-yellow-400 text-sm">
-                          {totalCredits != null ? `${totalCredits} credits` : "—"}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })()}
                 <button
                   onClick={handleGenerate}
                   disabled={generating || !prompt.trim()}
@@ -465,7 +439,12 @@ export default function AIVideoPage() {
                   {generating ? (
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
-                    <><Icon name="auto_videocam" className="text-sm" /> Generate Video</>
+                    <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
+                      const p = pricing?.[model.label];
+                      const qty = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
+                      const c = calcModelCredits(p?.unitPrice ?? 0.05, qty, creditSettings);
+                      return c != null && <span className="text-yellow-300/90 font-semibold">({c} credits)</span>;
+                    })()}</>
                   )}
                 </button>
 
