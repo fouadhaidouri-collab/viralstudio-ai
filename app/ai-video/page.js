@@ -523,11 +523,7 @@ export default function AIVideoPage() {
                       <span className="text-[10px] text-blue-400 font-medium">Verifying...</span>
                     </div>
                   )}
-                  {realCaps?.fetched && !realCaps?.schemaError && (
-                    <div className="shrink-0 pb-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-500/10 border border-green-500/20">
-                      <span className="text-[10px] text-green-400 font-medium">✓ Verified</span>
-                    </div>
-                  )}
+                  {realCaps?.fetched && !realCaps?.schemaError && null}
                   {realCaps?.fetched && realCaps?.schemaError && (
                     <div className="shrink-0 pb-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                       <span className="text-[10px] text-yellow-400 font-medium" title={realCaps.schemaError}>⚠ Schema unavailable</span>
