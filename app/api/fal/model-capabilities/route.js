@@ -28,7 +28,8 @@ export async function GET(request) {
     if (res.ok) {
       const data = await res.json();
       rawSchema = data;
-      schema = parseFalSchema(data.openapi || data);
+      const openapiDoc = data.models?.[0]?.openapi || data;
+      schema = parseFalSchema(openapiDoc);
     } else {
       schemaError = `Schema fetch returned ${res.status}`;
     }
