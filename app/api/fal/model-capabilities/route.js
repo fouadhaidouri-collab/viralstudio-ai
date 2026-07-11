@@ -16,6 +16,26 @@ export async function GET(request) {
     return Response.json({ success: false, setupRequired: true, error: keyResult.error }, { status: 200 });
   }
 
+  // Search mode
+  const isSearch = endpointId.startsWith("search/");
+  const searchQuery = isSearch ? endpointId.slice(7) : null;
+
+  if (isSearch) {
+    try {
+      const searchUrl = `https://api.fal.ai/v1/models?q=${encodeURIComponent(searchQuery)}`;
+      const res = await fetch(searchUrl, {
+        headers: { Authorization: `Key ${keyResult.key}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const endpoints = (data.models || []).map(m => ({ endpoint_id: m.endpoint_id, name: m.name }));
+        return Response.json({ success: true, search_query: searchQuery, endpoints });
+      }
+    } catch (err) {
+      return Response.json({ success: false, error: err.message });
+    }
+  }
+
   // Fetch schema
   let schema = null;
   let schemaError = null;
