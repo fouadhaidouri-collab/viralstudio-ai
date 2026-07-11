@@ -158,8 +158,8 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                 const startingCredits = calcStartingCredits?.(model);
                 const version = getVersion(model.label, model.family || activeProvider);
                 const durOpts = model.options?.duration || [];
-                const minDur = durOpts.length > 0 ? Math.min(...durOpts.map(d => parseInt(d))) : null;
-                const startDurStr = minDur ? `${minDur} sec` : null;
+                const maxDur = durOpts.length > 0 ? Math.max(...durOpts.map(d => parseInt(d))) : null;
+                const startDurStr = maxDur ? `${maxDur} sec` : null;
                 const badge = model.badge;
                 const badgeEmoji = badgeEmojis[badge];
                 return (
@@ -206,7 +206,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                         )}
                         {startingCredits != null && (
                           <span className="text-[11px] font-semibold text-yellow-400/90">
-                            💳 Starting from {startingCredits} credits
+                            💳 {startingCredits} credits
                           </span>
                         )}
                       </div>
