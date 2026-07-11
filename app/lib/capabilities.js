@@ -42,7 +42,7 @@ export const videoModels = [
   // Hailuo (MiniMax)
   { id: "hailuo_02_std", label: "Hailuo 02 Standard", family: "Hailuo", icon: "waves", color: "#3b82f6", desc: "MiniMax's advanced video model with natural motion dynamics.", genTime: 180, fal_model: "fal-ai/minimax/hailuo-02/standard/image-to-video", options: { aspect_ratio: ["9:16", "16:9", "1:1"], resolution: ["512P", "768P"], duration: ["6 seconds", "10 seconds"] } },
   // Happy Horse (Alibaba)
-  { id: "happy_horse", label: "Happy Horse", family: "Happy Horse", icon: "emoji_nature", color: "#14b8a6", desc: "Alibaba's efficient and affordable video generation.", genTime: 45, fal_model: "alibaba/happy-horse/image-to-video", options: { aspect_ratio: ["16:9", "9:16", "1:1", "4:3", "3:4"], resolution: ["720p", "1080p"], duration: ["5 seconds", "10 seconds"] } },
+  { id: "happy_horse", label: "Happy Horse", family: "Happy Horse", icon: "emoji_nature", color: "#14b8a6", desc: "Alibaba's efficient and affordable video generation.", genTime: 45, fal_model: "alibaba/happy-horse/image-to-video", options: { aspect_ratio: ["16:9", "9:16", "1:1", "4:3", "3:4"], resolution: ["720p", "1080p"], duration: ["5 seconds", "8 seconds", "10 seconds", "15 seconds"] } },
 ];
 
 export const aiModels = videoModels.map(({ label, icon, color, family, desc, genTime }) => ({ label, icon, color, family, desc, genTime }));
