@@ -9,6 +9,8 @@ export async function GET(request) {
     return Response.json({ error: "Missing endpoint_id" }, { status: 400 });
   }
 
+  const raw = searchParams.get("raw") === "true";
+
   const keyResult = await getFalKey();
   if (!keyResult.hasKey) {
     return Response.json({ success: false, setupRequired: true, error: keyResult.error }, { status: 200 });
@@ -17,6 +19,7 @@ export async function GET(request) {
   // Fetch schema
   let schema = null;
   let schemaError = null;
+  let rawSchema = null;
   try {
     const schemaUrl = `https://api.fal.ai/v1/models?endpoint_id=${encodeURIComponent(endpointId)}&expand=openapi-3.0`;
     const res = await fetch(schemaUrl, {
@@ -24,6 +27,7 @@ export async function GET(request) {
     });
     if (res.ok) {
       const data = await res.json();
+      rawSchema = data;
       schema = parseFalSchema(data.openapi || data);
     } else {
       schemaError = `Schema fetch returned ${res.status}`;
@@ -35,6 +39,7 @@ export async function GET(request) {
   // Fetch pricing
   let pricing = null;
   let pricingError = null;
+  let rawPricing = null;
   try {
     const priceUrl = `https://api.fal.ai/v1/models/pricing?endpoint_id=${encodeURIComponent(endpointId)}`;
     const res = await fetch(priceUrl, {
@@ -42,6 +47,7 @@ export async function GET(request) {
     });
     if (res.ok) {
       const data = await res.json();
+      rawPricing = data;
       if (data.prices && data.prices.length > 0) {
         const p = data.prices[0];
         pricing = { unitPrice: p.unit_price, unit: p.unit, currency: p.currency || "USD" };
@@ -72,7 +78,7 @@ export async function GET(request) {
     }
   }
 
-  return Response.json({
+  const result = {
     success: true,
     endpoint_id: endpointId,
     schema: {
@@ -84,5 +90,12 @@ export async function GET(request) {
     schemaError,
     pricingError,
     fetched_at: new Date().toISOString(),
-  });
+  };
+
+  if (raw) {
+    result._rawSchema = rawSchema;
+    result._rawPricing = rawPricing;
+  }
+
+  return Response.json(result);
 }
