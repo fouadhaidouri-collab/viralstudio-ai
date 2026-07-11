@@ -51,6 +51,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const ref = useRef(null);
   const btnRef = useRef(null);
+  const hasInteracted = useRef(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -62,8 +63,10 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // On open: auto-select provider based on selectedModel (only if user hasn't interacted)
   useEffect(() => {
     if (open) {
+      hasInteracted.current = false;
       for (const p of providers) {
         if (p.models.some(m => m.id === selectedModel.id || m.label === selectedModel.label)) {
           setActiveProvider(p.name);
@@ -72,7 +75,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
       }
       if (providers.length > 0) setActiveProvider(providers[0].name);
     }
-  }, [open, providers, selectedModel]);
+  }, [open]);
 
   const toggle = () => {
     if (!open && btnRef.current) {
@@ -126,7 +129,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
               return (
                 <button
                   key={p.name}
-                  onClick={() => setActiveProvider(p.name)}
+                  onClick={() => { hasInteracted.current = true; setActiveProvider(p.name); }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 transition-all duration-200 text-left ${
                     isActive
                       ? "text-white"
