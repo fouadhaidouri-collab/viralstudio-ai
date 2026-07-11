@@ -38,7 +38,7 @@ export const videoModels = [
   // Luma
   { id: "luma_ray_2", label: "Luma Ray 2", family: "Luma", icon: "flare", color: "#8b5cf6", desc: "Photorealistic video generation with dream-like quality.", genTime: 120, fal_model: "fal-ai/luma-dream-machine/ray-2", options: { aspect_ratio: ["9:16", "16:9", "1:1"], resolution: ["720p", "1080p"], duration: ["5 seconds", "9 seconds"] } },
   // Pika
-  { id: "pika_21", label: "Pika 2.1", family: "Pika", icon: "pets", color: "#ec4899", desc: "Versatile video creation with widest aspect ratio support.", genTime: 60, fal_model: "fal-ai/pika/v2.1/image-to-video", options: { aspect_ratio: ["16:9", "9:16", "1:1", "4:5", "5:4", "3:2", "2:3"], resolution: ["720p", "1080p"], duration: ["5 seconds"] } },
+  { id: "pika_21", label: "Pika 2.1", family: "Pika", icon: "pets", color: "#ec4899", desc: "Versatile video creation with widest aspect ratio support.", genTime: 60, fal_model: "fal-ai/pika/v2.1/image-to-video", options: { aspect_ratio: ["16:9", "9:16", "1:1", "4:5", "5:4", "3:2", "2:3"], resolution: ["720p", "1080p"], duration: ["5 seconds", "10 seconds"] } },
   // Hailuo (MiniMax)
   { id: "hailuo_02_std", label: "Hailuo 02 Standard", family: "Hailuo", icon: "waves", color: "#3b82f6", desc: "MiniMax's advanced video model with natural motion dynamics.", genTime: 180, fal_model: "fal-ai/minimax/hailuo-02/standard/image-to-video", options: { aspect_ratio: ["9:16", "16:9", "1:1"], resolution: ["720p", "1080p"], duration: ["5 seconds", "10 seconds"] } },
   // Happy Horse (Alibaba)
