@@ -163,9 +163,36 @@ export default function AIVideoPage() {
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(videoModels[0]);
   const [modelConfigs, setModelConfigs] = useState({});
+  const [videoCount, setVideoCount] = useState(1);
+  const [images, setImages] = useState([]);
+  const [generating, setGenerating] = useState(false);
+  const [videoUrls, setVideoUrls] = useState([]);
+  const [videoError, setVideoError] = useState(null);
+  const [pricing, setPricing] = useState({});
+  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
+  const [credits, setCredits] = useState(0);
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [neededCredits, setNeededCredits] = useState(0);
+  const [modelCapabilities, setModelCapabilities] = useState({});
+  const [verifyingModel, setVerifyingModel] = useState(false);
+  const fileInputRef = useRef();
+  const [bgVideoIdx, setBgVideoIdx] = useState(0);
+  const { setMobileOpen } = useSidebar();
 
   const caps = videoModelCapabilities[model.label] || videoModelCapabilities["Veo 3.1 Fast"];
   const defaultDurations = caps.durations.length > 0 ? caps.durations : ["5 seconds"];
+  const realCaps = modelCapabilities[model.fal_model] || null;
+  const schemaOpts = useCallback((...names) => {
+    const opts = realCaps?.schema?.options || {};
+    for (const n of names) {
+      if (opts[n]) return opts[n];
+    }
+    return null;
+  }, [realCaps]);
+  const getVerifiedOpts = useCallback((fieldName, altNames) => {
+    const candidates = [fieldName, ...(altNames || [])];
+    return schemaOpts(...candidates);
+  }, [schemaOpts]);
   // Use real fal.ai schema options when available, otherwise fall back to hardcoded caps
   const availableAspectRatios = useMemo(() => {
     const mc = modelCapabilities[model.fal_model];
@@ -193,13 +220,6 @@ export default function AIVideoPage() {
   const updateConfig = (key, value) => {
     setModelConfigs(prev => ({ ...prev, [model.label]: { ...(prev[model.label] || {}), [key]: value } }));
   };
-  const [videoCount, setVideoCount] = useState(1);
-  const [images, setImages] = useState([]);
-  const [generating, setGenerating] = useState(false);
-  const [videoUrls, setVideoUrls] = useState([]);
-  const [videoError, setVideoError] = useState(null);
-  const [pricing, setPricing] = useState({});
-  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
   const providers = useMemo(() => buildVideoFamilies(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings), [pricing, currentConfig.duration, currentConfig.resolution, creditSettings]);
   const calcCredits = (m) => {
     const p = pricing?.[m.label];
@@ -211,28 +231,6 @@ export default function AIVideoPage() {
     const q = durationMultiplier(startDur) * resolutionMultiplier("720p");
     return calcModelCredits(p?.unitPrice ?? 0.05, q, creditSettings);
   };
-  const [credits, setCredits] = useState(0);
-  const [showCreditModal, setShowCreditModal] = useState(false);
-  const [neededCredits, setNeededCredits] = useState(0);
-  const [modelCapabilities, setModelCapabilities] = useState({});
-  const [verifyingModel, setVerifyingModel] = useState(false);
-  const fileInputRef = useRef();
-  const [bgVideoIdx, setBgVideoIdx] = useState(0);
-  const { setMobileOpen } = useSidebar();
-
-  // Build real capabilities helpers early for use in availableXxx memos
-  const realCaps = modelCapabilities[model.fal_model] || null;
-  const schemaOpts = useCallback((...names) => {
-    const opts = realCaps?.schema?.options || {};
-    for (const n of names) {
-      if (opts[n]) return opts[n];
-    }
-    return null;
-  }, [realCaps]);
-  const getVerifiedOpts = useCallback((fieldName, altNames) => {
-    const candidates = [fieldName, ...(altNames || [])];
-    return schemaOpts(...candidates);
-  }, [schemaOpts]);
 
   useEffect(() => {
     const interval = setInterval(() => {
