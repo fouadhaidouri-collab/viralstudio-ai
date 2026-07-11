@@ -161,7 +161,7 @@ export default function AIVideoPage() {
   const [videoUrls, setVideoUrls] = useState([]);
   const [videoError, setVideoError] = useState(null);
   const [pricing, setPricing] = useState({});
-  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 1.0, minimum_generation_credits: 1 });
+  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
   const [credits, setCredits] = useState(0);
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
