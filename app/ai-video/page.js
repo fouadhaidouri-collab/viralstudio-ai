@@ -174,6 +174,12 @@ export default function AIVideoPage() {
     const p = pricing?.[m.label];
     return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings);
   };
+  const calcStartingCredits = (m) => {
+    const p = pricing?.[m.label];
+    const startDur = m.options?.duration?.[0] || "5 seconds";
+    const q = durationMultiplier(startDur) * resolutionMultiplier("720p");
+    return calcModelCredits(p?.unitPrice ?? 0.05, q, creditSettings);
+  };
   const [credits, setCredits] = useState(0);
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
@@ -230,8 +236,8 @@ export default function AIVideoPage() {
     const c = videoModelCapabilities[model.label];
     if (!c) return;
     const existing = modelConfigs[model.label];
-    const defaultRes = c.resolutions.length > 0 ? c.resolutions[c.resolutions.length - 1] : videoResolutions[0];
-    const defaultDur = c.durations.length > 0 ? c.durations[c.durations.length - 1] : defaultDurations[0];
+    const defaultRes = c.resolutions.length > 0 ? c.resolutions[0] : videoResolutions[0];
+    const defaultDur = c.durations.length > 0 ? c.durations[0] : defaultDurations[0];
     if (!existing) {
       const defaults = { aspectRatio: videoAspectRatios[0], resolution: defaultRes, duration: defaultDur };
       if (c.aspectRatios.length > 0) {
@@ -415,7 +421,7 @@ export default function AIVideoPage() {
               )}
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelSelector label="AI Model" providers={providers} selectedModel={model} onSelect={setModel} calcCredits={calcCredits} compact />
+                <ModelSelector label="AI Model" providers={providers} selectedModel={model} onSelect={setModel} calcCredits={calcCredits} calcStartingCredits={calcStartingCredits} compact />
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {availableAspectRatios.length > 0 && (
                     <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
@@ -431,7 +437,6 @@ export default function AIVideoPage() {
                   const resMul = resolutionMultiplier(currentConfig.resolution);
                   const qty = videoCount * durMul * resMul;
                   const totalCredits = calcModelCredits(unitPrice ?? 0.05, qty, creditSettings);
-                  const perVideoCredits = calcModelCredits(unitPrice ?? 0.05, durMul * resMul, creditSettings);
                   return (
                     <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs">
                       <div className="flex items-center gap-3 text-white/60">

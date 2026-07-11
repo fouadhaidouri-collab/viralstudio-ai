@@ -45,7 +45,7 @@ const badgeEmojis = {
   "Premium": "💎",
 };
 
-export default function ModelSelector({ label, providers, selectedModel, onSelect, calcCredits, compact }) {
+export default function ModelSelector({ label, providers, selectedModel, onSelect, calcCredits, calcStartingCredits, compact }) {
   const [open, setOpen] = useState(false);
   const [activeProvider, setActiveProvider] = useState("");
   const [pos, setPos] = useState({ top: 0, left: 0 });
@@ -155,12 +155,11 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
             <div className="space-y-2">
               {activeModels.map((model, idx) => {
                 const selected = model.id ? model.id === selectedModel.id : model.label === selectedModel.label;
-                const credits = calcCredits?.(model);
+                const startingCredits = calcStartingCredits?.(model);
                 const version = getVersion(model.label, model.family || activeProvider);
                 const durOpts = model.options?.duration || [];
                 const minDur = durOpts.length > 0 ? Math.min(...durOpts.map(d => parseInt(d))) : null;
-                const maxDur = durOpts.length > 0 ? Math.max(...durOpts.map(d => parseInt(d))) : null;
-                const durStr = minDur && maxDur ? (minDur === maxDur ? `${minDur}s` : `${minDur}-${maxDur}s`) : null;
+                const startDurStr = minDur ? `${minDur} sec` : null;
                 const badge = model.badge;
                 const badgeEmoji = badgeEmojis[badge];
                 return (
@@ -200,14 +199,14 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                       </div>
                       <div className="text-[13px] text-white/50 mt-1 leading-snug">{model.desc || ""}</div>
                       <div className="flex items-center gap-3 mt-2">
-                        {credits != null && (
-                          <span className="text-[11px] font-semibold text-yellow-400/90">
-                            🪙 {credits} credits
+                        {startDurStr && (
+                          <span className="text-[11px] text-white/50 font-medium flex items-center gap-1">
+                            <Icon name="schedule" size={11} className="text-white/40" />{startDurStr}
                           </span>
                         )}
-                        {durStr && (
-                          <span className="text-[11px] text-white/50 font-medium flex items-center gap-1">
-                            <Icon name="schedule" size={11} className="text-white/40" />{durStr}
+                        {startingCredits != null && (
+                          <span className="text-[11px] font-semibold text-yellow-400/90">
+                            💳 Starting from {startingCredits} credits
                           </span>
                         )}
                       </div>
