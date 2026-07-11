@@ -230,14 +230,14 @@ export default function AIVideoPage() {
     const c = videoModelCapabilities[model.label];
     if (!c) return;
     const existing = modelConfigs[model.label];
+    const defaultRes = c.resolutions.length > 0 ? c.resolutions[c.resolutions.length - 1] : videoResolutions[0];
+    const defaultDur = c.durations.length > 0 ? c.durations[c.durations.length - 1] : defaultDurations[0];
     if (!existing) {
-      const defaults = { aspectRatio: videoAspectRatios[0], resolution: videoResolutions[0], duration: defaultDurations[0] };
+      const defaults = { aspectRatio: videoAspectRatios[0], resolution: defaultRes, duration: defaultDur };
       if (c.aspectRatios.length > 0) {
         const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
         if (found) defaults.aspectRatio = found;
       }
-      if (c.resolutions.length > 0) defaults.resolution = c.resolutions[0];
-      if (c.durations.length > 0) defaults.duration = c.durations[0];
       setModelConfigs(prev => ({ ...prev, [model.label]: defaults }));
       return;
     }
@@ -248,10 +248,10 @@ export default function AIVideoPage() {
       if (found) { updated.aspectRatio = found; changed = true; }
     }
     if (c.resolutions.length > 0 && !c.resolutions.includes(existing.resolution)) {
-      updated.resolution = c.resolutions[0]; changed = true;
+      updated.resolution = defaultRes; changed = true;
     }
     if (c.durations.length > 0 && !c.durations.includes(existing.duration)) {
-      updated.duration = c.durations[0]; changed = true;
+      updated.duration = defaultDur; changed = true;
     }
     if (changed) setModelConfigs(prev => ({ ...prev, [model.label]: updated }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -424,6 +424,33 @@ export default function AIVideoPage() {
                   <Dropdown label="Duration" value={currentConfig.duration} options={availableDurations} onChange={(v) => updateConfig("duration", v)} />
                   <Dropdown label="Quantity" value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} />
                 </div>
+                {(() => {
+                  const p = pricing?.[model.label];
+                  const unitPrice = p?.unitPrice;
+                  const durMul = durationMultiplier(currentConfig.duration);
+                  const resMul = resolutionMultiplier(currentConfig.resolution);
+                  const qty = videoCount * durMul * resMul;
+                  const totalCredits = calcModelCredits(unitPrice ?? 0.05, qty, creditSettings);
+                  const perVideoCredits = calcModelCredits(unitPrice ?? 0.05, durMul * resMul, creditSettings);
+                  return (
+                    <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs">
+                      <div className="flex items-center gap-3 text-white/60">
+                        <Icon name="bolt" className="text-yellow-400 text-sm" />
+                        <span>{currentConfig.resolution} · {currentConfig.duration}</span>
+                        <span className="text-white/30">|</span>
+                        <span>×{videoCount}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {unitPrice != null && (
+                          <span className="text-white/40 text-[10px]">${unitPrice.toFixed(4)}/s</span>
+                        )}
+                        <span className="font-semibold text-yellow-400 text-sm">
+                          {totalCredits != null ? `${totalCredits} credits` : "—"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <button
                   onClick={handleGenerate}
                   disabled={generating || !prompt.trim()}
@@ -433,12 +460,7 @@ export default function AIVideoPage() {
                   {generating ? (
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
-                    <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
-                      const p = pricing?.[model.label];
-                      const quantity = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
-                      const c = calcModelCredits(p?.unitPrice ?? 0.05, quantity, creditSettings);
-                      return c != null && <span className="text-yellow-300/90">({c} credit)</span>;
-                    })()}</>
+                    <><Icon name="auto_videocam" className="text-sm" /> Generate Video</>
                   )}
                 </button>
 
