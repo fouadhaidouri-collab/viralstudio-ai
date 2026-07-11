@@ -157,9 +157,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                 const selected = model.id ? model.id === selectedModel.id : model.label === selectedModel.label;
                 const startingCredits = calcStartingCredits?.(model);
                 const version = getVersion(model.label, model.family || activeProvider);
-                const durOpts = model.options?.duration || [];
-                const maxDur = durOpts.length > 0 ? Math.max(...durOpts.map(d => parseInt(d))) : null;
-                const startDurStr = maxDur ? `${maxDur} sec` : null;
+                const genTime = model.genTime;
                 const badge = model.badge;
                 const badgeEmoji = badgeEmojis[badge];
                 return (
@@ -199,13 +197,12 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                       </div>
                       <div className="text-[13px] text-white/50 mt-1 leading-snug">{model.desc || ""}</div>
                       <div className="flex items-center gap-3 mt-2">
-                        {startDurStr && (
-                          <span className="text-[11px] text-white/50 font-medium flex items-center gap-1">
-                            <Icon name="schedule" size={11} className="text-white/40" />{startDurStr}
-                          </span>
-                        )}
+                        <span className="text-[11px] text-white/50 font-medium flex items-center gap-1">
+                          <Icon name="schedule" size={11} className="text-white/40" />
+                          Video Generation Time: {genTime ? `${genTime} sec` : "—"}
+                        </span>
                         {startingCredits != null && (
-                          <span className="text-[11px] font-semibold text-yellow-400/90">
+                          <span className="text-[11px] font-semibold text-yellow-400/90 ml-auto">
                             💳 {startingCredits} credits
                           </span>
                         )}
