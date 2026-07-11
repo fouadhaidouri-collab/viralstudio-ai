@@ -191,7 +191,14 @@ export default function AIVideoPage() {
   const availableDurations = useMemo(() => {
     const mc = modelCapabilities[model.fal_model];
     const realOpts = mc?.schema?.options?.["duration"] || mc?.schema?.options?.["num_seconds"] || mc?.schema?.options?.["duration_s"] || mc?.schema?.options?.["duration_seconds"];
-    if (realOpts && Array.isArray(realOpts)) return realOpts.map(v => `${v} seconds`).filter(d => caps.durations.includes(d) || !caps.durations.length);
+    if (realOpts && Array.isArray(realOpts)) {
+      const mapped = realOpts.map(v => {
+        // fal.ai returns "Xs" format (e.g. "8s"), convert to "X seconds"
+        const secMatch = String(v).match(/^(\d+)s?$/);
+        return secMatch ? `${secMatch[1]} seconds` : `${v} seconds`;
+      });
+      return mapped;
+    }
     if (realOpts && typeof realOpts === "object" && realOpts.type === "number") return defaultDurations;
     return caps.durations;
   }, [modelCapabilities, model.fal_model, caps]);
