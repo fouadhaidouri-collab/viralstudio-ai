@@ -37,12 +37,6 @@ const secFromDuration = (d) => {
 };
 const durationMultiplier = (d) => secFromDuration(d) / BASE_DURATION_SEC;
 const resolutionMultiplier = (r) => r === "1080p" ? 1.5 : r === "4k" ? 2.5 : 1;
-const calcQtyByUnit = (videoCount, duration, resolution, unit) => {
-  if (!unit) return videoCount * durationMultiplier(duration) * resolutionMultiplier(resolution);
-  const u = unit.toLowerCase();
-  if (u.includes("second") || u.includes("minute")) return videoCount * durationMultiplier(duration) * resolutionMultiplier(resolution);
-  return videoCount;
-};
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
 
@@ -215,14 +209,13 @@ export default function AIVideoPage() {
   const providers = useMemo(() => buildVideoFamilies(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings), [pricing, currentConfig.duration, currentConfig.resolution, creditSettings]);
   const calcCredits = (m) => {
     const p = pricing?.[m.label];
-    const qty = calcQtyByUnit(1, currentConfig.duration, currentConfig.resolution, p?.unit);
-    return calcModelCredits(p?.unitPrice ?? 0.05, qty, creditSettings, m.markup);
+    return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings, m.markup);
   };
   const calcStartingCredits = (m) => {
     const p = pricing?.[m.label];
     const startDur = m.options?.duration?.[0] || "5 seconds";
-    const qty = calcQtyByUnit(1, startDur, "720p", p?.unit);
-    return calcModelCredits(p?.unitPrice ?? 0.05, qty, creditSettings, m.markup);
+    const q = durationMultiplier(startDur) * resolutionMultiplier("720p");
+    return calcModelCredits(p?.unitPrice ?? 0.05, q, creditSettings, m.markup);
   };
 
   useEffect(() => {
@@ -377,9 +370,9 @@ export default function AIVideoPage() {
     if (!prompt.trim()) return;
     if (!isAuthenticated) { router.push("/login"); return; }
 
-    const p = pricing?.[model.label] ?? {};
-    const quantity = calcQtyByUnit(videoCount, currentConfig.duration, currentConfig.resolution, p.unit);
-    const needed = calcModelCredits(p.unitPrice ?? 0.05, quantity, creditSettings, model.markup);
+    const p = pricing?.[model.label];
+    const quantity = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
+    const needed = calcModelCredits(p?.unitPrice ?? 0.05, quantity, creditSettings);
     if (needed != null && credits < needed) {
       setNeededCredits(needed);
       setShowCreditModal(true);
@@ -491,9 +484,8 @@ export default function AIVideoPage() {
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
                     <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
-                      const p = realCaps?.pricing ?? pricing?.[model.label] ?? {};
-                      const unitPrice = p.unitPrice ?? 0.05;
-                      const qty = calcQtyByUnit(videoCount, currentConfig.duration, currentConfig.resolution, p.unit);
+                      const unitPrice = realCaps?.pricing?.unitPrice ?? pricing?.[model.label]?.unitPrice ?? 0.05;
+                      const qty = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
                       const c = calcModelCredits(unitPrice, qty, creditSettings, model.markup);
                       return <span className="text-yellow-300/90 font-semibold">({c} credits)</span>;
                     })()}</>
