@@ -40,9 +40,9 @@ const resolutionMultiplier = (r) => r === "1080p" ? 1.5 : r === "4k" ? 2.5 : 1;
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
 
-const calcModelCredits = (unitPrice, quantity, settings) => {
+const calcModelCredits = (unitPrice, quantity, settings, modelMarkup) => {
   if (unitPrice == null) return null;
-  const markup = settings?.default_markup_multiplier ?? 1.0;
+  const markup = modelMarkup ?? settings?.default_markup_multiplier ?? 1.0;
   const usdValue = settings?.credit_usd_value || 0.029;
   const minCredits = settings?.minimum_generation_credits || 1;
   const sellCost = unitPrice * quantity * markup;
@@ -209,13 +209,13 @@ export default function AIVideoPage() {
   const providers = useMemo(() => buildVideoFamilies(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings), [pricing, currentConfig.duration, currentConfig.resolution, creditSettings]);
   const calcCredits = (m) => {
     const p = pricing?.[m.label];
-    return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings);
+    return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings, m.markup);
   };
   const calcStartingCredits = (m) => {
     const p = pricing?.[m.label];
     const startDur = m.options?.duration?.[0] || "5 seconds";
     const q = durationMultiplier(startDur) * resolutionMultiplier("720p");
-    return calcModelCredits(p?.unitPrice ?? 0.05, q, creditSettings);
+    return calcModelCredits(p?.unitPrice ?? 0.05, q, creditSettings, m.markup);
   };
 
   useEffect(() => {
@@ -486,7 +486,7 @@ export default function AIVideoPage() {
                     <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
                       const unitPrice = realCaps?.pricing?.unitPrice ?? pricing?.[model.label]?.unitPrice ?? 0.05;
                       const qty = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
-                      const c = calcModelCredits(unitPrice, qty, creditSettings);
+                      const c = calcModelCredits(unitPrice, qty, creditSettings, model.markup);
                       return <span className="text-yellow-300/90 font-semibold">({c} credits)</span>;
                     })()}</>
                   )}
