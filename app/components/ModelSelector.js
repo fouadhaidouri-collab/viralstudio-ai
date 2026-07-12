@@ -10,30 +10,28 @@ function getVersion(label, family) {
   return label.slice(idx + family.length).trim();
 }
 
-const logoMap = {
-  Veo: "veo.png",
-  Grok: "grok.png",
-  Seedance: "seedance.jpg",
-  Kling: "kling.png",
-  Runway: "runway.jpg",
-  Luma: "luma.jpg",
-  Pika: "pika.png",
-  Hailuo: "hailuo.jpg",
-  "Happy Horse": "happy-horse.png",
+const brandIcons = {
+  Veo: { icon: "videocam", color: "#4285F4" },
+  Grok: { icon: "psychology", color: "#06b6d4" },
+  Seedance: { icon: "directions_run", color: "#f59e0b" },
+  Kling: { icon: "smart_display", color: "#ef4444" },
+  Runway: { icon: "run_circle", color: "#10b981" },
+  Luma: { icon: "flare", color: "#8b5cf6" },
+  Pika: { icon: "pets", color: "#ec4899" },
+  Hailuo: { icon: "waves", color: "#3b82f6" },
+  "Happy Horse": { icon: "emoji_nature", color: "#14b8a6" },
+  OpenAI: { icon: "psychology", color: "#10b981" },
+  "Nano Banana": { icon: "auto_awesome", color: "#f59e0b" },
+  Google: { icon: "videocam", color: "#4285F4" },
 };
 
 function BrandLogo({ name, size = 24 }) {
-  const src = logoMap[name];
-  if (!src) return null;
+  const brand = brandIcons[name];
+  if (!brand) return null;
   return (
-    <img
-      src={`/logos/${src}`}
-      alt={name}
-      width={size}
-      height={size}
-      className="rounded-lg shrink-0"
-      style={{ width: size, height: size, objectFit: "cover" }}
-    />
+    <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${brand.color}20` }}>
+      <Icon name={brand.icon} className="text-sm" style={{ color: brand.color }} />
+    </div>
   );
 }
 
