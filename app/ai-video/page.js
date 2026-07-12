@@ -487,9 +487,7 @@ export default function AIVideoPage() {
                       const unitPrice = realCaps?.pricing?.unitPrice ?? pricing?.[model.label]?.unitPrice ?? 0.05;
                       const qty = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
                       const c = calcModelCredits(unitPrice, qty, creditSettings);
-                      const rawSecs = secFromDuration(currentConfig.duration) * videoCount;
-                      const falCost = unitPrice * rawSecs;
-                      return <span className="text-yellow-300/90 font-semibold">({c} credits · <span className="text-green-400/80">${falCost.toFixed(3)}</span>)</span>;
+                      return <span className="text-yellow-300/90 font-semibold">({c} credits)</span>;
                     })()}</>
                   )}
                 </button>
