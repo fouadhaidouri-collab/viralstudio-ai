@@ -20,21 +20,33 @@ const logoMap = {
   Pika: "pika.png",
   Hailuo: "hailuo.jpg",
   "Happy Horse": "happy-horse.png",
+  OpenAI: "openai.png",
+  "Nano Banana": "nano-bana.jpg",
+  Google: "google.png",
 };
 
-function BrandLogo({ name, size = 24 }) {
+function BrandLogo({ name, icon, color, size = 24 }) {
   const src = logoMap[name];
-  if (!src) return null;
-  return (
-    <img
-      src={`/logos/${src}`}
-      alt={name}
-      width={size}
-      height={size}
-      className="rounded-lg shrink-0"
-      style={{ width: size, height: size, objectFit: "cover" }}
-    />
-  );
+  if (src) {
+    return (
+      <img
+        src={`/logos/${src}`}
+        alt={name}
+        width={size}
+        height={size}
+        className="rounded-lg shrink-0"
+        style={{ width: size, height: size, objectFit: "cover" }}
+      />
+    );
+  }
+  if (icon) {
+    return (
+      <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}20` }}>
+        <Icon name={icon} className="text-sm" style={{ color }} />
+      </div>
+    );
+  }
+  return null;
 }
 
 const badgeEmojis = {
@@ -89,6 +101,8 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
 
   const activeGroup = providers.find(p => p.name === activeProvider);
   const activeModels = activeGroup?.models || [];
+  const providersByName = {};
+  for (const p of providers) providersByName[p.name] = p;
 
   return (
     <div className="w-full">
@@ -99,7 +113,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
         className={`w-full flex items-center justify-between gap-1.5 bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 rounded-xl hover:border-primary/40 hover:from-primary/[0.08] hover:to-primary/[0.02] transition-all duration-200 shadow-sm ${compact ? 'px-2.5 py-1.5' : 'px-3.5 py-3 text-sm'}`}
       >
         <span className="flex items-center gap-2 truncate min-w-0">
-          <BrandLogo name={selectedModel.family || selectedModel.provider} />
+          <BrandLogo name={selectedModel.family || selectedModel.provider} icon={providersByName[selectedModel.family || selectedModel.provider]?.icon} color={providersByName[selectedModel.family || selectedModel.provider]?.color} />
           <span className="font-semibold text-white text-[11px] truncate">{selectedModel.label}</span>
           {calcCredits?.(selectedModel) != null && (
             <span className="text-[9px] text-yellow-400 font-medium shrink-0">({calcCredits(selectedModel)} credit)</span>
@@ -140,7 +154,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                     borderRight: isActive ? `2px solid ${p.color}` : "2px solid transparent",
                   }}
                 >
-                  <BrandLogo name={p.name} />
+                  <BrandLogo name={p.name} icon={p.icon} color={p.color} />
                   <span className="text-xs font-semibold">{p.name}</span>
                 </button>
               );
@@ -149,7 +163,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
 
           <div className="flex-1 overflow-y-auto py-3 px-3 custom-scrollbar">
             <div className="flex items-center gap-2 mb-3 px-1.5">
-              <BrandLogo name={activeProvider} />
+              <BrandLogo name={activeProvider} icon={activeGroup?.icon} color={activeGroup?.color} />
               <span className="text-[11px] font-bold text-white uppercase tracking-wider">{activeProvider}</span>
             </div>
             <div className="space-y-2">
@@ -175,7 +189,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                     }}
                   >
                     <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                      <BrandLogo name={model.family || model.provider} />
+                      <BrandLogo name={model.family || model.provider} icon={providersByName[model.family || model.provider]?.icon} color={providersByName[model.family || model.provider]?.color} />
                     </div>
                     <div className="flex-1 text-left min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
