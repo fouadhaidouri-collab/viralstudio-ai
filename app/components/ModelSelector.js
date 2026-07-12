@@ -164,7 +164,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                   <button
                     key={model.id || model.label}
                     onClick={() => { onSelect(model); setOpen(false); }}
-                    className={`w-full flex items-start gap-3 px-4 py-[14px] rounded-xl transition-all duration-200 hover:scale-[1.02] ${
+                    className={`w-full flex items-start gap-3 px-4 py-4 rounded-xl transition-all duration-200 hover:scale-[1.02] ${
                       selected
                         ? "border border-purple-500/40 shadow-[0_0_12px_-4px_rgba(139,92,246,0.3)]"
                         : "border border-transparent hover:bg-white/[0.04]"
@@ -179,7 +179,7 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                     </div>
                     <div className="flex-1 text-left min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-base font-semibold ${selected ? "text-white" : "text-white/80"}`}>
+                        <span className={`text-lg font-semibold ${selected ? "text-white" : "text-white/80"}`}>
                           {version || model.label}
                         </span>
                         {badge && badgeEmoji && (
@@ -195,14 +195,10 @@ export default function ModelSelector({ label, providers, selectedModel, onSelec
                           </span>
                         )}
                       </div>
-                      <div className="text-[13px] text-white/50 mt-1 leading-snug">{model.desc || ""}</div>
+                      <div className="text-sm text-white/50 mt-1 leading-snug">{model.desc || ""}</div>
                       <div className="flex items-center gap-3 mt-2">
-                        <span className="text-[11px] text-white/50 font-medium flex items-center gap-1">
-                          <Icon name="schedule" size={11} className="text-white/40" />
-                          Video Generation Time: {genTime ? `${genTime} sec` : "—"}
-                        </span>
                         {startingCredits != null && (
-                          <span className="text-[11px] font-semibold text-yellow-400/90 ml-auto">
+                          <span className="text-xs font-semibold text-yellow-400/90">
                             💳 {startingCredits} credits
                           </span>
                         )}

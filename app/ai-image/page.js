@@ -43,9 +43,9 @@ const calcModelCredits = (unitPrice, quantity, settings) => {
 
 const imageProviderMeta = {
   OpenAI: { icon: "psychology", color: "#10b981" },
-  Recraft: { icon: "auto_awesome", color: "#f59e0b" },
+  "Nano Banana": { icon: "auto_awesome", color: "#f59e0b" },
   Google: { icon: "videocam", color: "#4285F4" },
-  xAI: { icon: "psychology", color: "#06b6d4" },
+  Grok: { icon: "psychology", color: "#06b6d4" },
 };
 
 function buildImageProviders(models, pricingMap, creditSettings) {

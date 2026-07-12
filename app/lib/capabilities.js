@@ -73,11 +73,11 @@ const ALL_IMAGE_ARS = ["Square 1:1", "Portrait 4:5", "Landscape 16:9", "Portrait
 
 export const imageModels = [
   { label: "GPT Image 2", provider: "OpenAI", icon: "psychology", color: "#10b981", fal_model: "fal-ai/flux-pro", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
-  { label: "NanoBanana 2", provider: "Recraft", icon: "auto_awesome", color: "#f59e0b", fal_model: "fal-ai/recraft-20b", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
-  { label: "NanoBanana Pro", provider: "Recraft", icon: "auto_awesome", color: "#8b5cf6", fal_model: "fal-ai/ideogram/v2", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
-  { label: "NanoBanana", provider: "Recraft", icon: "auto_awesome", color: "#ec4899", fal_model: "fal-ai/stable-diffusion-v3", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
+  { label: "NanoBanana 2", provider: "Nano Banana", icon: "auto_awesome", color: "#f59e0b", fal_model: "fal-ai/recraft-20b", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
+  { label: "NanoBanana Pro", provider: "Nano Banana", icon: "auto_awesome", color: "#8b5cf6", fal_model: "fal-ai/ideogram/v2", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
+  { label: "NanoBanana", provider: "Nano Banana", icon: "auto_awesome", color: "#ec4899", fal_model: "fal-ai/stable-diffusion-v3", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
   { label: "Imagen 4", provider: "Google", icon: "videocam", color: "#4285F4", fal_model: "fal-ai/imagen-3", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
-  { label: "Grok", provider: "xAI", icon: "psychology", color: "#06b6d4", fal_model: "fal-ai/flux-dev", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
+  { label: "Grok", provider: "Grok", icon: "psychology", color: "#06b6d4", fal_model: "fal-ai/flux-dev", options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p"] } },
 ];
 
 export const imageModelCapabilities = Object.fromEntries(imageModels.map(m => [
