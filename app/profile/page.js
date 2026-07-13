@@ -9,6 +9,11 @@ import { SidebarProvider } from "../components/SidebarContext";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
 
+function formatBytes(bytes) {
+  if (!bytes || bytes <= 0) return "0 GB";
+  return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+}
+
 function gravatarUrl(email) {
   let hash = 0;
   const str = email.trim().toLowerCase();
@@ -26,6 +31,7 @@ export default function ProfilePage() {
   const username = email.split("@")[0];
   const photoURL = user?.photoURL || gravatarUrl(email);
   const [realCredits, setRealCredits] = useState(null);
+  const [storageData, setStorageData] = useState(null);
   const creditsDisplay = (realCredits ?? user?.credits ?? 0).toLocaleString();
   const plan = user?.plan || "Free";
   const planIcon = plan === "Free" ? "person" : "workspace_premium";
@@ -63,7 +69,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setRealCredits(d.balance); }).catch(() => {});
-  }, []);
+    const uid = user?.id;
+    if (uid) {
+      fetch("/api/storage", { headers: { "x-user-id": uid } }).then(r => r.json()).then(d => { if (d.limit_bytes != null) setStorageData(d); }).catch(() => {});
+    }
+  }, [user?.id]);
 
   const tabs = [
     { key: "overview", label: "Overview", icon: "person" },
@@ -145,6 +155,42 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
+
+              {/* Storage Card */}
+              {storageData && (
+                <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(16,185,129,0.04), transparent)' }}>
+                  <div className="absolute top-0 right-0 w-48 h-48 opacity-[0.05]" style={{ background: 'radial-gradient(circle, #3b82f6, transparent 70%)' }} />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-on-surface-variant">Storage</span>
+                      </div>
+                      <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                        <Icon name="folder" className="text-blue-400" size={20} />
+                      </div>
+                    </div>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-2xl font-bold text-white">{formatBytes(storageData.used_bytes)}</span>
+                      <span className="text-sm text-on-surface-variant">/ {formatBytes(storageData.limit_bytes)}</span>
+                    </div>
+                    <div className="w-full h-2 bg-surface-container-high rounded-full mt-2 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${storageData.used_percent}%`,
+                          background: storageData.used_percent > 90
+                            ? "linear-gradient(90deg, #f59e0b, #ef4444)"
+                            : "linear-gradient(90deg, #3b82f6, #10b981)",
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-[11px] text-on-surface-variant">{storageData.used_percent}% used</span>
+                      <span className="text-[11px] text-on-surface-variant">{formatBytes(storageData.free_bytes)} free</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Quick Actions */}
               <div className="rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
