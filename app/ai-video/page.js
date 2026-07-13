@@ -50,6 +50,18 @@ const calcModelCredits = (unitPrice, quantity, settings, modelMarkup) => {
   return Math.max(credits, minCredits);
 };
 
+const familyProviders = {
+  Veo: "OpenAI",
+  Grok: "xAI",
+  Seedance: "ByteDance",
+  Kling: "Kling",
+  Runway: "Runway",
+  Luma: "Luma",
+  Pika: "Pika",
+  Hailuo: "Hailuo",
+  "Happy Horse": "Alibaba",
+};
+
 const familyMeta = {
   Veo: { icon: "videocam", color: "#4285F4" },
   Grok: { icon: "psychology", color: "#06b6d4" },
@@ -389,6 +401,12 @@ export default function AIVideoPage() {
         const url = await generateOne();
         results.push(url);
         setVideoUrls([...results]);
+        const prov = familyProviders[model.family] || model.family || "Unknown";
+        fetch("/api/generations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "AI Video", provider: prov, model: model.fal_model, prompt, output_url: url, thumbnail_url: url, credits_used: 0 }),
+        }).catch(() => {});
       }
     } catch (err) {
       setVideoError(err.message);

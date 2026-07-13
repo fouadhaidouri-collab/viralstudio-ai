@@ -270,6 +270,11 @@ export default function AIImagePage() {
             results.push(statusData.imageUrl);
             setImageUrls([...results]);
             done = true;
+            fetch("/api/generations", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type: "Image Lab", provider: selectedModel.provider, model: selectedModel.fal_model, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: 0 }),
+            }).catch(() => {});
           } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
             throw new Error(`Generation ${statusData.status.toLowerCase()}`);
           }

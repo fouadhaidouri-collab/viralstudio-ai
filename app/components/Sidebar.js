@@ -13,6 +13,7 @@ const toolItems = [
   { href: "/ugc-engine", label: "UGC Engine", icon: "record_voice_over", soon: true },
   { href: "/hook-gen", label: "Hook Gen", icon: "auto_awesome", soon: true },
   { href: "/clipping", label: "Clipping", icon: "content_cut", soon: true },
+  { href: "/library", label: "Library", icon: "folder" },
 ];
 
 function SidebarContent() {
