@@ -17,7 +17,8 @@ export async function POST(request) {
     "Portrait 9:16": "9:16",
   };
 
-  const resNum = parseInt(resolution, 10) || 720;
+  const resMap = { "4k": 2160, "1080p": 1080, "1080": 1080, "720p": 720, "720": 720 };
+  const resNum = resMap[resolution] || 720;
   const ar = aspectMap[aspectRatio] || "1:1";
   const [aw, ah] = ar.split(":").map(Number);
   const isLandscape = aw > ah;
