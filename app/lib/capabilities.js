@@ -72,12 +72,12 @@ export const imageResolutions = ["720p", "1080p", "4k"];
 const ALL_IMAGE_ARS = ["Square 1:1", "Portrait 4:5", "Landscape 16:9", "Portrait 9:16"];
 
 export const imageModels = [
-  { label: "GPT Image 2", provider: "OpenAI", icon: "psychology", color: "#10b981", fal_model: "fal-ai/flux-pro", credits: 4, sellPrice: 0.11, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
-  { label: "NanoBanana 2", provider: "Nano Banana", icon: "auto_awesome", color: "#f59e0b", fal_model: "fal-ai/recraft-20b", credits: 2, sellPrice: 0.0613, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
-  { label: "NanoBanana Pro", provider: "Nano Banana", icon: "auto_awesome", color: "#8b5cf6", fal_model: "fal-ai/ideogram/v2", credits: 6, sellPrice: 0.16, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
-  { label: "NanoBanana", provider: "Nano Banana", icon: "auto_awesome", color: "#ec4899", fal_model: "fal-ai/stable-diffusion-v3", credits: 1, sellPrice: 0.03, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
-  { label: "Imagen 4", provider: "Google", icon: "videocam", color: "#4285F4", fal_model: "fal-ai/imagen-3", credits: 4, sellPrice: 0.10, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
-  { label: "Grok", provider: "Grok", icon: "psychology", color: "#06b6d4", fal_model: "fal-ai/flux-dev", credits: 1, sellPrice: 0.015, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
+  { label: "GPT Image 2", provider: "OpenAI", icon: "psychology", color: "#10b981", fal_model: "fal-ai/flux-pro", unitPrice: 0.05, unit: "megapixels", markup: 1.2, credits: 4, sellPrice: 0.11, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
+  { label: "NanoBanana 2", provider: "Nano Banana", icon: "auto_awesome", color: "#f59e0b", fal_model: "fal-ai/recraft-20b", unitPrice: 0.0219, unit: "images", markup: 1.8, credits: 3, sellPrice: 0.0613, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
+  { label: "NanoBanana Pro", provider: "Nano Banana", icon: "auto_awesome", color: "#8b5cf6", fal_model: "fal-ai/ideogram/v2", unitPrice: 0.08, unit: "images", markup: 1.0, credits: 6, sellPrice: 0.16, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
+  { label: "NanoBanana", provider: "Nano Banana", icon: "auto_awesome", color: "#ec4899", fal_model: "fal-ai/stable-diffusion-v3-medium", unitPrice: 0.035, unit: "images", markup: 2.0, credits: 4, sellPrice: 0.105, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
+  { label: "Imagen 4", provider: "Google", icon: "videocam", color: "#4285F4", fal_model: "fal-ai/imagen4/preview/fast", unitPrice: 0.02, unit: "images", markup: 1.5, credits: 2, sellPrice: 0.05, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
+  { label: "Grok", provider: "Grok", icon: "psychology", color: "#06b6d4", fal_model: "fal-ai/flux/dev", unitPrice: 0.025, unit: "megapixels", markup: 2.0, credits: 3, sellPrice: 0.075, options: { aspect_ratio: ALL_IMAGE_ARS, resolution: ["720p", "1080p", "4k"] } },
 ];
 
 export const imageModelCapabilities = Object.fromEntries(imageModels.map(m => [

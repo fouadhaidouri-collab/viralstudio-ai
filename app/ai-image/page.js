@@ -31,6 +31,24 @@ import {
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
 
+const resMap = { "4k": 2160, "1080p": 1080, "720p": 720 };
+const CREDIT_USD_VALUE = 0.029;
+
+function calcImageCredits(model, aspectRatio, resolution, quantity) {
+  if (model.unit === "megapixels") {
+    const resNum = resMap[resolution] || 720;
+    const [aw, ah] = aspectRatio.split(":").map(Number);
+    const isLandscape = aw > ah;
+    const w = isLandscape ? Math.round(resNum * (aw / ah)) : resNum;
+    const h = isLandscape ? resNum : Math.round(resNum * (ah / aw));
+    const mp = (w * h) / 1000000;
+    const cost = mp * model.unitPrice;
+    const sell = cost * (1 + model.markup);
+    return Math.max(1, Math.ceil(sell / CREDIT_USD_VALUE)) * quantity;
+  }
+  return (model.credits || 1) * quantity;
+}
+
 const imageProviderMeta = {
   OpenAI: { icon: "psychology", color: "#10b981" },
   "Nano Banana": { icon: "auto_awesome", color: "#f59e0b" },
@@ -218,7 +236,7 @@ export default function AIImagePage() {
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     if (!isAuthenticated) { router.push("/login"); return; }
-    const needed = (selectedModel.credits || 1) * imageCount;
+    const needed = calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, imageCount);
     if (needed != null && credits < needed) { setNeededCredits(needed); setShowCreditModal(true); return; }
     setGenerating(true);
     setImageUrls([]);
@@ -343,7 +361,7 @@ export default function AIImagePage() {
               )}
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelSelector label="Model" providers={buildImageProviders(imageModels, pricing, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => m.credits || 1} compact />
+                <ModelSelector label="Model" providers={buildImageProviders(imageModels, pricing, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => { return calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1); }} compact />
 
                 <div className="grid grid-cols-3 gap-2">
                   <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
@@ -361,7 +379,7 @@ export default function AIImagePage() {
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
                     <><Icon name="auto_awesome" className="text-sm" /> Generate Image {(() => {
-                      const c = (selectedModel.credits || 1) * imageCount;
+                      const c = calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, imageCount);
                       return <span className="text-yellow-300/90">({c} credit{c !== 1 ? "s" : ""})</span>;
                     })()}</>
                   )}
