@@ -31,16 +31,6 @@ import {
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
 
-const calcModelCredits = (unitPrice, quantity, settings) => {
-  if (unitPrice == null) return null;
-  const markup = settings?.default_markup_multiplier ?? 1.0;
-  const usdValue = settings?.credit_usd_value || 0.029;
-  const minCredits = settings?.minimum_generation_credits || 1;
-  const sellCost = unitPrice * quantity * markup;
-  const credits = Math.ceil(sellCost / usdValue);
-  return Math.max(credits, minCredits);
-};
-
 const imageProviderMeta = {
   OpenAI: { icon: "psychology", color: "#10b981" },
   "Nano Banana": { icon: "auto_awesome", color: "#f59e0b" },
@@ -228,8 +218,7 @@ export default function AIImagePage() {
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     if (!isAuthenticated) { router.push("/login"); return; }
-    const p = pricing?.[selectedModel.label];
-    const needed = calcModelCredits(p?.unitPrice ?? 0.05, imageCount, creditSettings);
+    const needed = (selectedModel.credits || 1) * imageCount;
     if (needed != null && credits < needed) { setNeededCredits(needed); setShowCreditModal(true); return; }
     setGenerating(true);
     setImageUrls([]);
@@ -273,7 +262,7 @@ export default function AIImagePage() {
             fetch("/api/generations", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ type: "Image Lab", provider: selectedModel.provider, model: selectedModel.fal_model, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: 0 }),
+              body: JSON.stringify({ type: "Image Lab", provider: selectedModel.provider, model: selectedModel.fal_model, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: selectedModel.credits || 1 }),
             }).catch(() => {});
           } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
             throw new Error(`Generation ${statusData.status.toLowerCase()}`);
@@ -354,7 +343,7 @@ export default function AIImagePage() {
               )}
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelSelector label="Model" providers={buildImageProviders(imageModels, pricing, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => { const p = pricing?.[m.label]; return calcModelCredits(p?.unitPrice ?? 0.05, 1, creditSettings); }} compact />
+                <ModelSelector label="Model" providers={buildImageProviders(imageModels, pricing, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => m.credits || 1} compact />
 
                 <div className="grid grid-cols-3 gap-2">
                   <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
@@ -372,9 +361,8 @@ export default function AIImagePage() {
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
                     <><Icon name="auto_awesome" className="text-sm" /> Generate Image {(() => {
-                      const up = pricing?.[selectedModel.label]?.unitPrice ?? 0.05;
-                      const c = calcModelCredits(up, imageCount, creditSettings);
-                      return c != null && <span className="text-yellow-300/90">({c} credit)</span>;
+                      const c = (selectedModel.credits || 1) * imageCount;
+                      return <span className="text-yellow-300/90">({c} credit{c !== 1 ? "s" : ""})</span>;
                     })()}</>
                   )}
                 </button>
