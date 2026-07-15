@@ -188,7 +188,7 @@ export default function LoginPage() {
                   value={digit}
                   onChange={e => handleOtpChange(i, e.target.value)}
                   onKeyDown={e => handleOtpKeyDown(i, e)}
-                  className="w-10 h-12 md:w-11 md:h-14 text-center text-xl font-bold text-white bg-surface-container-lowest border border-surface-border/60 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+                  className="w-11 h-14 md:w-14 md:h-16 text-center text-2xl font-bold rounded-xl border-2 transition-all duration-150 ${digit ? 'bg-primary/10 border-primary text-primary shadow-lg shadow-primary/20' : 'bg-surface-container border-surface-border/40 text-white hover:border-primary/40 hover:bg-surface-container-high'}"
                   autoFocus={i === 0}
                 />
               ))}
