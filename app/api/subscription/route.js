@@ -17,30 +17,67 @@ export async function GET() {
   const now = new Date();
   const startDate = sub.starts_at ? new Date(sub.starts_at) : now;
   const expireDate = sub.expires_at ? new Date(sub.expires_at) : new Date(now.getTime() + 365 * 86400000);
-  const msPerMonth = 30.5 * 86400000;
 
-  const isYearly = sub.billing_cycle === "yearly";
-  const totalMonths = isYearly ? 12 : 1;
-  const monthsUsed = Math.min(totalMonths, Math.max(0, Math.floor((now - startDate) / msPerMonth)));
-  const monthsRemaining = totalMonths - monthsUsed;
-  const daysLeft = Math.max(0, Math.ceil((expireDate - now) / 86400000));
-  const nextPayment = new Date(startDate.getTime() + (monthsUsed + 1) * msPerMonth);
+  const cycle = sub.billing_cycle || "monthly";
+  const msPerDay = 86400000;
+  const msPerWeek = 7 * msPerDay;
+  const msPerMonth = 30.5 * msPerDay;
+  const totalDays = Math.max(0, Math.ceil((expireDate - startDate) / msPerDay));
+  const daysLeft = Math.max(0, Math.ceil((expireDate - now) / msPerDay));
+
+  let result;
+
+  if (cycle === "weekly") {
+    const totalWeeks = Math.round(totalDays / 7);
+    const weekMs = now - startDate;
+    const weeksUsed = Math.min(totalWeeks, Math.max(0, Math.floor(weekMs / msPerWeek)));
+    result = {
+      is_yearly: false,
+      is_weekly: true,
+      total_periods: totalWeeks,
+      periods_used: weeksUsed,
+      periods_remaining: totalWeeks - weeksUsed,
+      period_label: "week",
+      next_payment: new Date(startDate.getTime() + (weeksUsed + 1) * msPerWeek).toISOString(),
+    };
+  } else if (cycle === "yearly") {
+    const totalMonths = 12;
+    const monthsUsed = Math.min(totalMonths, Math.max(0, Math.floor((now - startDate) / msPerMonth)));
+    result = {
+      is_yearly: true,
+      is_weekly: false,
+      total_periods: totalMonths,
+      periods_used: monthsUsed,
+      periods_remaining: totalMonths - monthsUsed,
+      period_label: "month",
+      next_payment: new Date(startDate.getTime() + (monthsUsed + 1) * msPerMonth).toISOString(),
+    };
+  } else {
+    const totalMonths = 1;
+    const monthsUsed = Math.min(totalMonths, Math.max(0, (now - startDate) / msPerMonth));
+    result = {
+      is_yearly: false,
+      is_weekly: false,
+      total_periods: totalMonths,
+      periods_used: Math.floor(monthsUsed),
+      periods_remaining: totalMonths - Math.floor(monthsUsed),
+      period_label: "month",
+      next_payment: new Date(startDate.getTime() + 1 * msPerMonth).toISOString(),
+    };
+  }
 
   return Response.json({
     plan: sub.plan_name || sub.plan_id,
     plan_id: sub.plan_id,
-    billing: sub.billing_cycle || "monthly",
+    billing: cycle,
     status: sub.status,
     starts_at: sub.starts_at,
     expires_at: sub.expires_at,
     auto_renew: !!sub.auto_renew,
     price: sub.price,
     credits_per_cycle: sub.credits,
-    is_yearly: isYearly,
-    total_months: totalMonths,
-    months_used: monthsUsed,
-    months_remaining: monthsRemaining,
     days_left: daysLeft,
-    next_payment: nextPayment.toISOString(),
+    total_days: totalDays,
+    ...result,
   });
 }

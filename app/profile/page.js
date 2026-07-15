@@ -33,6 +33,9 @@ export default function ProfilePage() {
   const [realCredits, setRealCredits] = useState(null);
   const [storageData, setStorageData] = useState(null);
   const [subData, setSubData] = useState(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelMsg, setCancelMsg] = useState("");
   const creditsDisplay = (realCredits ?? user?.credits ?? 0).toLocaleString();
   const plan = user?.plan || "Free";
   const planIcon = plan === "Free" ? "person" : "workspace_premium";
@@ -66,6 +69,20 @@ export default function ProfilePage() {
       setCpCurrent(""); setCpNew(""); setCpConfirm("");
     } catch { setCpError("Network error"); }
     finally { setCpLoading(false); }
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelLoading(true);
+    setCancelMsg("");
+    try {
+      const res = await fetch("/api/subscription/cancel", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) { setCancelMsg(data.error || "Failed"); return; }
+      setCancelMsg(data.message);
+      setShowCancelConfirm(false);
+      setSubData(prev => prev ? { ...prev, status: "canceled", auto_renew: false } : null);
+    } catch { setCancelMsg("Network error"); }
+    finally { setCancelLoading(false); }
   };
 
   useEffect(() => {
@@ -135,41 +152,48 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[11px] px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 uppercase font-semibold">{subData.billing}</span>
                         <span className="text-[11px] text-on-surface-variant">
-                          {subData.is_yearly ? "Paid 12 Months" : "Active"}
+                          {subData.is_yearly ? "Paid 12 Months" : subData.is_weekly ? `Paid ${subData.total_periods} Weeks` : "Active"}
                         </span>
                       </div>
                     </div>
                   </div>
-                  {subData.status === "active" && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                      <span className="text-[11px] font-medium text-green-400">Active</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {subData.status === "active" && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                        <span className="text-[11px] font-medium text-green-400">Active</span>
+                      </div>
+                    )}
+                    {subData.status === "canceled" && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20">
+                        <span className="text-[11px] font-medium text-red-400">Canceled</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {subData.is_yearly ? (
                   <div>
                     <div className="flex items-baseline gap-1 mb-3">
-                      <span className="text-3xl font-bold text-white">{subData.months_used}</span>
-                      <span className="text-sm text-on-surface-variant">/ {subData.total_months} months</span>
+                      <span className="text-3xl font-bold text-white">{subData.periods_used}</span>
+                      <span className="text-sm text-on-surface-variant">/ {subData.total_periods} months</span>
                     </div>
                     <div className="w-full h-2 bg-surface-container-high rounded-full mb-4 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(subData.months_used / subData.total_months) * 100}%`, background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} />
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(subData.periods_used / subData.total_periods) * 100}%`, background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} />
                     </div>
                     <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5 mb-4">
-                      {Array.from({ length: subData.total_months }, (_, i) => {
-                        const monthNum = i + 1;
-                        const isPast = monthNum <= subData.months_used;
-                        const isCurrent = monthNum === subData.months_used + 1;
+                      {Array.from({ length: subData.total_periods }, (_, i) => {
+                        const pNum = i + 1;
+                        const isPast = pNum <= subData.periods_used;
+                        const isCurrent = pNum === subData.periods_used + 1;
                         return (
-                          <div key={monthNum} className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${
+                          <div key={pNum} className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${
                             isPast ? "bg-yellow-400/10 border border-yellow-400/20" :
                             isCurrent ? "bg-blue-500/10 border border-blue-500/20" :
                             "bg-surface-container-high border border-white/5"
                           }`}>
                             <span className="text-[9px] font-medium text-on-surface-variant">Month</span>
-                            <span className={`text-sm font-bold ${isPast ? "text-yellow-400" : isCurrent ? "text-blue-400" : "text-on-surface-variant"}`}>{monthNum}</span>
+                            <span className={`text-sm font-bold ${isPast ? "text-yellow-400" : isCurrent ? "text-blue-400" : "text-on-surface-variant"}`}>{pNum}</span>
                             <span className="text-[10px]">{isPast ? "✅" : isCurrent ? "⏳" : ""}</span>
                           </div>
                         );
@@ -177,7 +201,44 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-on-surface-variant">Expires <span className="text-white font-medium">{new Date(subData.expires_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span></span>
-                      {subData.auto_renew && <span className="text-[11px] text-yellow-400/70">Auto-renewal ON</span>}
+                      <div className="flex items-center gap-3">
+                        {subData.auto_renew && <span className="text-[11px] text-yellow-400/70">Auto-renewal ON</span>}
+                        {subData.status === "active" && <button onClick={() => setShowCancelConfirm(true)} className="text-[11px] text-red-400 hover:text-red-300 underline">Cancel</button>}
+                      </div>
+                    </div>
+                  </div>
+                ) : subData.is_weekly ? (
+                  <div>
+                    <div className="flex items-baseline gap-1 mb-3">
+                      <span className="text-3xl font-bold text-white">{subData.periods_used}</span>
+                      <span className="text-sm text-on-surface-variant">/ {subData.total_periods} weeks</span>
+                    </div>
+                    <div className="w-full h-2 bg-surface-container-high rounded-full mb-4 overflow-hidden">
+                      <div className="h-full rounded-full bg-yellow-400 transition-all duration-500" style={{ width: `${(subData.periods_used / subData.total_periods) * 100}%` }} />
+                    </div>
+                    <div className="grid grid-cols-7 gap-1.5 mb-4">
+                      {Array.from({ length: subData.total_periods }, (_, i) => {
+                        const pNum = i + 1;
+                        const isPast = pNum <= subData.periods_used;
+                        const isCurrent = pNum === subData.periods_used + 1;
+                        return (
+                          <div key={pNum} className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${
+                            isPast ? "bg-yellow-400/10 border border-yellow-400/20" :
+                            isCurrent ? "bg-blue-500/10 border border-blue-500/20" :
+                            "bg-surface-container-high border border-white/5"
+                          }`}>
+                            <span className="text-[9px] font-medium text-on-surface-variant">W{pNum}</span>
+                            <span className="text-sm">{isPast ? "✅" : isCurrent ? "⏳" : ""}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-on-surface-variant">Expires <span className="text-white font-medium">{new Date(subData.expires_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span></span>
+                      <div className="flex items-center gap-3">
+                        {subData.auto_renew && <span className="text-[11px] text-yellow-400/70">Auto-renewal ON</span>}
+                        {subData.status === "active" && <button onClick={() => setShowCancelConfirm(true)} className="text-[11px] text-red-400 hover:text-red-300 underline">Cancel</button>}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -205,14 +266,44 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-yellow-400 transition-all duration-500" style={{ width: `${Math.min(100, (subData.months_used / subData.total_months) * 100)}%` }} />
+                      <div className="h-full rounded-full bg-yellow-400 transition-all duration-500" style={{ width: `${Math.min(100, Math.round((subData.periods_used / subData.total_periods) * 100))}%` }} />
                     </div>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-[11px] text-on-surface-variant">{Math.min(100, Math.round((subData.months_used / subData.total_months) * 100))}% complete</span>
-                      {subData.auto_renew && <span className="text-[11px] text-yellow-400/70">Auto-renewal ON</span>}
+                      <span className="text-[11px] text-on-surface-variant">{Math.min(100, Math.round((subData.periods_used / subData.total_periods) * 100))}% complete</span>
+                      <div className="flex items-center gap-3">
+                        {subData.auto_renew && <span className="text-[11px] text-yellow-400/70">Auto-renewal ON</span>}
+                        {subData.status === "active" && <button onClick={() => setShowCancelConfirm(true)} className="text-[11px] text-red-400 hover:text-red-300 underline">Cancel</button>}
+                      </div>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Cancel Confirmation Modal */}
+          {showCancelConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+              <div className="relative w-full max-w-md rounded-2xl p-6 border border-white/10 shadow-2xl" style={{ background: 'linear-gradient(135deg, #1c1c1e, #2c2c2e)' }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <Icon name="error" className="text-red-400" size={20} />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Cancel Subscription</h3>
+                </div>
+                <p className="text-sm text-on-surface-variant mb-6">
+                  Your <strong className="text-white">{subData.plan}</strong> ({subData.billing}) subscription will be canceled. You can still use the service until <strong className="text-white">{new Date(subData.expires_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</strong>. Auto-renewal will be turned off.
+                </p>
+                {cancelMsg && <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs mb-4">{cancelMsg}</div>}
+                <div className="flex gap-3">
+                  <button onClick={() => { setShowCancelConfirm(false); setCancelMsg(""); }} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-surface-container-high border border-white/10 hover:bg-surface-container transition-all">
+                    Keep Plan
+                  </button>
+                  <button onClick={handleCancelSubscription} disabled={cancelLoading} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-red-500/80 hover:bg-red-500 border border-red-400/30 transition-all flex items-center justify-center gap-2">
+                    {cancelLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="close" size={14} />}
+                    Cancel Now
+                  </button>
+                </div>
               </div>
             </div>
           )}
