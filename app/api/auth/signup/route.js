@@ -24,7 +24,22 @@ export async function POST(request) {
         });
       }
     }
-    return Response.json({ user }, { status: 201 });
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    await run(
+      "INSERT OR REPLACE INTO email_verifications (email, code, expires_at, attempts, created_at) VALUES (?, ?, ?, 0, datetime('now'))",
+      [email, code, expiresAt]
+    );
+
+    try {
+      const { sendVerificationEmail } = await import("../../../../lib/email");
+      await sendVerificationEmail(email, code);
+    } catch (emailErr) {
+      console.error("Failed to send verification email:", emailErr);
+    }
+
+    return Response.json({ user, verification_sent: true }, { status: 201 });
   } catch (err) {
     if (err.message === "User already exists") {
       return Response.json({ error: "An account with this email already exists" }, { status: 409 });

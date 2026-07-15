@@ -240,3 +240,11 @@ CREATE TABLE IF NOT EXISTS provider_model_prices (
   currency TEXT DEFAULT 'USD',
   updated_at TEXT
 );
+
+CREATE TABLE IF NOT EXISTS email_verifications (
+  email TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  attempts INTEGER DEFAULT 0,
+  created_at TEXT
+);
