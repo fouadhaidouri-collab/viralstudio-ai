@@ -158,6 +158,23 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {!verifyEmail && (
+          <div className="flex gap-1 mb-6 p-1 bg-surface-container-low rounded-xl border border-surface-border/40">
+            <button
+              onClick={() => { setTab("signin"); setLoginError(""); }}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${tab === "signin" ? "bg-surface-container-high text-white shadow-sm" : "text-on-surface-variant hover:text-white"}`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => { setTab("signup"); setLoginError(""); }}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${tab === "signup" ? "bg-surface-container-high text-white shadow-sm" : "text-on-surface-variant hover:text-white"}`}
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
+
         {verifyEmail ? (
           <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
             <div className="flex justify-center gap-2 mb-6" onPaste={handleOtpPaste}>
