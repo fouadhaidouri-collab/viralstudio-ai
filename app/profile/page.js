@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const photoURL = user?.photoURL || gravatarUrl(email);
   const [realCredits, setRealCredits] = useState(null);
   const [storageData, setStorageData] = useState(null);
+  const [subData, setSubData] = useState(null);
   const creditsDisplay = (realCredits ?? user?.credits ?? 0).toLocaleString();
   const plan = user?.plan || "Free";
   const planIcon = plan === "Free" ? "person" : "workspace_premium";
@@ -69,6 +70,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setRealCredits(d.balance); }).catch(() => {});
+    fetch("/api/subscription").then(r => r.json()).then(d => { if (d.plan) setSubData(d); }).catch(() => {});
     const uid = user?.id;
     if (uid) {
       fetch("/api/storage", { headers: { "x-user-id": uid } }).then(r => r.json()).then(d => { if (d.limit_bytes != null) setStorageData(d); }).catch(() => {});
@@ -117,6 +119,103 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
+
+          {/* Plan Card */}
+          {subData && subData.billing && (
+            <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 mb-6 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.04), transparent)' }}>
+              <div className="absolute top-0 right-0 w-48 h-48 opacity-[0.04]" style={{ background: 'radial-gradient(circle, #f59e0b, transparent 70%)' }} />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-yellow-400/10 flex items-center justify-center">
+                      <Icon name="workspace_premium" className="text-yellow-400" size={24} />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-white">{subData.plan}</h2>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 uppercase font-semibold">{subData.billing}</span>
+                        <span className="text-[11px] text-on-surface-variant">
+                          {subData.is_yearly ? "Paid 12 Months" : "Active"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {subData.status === "active" && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                      <span className="text-[11px] font-medium text-green-400">Active</span>
+                    </div>
+                  )}
+                </div>
+
+                {subData.is_yearly ? (
+                  <div>
+                    <div className="flex items-baseline gap-1 mb-3">
+                      <span className="text-3xl font-bold text-white">{subData.months_used}</span>
+                      <span className="text-sm text-on-surface-variant">/ {subData.total_months} months</span>
+                    </div>
+                    <div className="w-full h-2 bg-surface-container-high rounded-full mb-4 overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(subData.months_used / subData.total_months) * 100}%`, background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} />
+                    </div>
+                    <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5 mb-4">
+                      {Array.from({ length: subData.total_months }, (_, i) => {
+                        const monthNum = i + 1;
+                        const isPast = monthNum <= subData.months_used;
+                        const isCurrent = monthNum === subData.months_used + 1;
+                        return (
+                          <div key={monthNum} className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${
+                            isPast ? "bg-yellow-400/10 border border-yellow-400/20" :
+                            isCurrent ? "bg-blue-500/10 border border-blue-500/20" :
+                            "bg-surface-container-high border border-white/5"
+                          }`}>
+                            <span className="text-[9px] font-medium text-on-surface-variant">Month</span>
+                            <span className={`text-sm font-bold ${isPast ? "text-yellow-400" : isCurrent ? "text-blue-400" : "text-on-surface-variant"}`}>{monthNum}</span>
+                            <span className="text-[10px]">{isPast ? "✅" : isCurrent ? "⏳" : ""}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-on-surface-variant">Expires <span className="text-white font-medium">{new Date(subData.expires_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span></span>
+                      {subData.auto_renew && <span className="text-[11px] text-yellow-400/70">Auto-renewal ON</span>}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                      <div className="p-3 rounded-xl bg-surface-container-low border border-white/5">
+                        <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">Current Cycle</span>
+                        <p className="text-xs text-white mt-1">
+                          {new Date(subData.starts_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
+                          <span className="text-on-surface-variant"> → </span>
+                          {new Date(subData.expires_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-surface-container-low border border-white/5">
+                        <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">Days Left</span>
+                        <p className="text-2xl font-bold text-white mt-1">{subData.days_left}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-surface-container-low border border-white/5">
+                        <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">Next Payment</span>
+                        <p className="text-xs text-white mt-1">{new Date(subData.next_payment).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-surface-container-low border border-white/5">
+                        <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">Credits</span>
+                        <p className="text-xl font-bold text-yellow-400 mt-1">{subData.credits_per_cycle || "—"}/mo</p>
+                      </div>
+                    </div>
+                    <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-yellow-400 transition-all duration-500" style={{ width: `${Math.min(100, (subData.months_used / subData.total_months) * 100)}%` }} />
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-[11px] text-on-surface-variant">{Math.min(100, Math.round((subData.months_used / subData.total_months) * 100))}% complete</span>
+                      {subData.auto_renew && <span className="text-[11px] text-yellow-400/70">Auto-renewal ON</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Tabs */}
           <div className="flex gap-1 mb-6 p-1 bg-surface-container-low rounded-xl border border-surface-border/40">
