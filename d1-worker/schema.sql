@@ -246,5 +246,6 @@ CREATE TABLE IF NOT EXISTS email_verifications (
   code TEXT NOT NULL,
   expires_at TEXT NOT NULL,
   attempts INTEGER DEFAULT 0,
+  metadata TEXT,
   created_at TEXT
 );

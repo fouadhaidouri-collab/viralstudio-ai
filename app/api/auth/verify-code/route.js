@@ -1,4 +1,7 @@
+import crypto from "crypto";
 import { run, get } from "../../../../lib/db";
+import { findUser } from "../../../lib/userStore";
+import { getAffiliateByReferralCode, createReferral } from "../../../../lib/affiliateStore";
 
 export async function POST(request) {
   try {
@@ -28,10 +31,34 @@ export async function POST(request) {
       return Response.json({ error: "Verification code expired. Please request a new one." }, { status: 400 });
     }
 
-    await run("UPDATE users SET email_verified = 1 WHERE email = ?", [email]);
+    const existing = await findUser(email);
+    if (existing) {
+      await run("UPDATE users SET email_verified = 1 WHERE email = ?", [email]);
+      await run("DELETE FROM email_verifications WHERE email = ?", [email]);
+      return Response.json({ ok: true, message: "Email verified successfully" });
+    }
+
+    let metadata = {};
+    try { metadata = JSON.parse(verification.metadata || "{}"); } catch {}
+
+    const id = String(Math.floor(10000000 + Math.random() * 90000000));
+    await run(
+      "INSERT INTO users (id, name, email, password, email_verified, created_at, updated_at) VALUES (?, ?, ?, ?, 1, datetime('now'), datetime('now'))",
+      [id, metadata.name || email, email, metadata.password_hash || ""]
+    );
+
+    if (metadata.ref_code) {
+      try {
+        const affiliate = await getAffiliateByReferralCode(metadata.ref_code);
+        if (affiliate && affiliate.user_id !== id) {
+          await createReferral({ affiliate_id: affiliate.id, referred_user_id: id });
+        }
+      } catch {}
+    }
+
     await run("DELETE FROM email_verifications WHERE email = ?", [email]);
 
-    return Response.json({ ok: true, message: "Email verified successfully" });
+    return Response.json({ ok: true, message: "Email verified successfully", user: { id, name: metadata.name || email, email } });
   } catch (err) {
     console.error("verify-code error:", err);
     return Response.json({ error: err.message || "Failed to verify code" }, { status: 500 });
