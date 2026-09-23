@@ -11,6 +11,24 @@ export async function POST(request) {
       return Response.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
 
+    const skipVerification = process.env.AUTH_SKIP_EMAIL_VERIFICATION === "true";
+
+    if (skipVerification) {
+      const { createUser } = await import("../../../lib/userStore");
+      const { getAffiliateByReferralCode, createReferral } = await import("../../../../lib/affiliateStore");
+      const user = await createUser(name, email, password);
+      await run("UPDATE users SET email_verified = 1 WHERE email = ?", [email]);
+      if (ref_code) {
+        try {
+          const affiliate = await getAffiliateByReferralCode(ref_code);
+          if (affiliate && affiliate.user_id !== user.id) {
+            await createReferral({ affiliate_id: affiliate.id, referred_user_id: user.id });
+          }
+        } catch {}
+      }
+      return Response.json({ ok: true, verification_required: false, email: user.email }, { status: 201 });
+    }
+
     const password_hash = crypto.createHash("sha256").update(password).digest("hex");
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();

@@ -55,6 +55,12 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
+      if (data.verification_required === false) {
+        const loginOk = await login(email.trim(), password);
+        if (loginOk) window.location.href = "/";
+        setLoading(false);
+        return;
+      }
       setVerifyEmail(email.trim());
       setOtp(Array(6).fill(""));
       setOtpError("");
