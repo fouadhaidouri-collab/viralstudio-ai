@@ -4,35 +4,35 @@
     "unit": "seconds",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T20:07:35.377Z"
+    "last_synced_at": "2026-09-24T15:28:54.698Z"
   },
   "xai/grok-imagine-video/image-to-video": {
     "unit_price": 0.05,
     "unit": "seconds",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T20:07:31.908Z"
+    "last_synced_at": "2026-09-24T15:27:54.763Z"
   },
   "fal-ai/bytedance/seedance/v1.5/pro/image-to-video": {
     "unit_price": 1.2,
     "unit": "1m tokens",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T20:07:32.455Z"
+    "last_synced_at": "2026-09-24T15:27:55.419Z"
   },
   "bytedance/seedance-2.0/image-to-video": {
     "unit_price": 0.014,
-    "unit": "units",
+    "unit": "1000 tokens",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T20:07:32.892Z"
+    "last_synced_at": "2026-09-24T15:29:01.124Z"
   },
   "fal-ai/kling-video/v3/standard/image-to-video": {
     "unit_price": 0.14,
     "unit": "seconds",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T20:07:33.304Z"
+    "last_synced_at": "2026-09-24T15:28:00.808Z"
   },
   "runway/gen4.5": {
     "unit_price": 0.05,
@@ -52,7 +52,7 @@
     "unit": "images",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T17:31:29.840Z"
+    "last_synced_at": "2026-09-24T15:28:42.923Z"
   },
   "fal-ai/pika/v2.1/image-to-video": {
     "unit_price": 0.4,
@@ -79,14 +79,14 @@
     "unit": "megapixels",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T17:31:29.230Z"
+    "last_synced_at": "2026-09-24T15:28:42.622Z"
   },
   "fal-ai/ideogram/v2": {
     "unit_price": 0.08,
     "unit": "images",
     "currency": "USD",
     "pricing_unavailable": false,
-    "last_synced_at": "2026-06-20T17:31:30.317Z"
+    "last_synced_at": "2026-09-24T15:28:43.243Z"
   },
   "fal-ai/stable-diffusion-v3": {
     "unit_price": 0.01,
@@ -106,5 +106,54 @@
     "currency": "USD",
     "pricing_unavailable": false,
     "last_synced_at": "2026-06-19T06:56:18.057Z"
+  },
+  "fal-ai/veo3.1/image-to-video": {
+    "unit_price": 0.4,
+    "unit": "seconds",
+    "currency": "USD",
+    "pricing_unavailable": false,
+    "last_synced_at": "2026-09-24T15:28:50.940Z"
+  },
+  "fal-ai/veo3.1/lite/image-to-video": {
+    "unit_price": 0.05,
+    "unit": "seconds",
+    "currency": "USD",
+    "pricing_unavailable": false,
+    "last_synced_at": "2026-09-24T15:27:54.420Z"
+  },
+  "xai/grok-imagine-video/v1.5/image-to-video": {
+    "unit_price": 0.01,
+    "unit": "seconds",
+    "currency": "USD",
+    "pricing_unavailable": false,
+    "last_synced_at": "2026-09-24T15:27:55.122Z"
+  },
+  "bytedance/seedance-2.0/fast/image-to-video": {
+    "unit_price": 0.0112,
+    "unit": "1000 tokens",
+    "currency": "USD",
+    "pricing_unavailable": false,
+    "last_synced_at": "2026-09-24T15:27:56.049Z"
+  },
+  "fal-ai/kling-video/v2.5-turbo/pro/image-to-video": {
+    "unit_price": 0.07,
+    "unit": "seconds",
+    "currency": "USD",
+    "pricing_unavailable": false,
+    "last_synced_at": "2026-09-24T15:28:18.779Z"
+  },
+  "fal-ai/stable-diffusion-v3-medium": {
+    "unit_price": 0.035,
+    "unit": "images",
+    "currency": "USD",
+    "pricing_unavailable": false,
+    "last_synced_at": "2026-09-24T15:28:43.523Z"
+  },
+  "fal-ai/kling-video/v3/pro/image-to-video": {
+    "unit_price": 0.14,
+    "unit": "seconds",
+    "currency": "USD",
+    "pricing_unavailable": false,
+    "last_synced_at": "2026-09-24T15:29:06.727Z"
   }
 }
