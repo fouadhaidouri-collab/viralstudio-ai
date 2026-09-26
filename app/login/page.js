@@ -23,6 +23,11 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tab") === "signup") setTab("signup");
+  }, []);
+
+  useEffect(() => {
     if (isAuthenticated) router.replace("/");
   }, [isAuthenticated, router]);
 

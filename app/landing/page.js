@@ -34,8 +34,8 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="hidden md:flex items-center gap-3">
-                <a href="#" className="btn-subtle text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/10 hover:border-primary/30 transition-all">Sign In</a>
-                <a href="#" className="primary-gradient text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-lg shadow-primary/25 hover:translate-y-[-1px] transition-all">Get Started</a>
+                <a href="/login" className="btn-subtle text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/10 hover:border-primary/30 transition-all">Sign In</a>
+                <a href="/login?tab=signup" className="primary-gradient text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-lg shadow-primary/25 hover:translate-y-[-1px] transition-all">Get Started</a>
               </div>
               <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-white text-2xl p-1" aria-label="Menu">&#9776;</button>
             </div>
@@ -57,10 +57,10 @@ export default function LandingPage() {
                 Transform your ideas into studio-quality short-form videos, high-fidelity images, and viral scripts in seconds.
               </p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                <a href="#" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:translate-y-[-1px]" style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 4px 20px rgba(168,85,247,0.25)" }}>
+                <a href="/login?tab=signup" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:translate-y-[-1px]" style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 4px 20px rgba(168,85,247,0.25)" }}>
                   &#9654; Start Creating Free
                 </a>
-                <a href="#" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] border border-white/10 text-[#a1a1aa] hover:text-white hover:border-primary/30">
+                <a href="#features" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] border border-white/10 text-[#a1a1aa] hover:text-white hover:border-primary/30">
                   &#9654; Watch Demo
                 </a>
               </div>
@@ -126,7 +126,7 @@ export default function LandingPage() {
                         </li>
                       ))}
                     </ul>
-                    <a href="#" className={`w-full inline-flex items-center justify-center py-2.5 rounded-xl text-sm font-semibold text-center transition-all ${plan.popular
+                    <a href={plan.price === "Custom" ? "mailto:contact@viralstudio-ai.com" : "/login?tab=signup"} className={`w-full inline-flex items-center justify-center py-2.5 rounded-xl text-sm font-semibold text-center transition-all ${plan.popular
                       ? "text-white shadow-lg shadow-primary/25"
                       : "text-white border border-white/10 hover:border-primary/30"
                     }`} style={plan.popular ? { background: "linear-gradient(135deg,#a855f7,#7c3aed)" } : {}}>
@@ -199,10 +199,10 @@ export default function LandingPage() {
                 <h2 className="text-2xl md:text-4xl font-bold text-white mb-3 tracking-tight">Ready to Transform Your Content?</h2>
                 <p className="text-sm text-[#a1a1aa] max-w-[480px] mx-auto mb-7">Join thousands of creators already using ViralStudio AI to produce stunning content at scale.</p>
                 <div className="flex items-center justify-center gap-3 flex-wrap">
-                  <a href="#" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:translate-y-[-1px]" style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 4px 20px rgba(168,85,247,0.25)" }}>
+                  <a href="/login?tab=signup" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:translate-y-[-1px]" style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 4px 20px rgba(168,85,247,0.25)" }}>
                     &#9654; Start Free Trial
                   </a>
-                  <a href="#" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] border border-white/10 text-[#a1a1aa] hover:text-white hover:border-primary/30">
+                  <a href="mailto:contact@viralstudio-ai.com" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] border border-white/10 text-[#a1a1aa] hover:text-white hover:border-primary/30">
                     &#9654; Book a Demo
                   </a>
                 </div>
