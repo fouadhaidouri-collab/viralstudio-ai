@@ -11,9 +11,10 @@ export async function POST(request) {
       return Response.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
 
-    const skipVerification = process.env.AUTH_SKIP_EMAIL_VERIFICATION === "true";
+    const requireVerification = process.env.AUTH_REQUIRE_EMAIL_VERIFICATION === "true";
 
-    if (skipVerification) {
+    // Signup is direct by default; email verification (OTP) only when explicitly enabled.
+    if (!requireVerification) {
       const { createUser } = await import("../../../lib/userStore");
       const { getAffiliateByReferralCode, createReferral } = await import("../../../../lib/affiliateStore");
       const user = await createUser(name, email, password);
