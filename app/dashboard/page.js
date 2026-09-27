@@ -83,7 +83,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBgVideoIdx((prev) => (prev + 1) % 3);
+      setBgVideoIdx((prev) => (prev + 1) % templates.length);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -100,7 +100,7 @@ export default function Dashboard() {
         <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6">
           <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[360px] md:min-h-[540px] flex items-end" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.04))' }}>
-            {templates.slice(0, 3).map((t, i) => (
+            {templates.map((t, i) => (
               <video
                 key={t.video}
                 src={t.video}
@@ -124,13 +124,7 @@ export default function Dashboard() {
             {templates.slice(0, 5).map((t, i) => (
               <button key={i} onClick={() => handleTemplateClick(t.prompt)} className="card-glow group rounded-xl overflow-hidden border border-surface-border/60 text-left hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <div className="relative aspect-[3/4] bg-surface-container-highest">
-                  <video
-                    src={t.video}
-                    muted loop playsInline preload="none"
-                    onMouseEnter={(e) => e.currentTarget.play()}
-                    onMouseLeave={(e) => e.currentTarget.pause()}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  <video src={t.video} muted autoPlay loop playsInline preload="none" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
                     <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                       <p className="text-[9px] text-white/80 line-clamp-2 leading-tight">{t.prompt}</p>
@@ -182,13 +176,7 @@ export default function Dashboard() {
               {templates.map((t, i) => (
                 <button key={i} onClick={() => handleTemplateClick(t.prompt)} className="card-glow group rounded-xl overflow-hidden border border-surface-border/60 text-left hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                   <div className="relative aspect-[3/4] bg-surface-container-highest">
-                    <video
-                      src={t.video}
-                      muted loop playsInline preload="none"
-                      onMouseEnter={(e) => e.currentTarget.play()}
-                      onMouseLeave={(e) => e.currentTarget.pause()}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                    <video src={t.video} muted autoPlay loop playsInline className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
                     <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                       <p className="text-[8px] text-white/80 line-clamp-1 leading-tight">{t.prompt}</p>
