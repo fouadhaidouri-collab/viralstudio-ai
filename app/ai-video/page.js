@@ -415,6 +415,28 @@ export default function AIVideoPage() {
     }
   };
 
+  const handleDownload = () => {
+    if (videoUrls.length === 0 || !videoUrls[0]) return;
+    const a = document.createElement("a");
+    a.href = videoUrls[0];
+    a.download = `viralstudio-${Date.now()}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const handleShare = async () => {
+    if (videoUrls.length === 0 || !videoUrls[0]) return;
+    try {
+      await navigator.clipboard.writeText(videoUrls[0]);
+    } catch {}
+  };
+
+  const handleRegenerate = () => {
+    if (videoUrls.length === 0) return;
+    handleGenerate();
+  };
+
   return (
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
@@ -449,8 +471,8 @@ export default function AIVideoPage() {
           <ProfileDropdown />
         </div>
       </header>
-      <main style={{ height: 'calc(100vh - 3.5rem)' }} className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)]">
-        <div className="relative z-10 h-full p-3 md:p-5 lg:pl-6 lg:pr-0 flex flex-col xl:grid xl:grid-cols-[432px_1fr] gap-3 md:gap-4 xl:gap-5 overflow-y-auto smooth-scroll">
+      <main className="fixed top-14 md:top-16 right-0 bottom-0 w-full md:w-[calc(100%-16rem)] overflow-y-auto smooth-scroll">
+        <div className="relative z-10 min-h-full p-3 md:p-5 lg:pl-6 lg:pr-0 flex flex-col xl:grid xl:grid-cols-[432px_1fr] gap-3 md:gap-4 xl:gap-5">
           {/* LEFT: Composer */}
           <div className="flex flex-col flex-1">
             {/* Single card — textarea fills, everything else at bottom */}
@@ -519,21 +541,35 @@ export default function AIVideoPage() {
             <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }} className="glass-card rounded-2xl relative bg-black flex-1 flex flex-col border border-white/5 card-glow">
               <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
                 <div style={{ background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.08) 0%, transparent 70%)' }} className="absolute inset-0"></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center animate-pulse mb-4">
-                    <Icon name="circle_play" className="text-primary text-3xl" />
+                {videoUrls.length > 0 ? (
+                  <video
+                    key={videoUrls[0]}
+                    src={videoUrls[0]}
+                    controls
+                    autoPlay
+                    loop
+                    playsInline
+                    className="relative z-10 max-w-full max-h-full object-contain rounded-xl"
+                    style={{ aspectRatio: (currentConfig.aspectRatio?.label || "16:9").replace(":", "/") }}
+                  />
+                ) : (
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center animate-pulse mb-4">
+                      <Icon name="circle_play" className="text-primary text-3xl" />
+                    </div>
+                    <p className="text-xs text-on-surface-variant/60 mt-2">Your video will appear here</p>
                   </div>
-                </div>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97]" style={{ fontFamily: 'Geist, sans-serif' }}>
+              <button onClick={handleDownload} disabled={videoUrls.length === 0} className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed" style={{ fontFamily: 'Geist, sans-serif' }}>
                 <Icon name="download" className="text-base" /> Download
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97]" style={{ fontFamily: 'Geist, sans-serif' }}>
+              <button onClick={handleShare} disabled={videoUrls.length === 0} className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed" style={{ fontFamily: 'Geist, sans-serif' }}>
                 <Icon name="share" className="text-base" /> Share
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97]" style={{ fontFamily: 'Geist, sans-serif' }}>
+              <button onClick={handleRegenerate} disabled={videoUrls.length === 0} className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed" style={{ fontFamily: 'Geist, sans-serif' }}>
                 <Icon name="rotate" className="text-base" /> Regenerate
               </button>
             </div>
@@ -548,7 +584,7 @@ export default function AIVideoPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {videoUrls.map((url, i) => (
                   <div key={i} className="glass-card rounded-lg overflow-hidden border-surface-border">
-                    <video src={url} controls className="w-full aspect-video object-contain bg-black" />
+                    <video src={url} controls className="w-full object-contain bg-black" style={{ aspectRatio: (currentConfig.aspectRatio?.label || "16:9").replace(":", "/") }} />
                     <div className="p-2 flex items-center justify-between">
                       <span className="text-[10px] font-medium text-on-surface-variant">Video {i + 1}</span>
                       <a href={url} download className="text-primary text-[10px] flex items-center gap-1 hover:underline"><Icon name="download" className="text-xs" /> DL</a>
