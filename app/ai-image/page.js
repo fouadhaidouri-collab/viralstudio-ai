@@ -328,7 +328,7 @@ export default function AIImagePage() {
           <ProfileDropdown />
         </div>
       </header>
-      <main style={{ height: 'calc(100vh - 3.5rem)' }} className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] overflow-y-auto smooth-scroll">
+      <main className="fixed top-14 md:top-16 right-0 bottom-0 w-full md:w-[calc(100%-16rem)] overflow-y-auto smooth-scroll">
         <div className="relative z-10 min-h-full p-5 lg:pl-6 lg:pr-0 flex flex-col xl:grid xl:grid-cols-[432px_1fr] gap-4 xl:gap-5">
           {/* LEFT: Composer */}
           <div className="flex flex-col flex-1">

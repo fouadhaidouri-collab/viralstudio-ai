@@ -162,8 +162,8 @@ export default function ModulePage({ params }) {
           </div>
         </header>
 
-        <main style={{ height: 'calc(100vh - 3.5rem)' }} className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)]">
-          <div className="relative z-10 h-full p-3 md:p-5 lg:pl-6 lg:pr-0 flex flex-col xl:grid xl:grid-cols-[480px_1fr] gap-3 md:gap-4 xl:gap-5 overflow-y-auto smooth-scroll">
+        <main className="fixed top-14 md:top-16 right-0 bottom-0 w-full md:w-[calc(100%-16rem)] overflow-y-auto smooth-scroll">
+          <div className="relative z-10 min-h-full p-3 md:p-5 lg:pl-6 lg:pr-0 flex flex-col xl:grid xl:grid-cols-[480px_1fr] gap-3 md:gap-4 xl:gap-5">
             <div className="flex flex-col flex-1">
               <div className="glass-card rounded-xl p-4 lg:p-5 border border-white/5 flex-1 flex flex-col gap-0 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <div className="flex items-center gap-2 mb-4">
