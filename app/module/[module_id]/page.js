@@ -137,11 +137,16 @@ export default function ModulePage({ params }) {
       <div className="h-screen overflow-hidden no-x-scroll">
         <Sidebar />
         <div className="fixed inset-0 overflow-hidden z-0">
-          {TEMPLATE_VIDEOS.map((src, i) => (
-            <video key={src} src={src} muted autoPlay loop playsInline
-              className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${i === bgVideoIdx ? "opacity-70" : "opacity-0"}`}
-            />
-          ))}
+          {(() => {
+            const cur = bgVideoIdx % TEMPLATE_VIDEOS.length;
+            const nxt = (cur + 1) % TEMPLATE_VIDEOS.length;
+            return [cur, nxt].map((idx, pos) => (
+              <video key={pos} src={TEMPLATE_VIDEOS[idx]} poster={TEMPLATE_VIDEOS[idx].replace(".mp4", ".jpg")} muted autoPlay loop playsInline
+                preload={pos === 0 ? "auto" : "metadata"}
+                className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-1000 ${pos === 0 ? "opacity-70" : "opacity-0"}`}
+              />
+            ));
+          })()}
           <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-background/10 to-background/30"></div>
         </div>
 
