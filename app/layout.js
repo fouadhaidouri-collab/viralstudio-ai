@@ -1,5 +1,6 @@
 import "./globals.css";
 import { AuthProvider } from "./lib/AuthContext";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
   title: "ViralStudio AI | Premium Suite",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           {children}
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
