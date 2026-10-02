@@ -1,0 +1,2097 @@
+{
+  "veo_31": {
+    "module_id": "veo_31",
+    "display_name": "Veo 3.1",
+    "endpoint_id": "fal-ai/veo3.1/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Veo 3.1",
+      "category": "Veo",
+      "description": "Google's flagship video model with 4K support and scene extension.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "4 seconds",
+            "6 seconds",
+            "8 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.3,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Veo",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 0,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "veo_31_fast": {
+    "module_id": "veo_31_fast",
+    "display_name": "Veo 3.1 Fast",
+    "endpoint_id": "fal-ai/veo3.1/fast/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Veo 3.1 Fast",
+      "category": "Veo",
+      "description": "Google's fastest video model with stunning quality.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "4 seconds",
+            "6 seconds",
+            "8 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.5,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Veo",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 1,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "veo_31_lite": {
+    "module_id": "veo_31_lite",
+    "display_name": "Veo 3.1 Lite",
+    "endpoint_id": "fal-ai/veo3.1/lite/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Veo 3.1 Lite",
+      "category": "Veo",
+      "description": "Google's accessible tier for high-volume rapid iteration.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "4 seconds",
+            "6 seconds",
+            "8 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2.5,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Veo",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 2,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "grok_imagine_video": {
+    "module_id": "grok_imagine_video",
+    "display_name": "Grok Imagine Video",
+    "endpoint_id": "xai/grok-imagine-video/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Grok Imagine Video",
+      "category": "Grok",
+      "description": "xAI's creative video generation with rich imagination and audio.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "8 seconds",
+            "10 seconds",
+            "15 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2.5,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Grok",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 3,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "grok_imagine_video_15": {
+    "module_id": "grok_imagine_video_15",
+    "display_name": "Grok Imagine Video 1.5",
+    "endpoint_id": "xai/grok-imagine-video/v1.5/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Grok Imagine Video 1.5",
+      "category": "Grok",
+      "description": "Next-gen xAI video with enhanced motion and lip-sync.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "8 seconds",
+            "10 seconds",
+            "15 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 6,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Grok",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 4,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "seedance_15_pro": {
+    "module_id": "seedance_15_pro",
+    "display_name": "Seedance 1.5 Pro",
+    "endpoint_id": "fal-ai/bytedance/seedance/v1.5/pro/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Seedance 1.5 Pro",
+      "category": "Seedance",
+      "description": "ByteDance's reliable video generation with smooth motion.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.2,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Seedance",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 5,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "seedance_20": {
+    "module_id": "seedance_20",
+    "display_name": "Seedance 2.0 Image to Video",
+    "endpoint_id": "bytedance/seedance-2.0/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Seedance 2.0 Image to Video",
+      "category": "Seedance",
+      "description": "Animate still images with cinematic quality and start/end frame control.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1",
+            "21:9"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds",
+            "15 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 3.5,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Seedance",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 6,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "seedance_20_fast": {
+    "module_id": "seedance_20_fast",
+    "display_name": "Seedance 2.0 Fast Image to Video",
+    "endpoint_id": "bytedance/seedance-2.0/fast/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Seedance 2.0 Fast Image to Video",
+      "category": "Seedance",
+      "description": "Fast tier image-to-video with synchronized audio at lower cost.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 4,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Seedance",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 7,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "seedance_20_ref2v": {
+    "module_id": "seedance_20_ref2v",
+    "display_name": "Seedance 2.0 Reference to Video",
+    "endpoint_id": "bytedance/seedance-2.0/reference-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Seedance 2.0 Reference to Video",
+      "category": "Seedance",
+      "description": "Multi-modal generation from images, video & audio references.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1",
+            "21:9"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds",
+            "15 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 3.5,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Seedance",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 8,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "seedance_20_fast_ref2v": {
+    "module_id": "seedance_20_fast_ref2v",
+    "display_name": "Seedance 2.0 Fast Reference to Video",
+    "endpoint_id": "bytedance/seedance-2.0/fast/reference-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Seedance 2.0 Fast Reference to Video",
+      "category": "Seedance",
+      "description": "Fast multi-modal video from references at lower cost.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 4,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Seedance",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 9,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "kling_21_std": {
+    "module_id": "kling_21_std",
+    "display_name": "Kling 2.1 Standard",
+    "endpoint_id": "fal-ai/kling-video/v2.1/standard/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Kling 2.1 Standard",
+      "category": "Kling",
+      "description": "Cost-efficient Kling with high-quality motion synthesis.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2.2,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Kling",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 10,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "kling_25_turbo_pro": {
+    "module_id": "kling_25_turbo_pro",
+    "display_name": "Kling 2.5 Turbo Pro",
+    "endpoint_id": "fal-ai/kling-video/v2.5-turbo/pro/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Kling 2.5 Turbo Pro",
+      "category": "Kling",
+      "description": "Fastest Kling with cinematic visuals and fluid motion.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Kling",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 11,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "kling_26_pro": {
+    "module_id": "kling_26_pro",
+    "display_name": "Kling 2.6 Pro",
+    "endpoint_id": "fal-ai/kling-video/v2.6/pro/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Kling 2.6 Pro",
+      "category": "Kling",
+      "description": "Top-tier Kling with native audio and cinematic motion.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Kling",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 12,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "kling_30_std": {
+    "module_id": "kling_30_std",
+    "display_name": "Kling 3.0 Standard",
+    "endpoint_id": "fal-ai/kling-video/v3/standard/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Kling 3.0 Standard",
+      "category": "Kling",
+      "description": "Latest Kling with improved quality and native audio.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.6,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Kling",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 13,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "kling_30_pro": {
+    "module_id": "kling_30_pro",
+    "display_name": "Kling 3.0 Pro",
+    "endpoint_id": "fal-ai/kling-video/v3/pro/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Kling 3.0 Pro",
+      "category": "Kling",
+      "description": "Premium Kling with multi-shot support and best quality.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds",
+            "15 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.6,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Kling",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 14,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "runway_gen_45": {
+    "module_id": "runway_gen_45",
+    "display_name": "Runway Gen 4.5",
+    "endpoint_id": "fal-ai/runway-gen3",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Runway Gen 4.5",
+      "category": "Runway",
+      "description": "World's #1 ranked video model for prompt adherence.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 6,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Runway",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 15,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "luma_ray_2": {
+    "module_id": "luma_ray_2",
+    "display_name": "Luma Ray 2",
+    "endpoint_id": "fal-ai/luma-dream-machine/ray-2",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Luma Ray 2",
+      "category": "Luma",
+      "description": "Photorealistic video generation with dream-like quality.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "9 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.3,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Luma",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 16,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "pika_21": {
+    "module_id": "pika_21",
+    "display_name": "Pika 2.1",
+    "endpoint_id": "fal-ai/pika/v2.1/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Pika 2.1",
+      "category": "Pika",
+      "description": "Versatile video creation with widest aspect ratio support.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:5",
+            "5:4",
+            "3:2",
+            "2:3"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.4,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Pika",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 17,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "hailuo_02_std": {
+    "module_id": "hailuo_02_std",
+    "display_name": "Hailuo 02 Standard",
+    "endpoint_id": "fal-ai/minimax/hailuo-02/standard/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Hailuo 02 Standard",
+      "category": "Hailuo",
+      "description": "MiniMax's advanced video model with natural motion dynamics.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "16:9",
+            "1:1"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "512P",
+            "768P"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "6 seconds",
+            "10 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2.5,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Hailuo",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 18,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "happy_horse": {
+    "module_id": "happy_horse",
+    "display_name": "Happy Horse",
+    "endpoint_id": "alibaba/happy-horse/image-to-video",
+    "provider": "fal.ai",
+    "fal_metadata": {
+      "display_name": "Happy Horse",
+      "category": "Happy Horse",
+      "description": "Alibaba's efficient and affordable video generation.",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Input image URL"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p"
+          ]
+        },
+        "duration": {
+          "type": "string",
+          "enum": [
+            "5 seconds",
+            "8 seconds",
+            "10 seconds",
+            "15 seconds"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": null,
+      "unit": null,
+      "currency": "USD",
+      "pricing_unavailable": true,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.6,
+      "minimum_credits": 1,
+      "estimated_credits": null,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Happy Horse",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 19,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "gpt_image_2": {
+    "module_id": "gpt_image_2",
+    "display_name": "GPT Image 2",
+    "endpoint_id": "fal-ai/flux-pro",
+    "provider": "OpenAI",
+    "fal_metadata": {
+      "display_name": "GPT Image 2",
+      "category": "OpenAI",
+      "description": "",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "Square 1:1",
+            "Portrait 4:5",
+            "Landscape 16:9",
+            "Portrait 9:16"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": 0.05,
+      "unit": "megapixels",
+      "currency": "USD",
+      "pricing_unavailable": false,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.2,
+      "minimum_credits": 1,
+      "estimated_credits": 4,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "OpenAI",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 100,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "nanobanana_2": {
+    "module_id": "nanobanana_2",
+    "display_name": "NanoBanana 2",
+    "endpoint_id": "fal-ai/recraft-20b",
+    "provider": "Nano Banana",
+    "fal_metadata": {
+      "display_name": "NanoBanana 2",
+      "category": "Nano Banana",
+      "description": "",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "Square 1:1",
+            "Portrait 4:5",
+            "Landscape 16:9",
+            "Portrait 9:16"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": 0.0219,
+      "unit": "images",
+      "currency": "USD",
+      "pricing_unavailable": false,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.8,
+      "minimum_credits": 1,
+      "estimated_credits": 3,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Nano Banana",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 101,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "nanobanana_pro": {
+    "module_id": "nanobanana_pro",
+    "display_name": "NanoBanana Pro",
+    "endpoint_id": "fal-ai/ideogram/v2",
+    "provider": "Nano Banana",
+    "fal_metadata": {
+      "display_name": "NanoBanana Pro",
+      "category": "Nano Banana",
+      "description": "",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "Square 1:1",
+            "Portrait 4:5",
+            "Landscape 16:9",
+            "Portrait 9:16"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": 0.08,
+      "unit": "images",
+      "currency": "USD",
+      "pricing_unavailable": false,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1,
+      "minimum_credits": 1,
+      "estimated_credits": 6,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Nano Banana",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 102,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "nanobanana": {
+    "module_id": "nanobanana",
+    "display_name": "NanoBanana",
+    "endpoint_id": "fal-ai/stable-diffusion-v3-medium",
+    "provider": "Nano Banana",
+    "fal_metadata": {
+      "display_name": "NanoBanana",
+      "category": "Nano Banana",
+      "description": "",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "Square 1:1",
+            "Portrait 4:5",
+            "Landscape 16:9",
+            "Portrait 9:16"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": 0.035,
+      "unit": "images",
+      "currency": "USD",
+      "pricing_unavailable": false,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2,
+      "minimum_credits": 1,
+      "estimated_credits": 4,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Nano Banana",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 103,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "imagen_4": {
+    "module_id": "imagen_4",
+    "display_name": "Imagen 4",
+    "endpoint_id": "fal-ai/imagen4/preview/fast",
+    "provider": "Google",
+    "fal_metadata": {
+      "display_name": "Imagen 4",
+      "category": "Google",
+      "description": "",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "Square 1:1",
+            "Portrait 4:5",
+            "Landscape 16:9",
+            "Portrait 9:16"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": 0.02,
+      "unit": "images",
+      "currency": "USD",
+      "pricing_unavailable": false,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 1.5,
+      "minimum_credits": 1,
+      "estimated_credits": 2,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Google",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 104,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  },
+  "grok": {
+    "module_id": "grok",
+    "display_name": "Grok",
+    "endpoint_id": "fal-ai/flux/dev",
+    "provider": "Grok",
+    "fal_metadata": {
+      "display_name": "Grok",
+      "category": "Grok",
+      "description": "",
+      "tags": [],
+      "status": "active",
+      "thumbnail_url": "",
+      "model_url": "",
+      "updated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "fal_schema": {
+      "input_schema": {
+        "prompt": {
+          "type": "string",
+          "description": "Prompt"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "Square 1:1",
+            "Portrait 4:5",
+            "Landscape 16:9",
+            "Portrait 9:16"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "720p",
+            "1080p",
+            "4k"
+          ]
+        }
+      },
+      "fields": [],
+      "required_fields": [],
+      "options": {},
+      "schema_hash": "",
+      "last_synced_at": ""
+    },
+    "fal_pricing": {
+      "unit_price": 0.025,
+      "unit": "megapixels",
+      "currency": "USD",
+      "pricing_unavailable": false,
+      "price_hash": "",
+      "last_synced_at": ""
+    },
+    "credit_pricing": {
+      "credit_pack_price_usd": 29,
+      "credit_pack_credits": 1000,
+      "credit_usd_value": 0.029,
+      "markup_multiplier": 2,
+      "minimum_credits": 1,
+      "estimated_credits": 3,
+      "last_calculated_at": "2026-10-02T17:17:02.169Z"
+    },
+    "business_config": {
+      "enabled": true,
+      "custom_category": "Grok",
+      "business_presets": {},
+      "prompt_presets": {},
+      "ui_order": 105,
+      "admin_notes": ""
+    },
+    "created_at": "2026-10-02T17:17:02.169Z",
+    "updated_at": "2026-10-02T17:17:02.169Z"
+  }
+}
