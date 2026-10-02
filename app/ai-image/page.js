@@ -218,7 +218,7 @@ export default function AIImagePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setBgVideoIdx((prev) => (prev + 1) % TEMPLATE_VIDEOS.length);
-    }, 2000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 

@@ -127,7 +127,7 @@ export default function Dashboard() {
   useEffect(() => {
     const interval = setInterval(() => {
       setBgVideoIdx((prev) => (prev + 1) % templates.length);
-    }, 2000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
   const handleTemplateClick = (prompt) => {

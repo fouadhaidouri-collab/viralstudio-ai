@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
 import { useState, useEffect } from "react";
 import Icon from "./Icon";
@@ -18,6 +18,7 @@ const toolItems = [
 
 function SidebarContent() {
   const pathname = usePathname();
+  const router = useRouter();
   const { setMobileOpen } = useSidebar();
   const [showAdmin, setShowAdmin] = useState(false);
   const [credits, setCredits] = useState(null);
@@ -26,6 +27,15 @@ function SidebarContent() {
     const host = window.location.hostname;
     setShowAdmin(!host.endsWith("viralstudio-ai.com"));
   }, []);
+
+  useEffect(() => {
+    const routes = [
+      homeItem.href,
+      ...toolItems.map((i) => i.href),
+      ...(showAdmin ? ["/admin"] : []),
+    ];
+    routes.forEach((href) => router.prefetch(href));
+  }, [router, showAdmin]);
 
   useEffect(() => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
