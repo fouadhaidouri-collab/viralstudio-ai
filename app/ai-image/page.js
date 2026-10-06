@@ -283,7 +283,7 @@ export default function AIImagePage() {
               body: JSON.stringify({ type: "Image Lab", provider: selectedModel.provider, model: selectedModel.fal_model, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: selectedModel.credits || 1 }),
             }).catch(() => {});
           } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
-            throw new Error(`Generation ${statusData.status.toLowerCase()}`);
+            throw new Error("The AI generation failed on the provider. No credits were charged.");
           }
         }
       }

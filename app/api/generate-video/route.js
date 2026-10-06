@@ -2,6 +2,9 @@ import { getFalKey } from "@/lib/fal-key";
 
 const FAL_BASE = "https://queue.fal.run";
 
+const PROVIDER_UNAVAILABLE =
+  "AI generation service is temporarily unavailable. Please try again later.";
+
 const MODEL_PAYLOADS = {
   "fal-ai/veo3.1/fast": ({ prompt, aspectRatio }) => ({
     prompt,
@@ -51,7 +54,10 @@ const MODEL_PAYLOADS = {
 export async function POST(request) {
   const keyResult = await getFalKey();
   if (!keyResult.hasKey) {
-    return Response.json({ error: keyResult.error, setupRequired: true }, { status: 200 });
+    return Response.json(
+      { error: "Generation service is not configured yet.", setupRequired: true },
+      { status: 503 }
+    );
   }
 
   const { prompt, modelId, aspectRatio } = await request.json();
@@ -70,18 +76,25 @@ export async function POST(request) {
 
   const payload = buildPayload({ prompt, aspectRatio: ratioMap[aspectRatio] || "16:9" });
 
-  const res = await fetch(`${FAL_BASE}/${modelId}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Key ${keyResult.key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  let res;
+  try {
+    res = await fetch(`${FAL_BASE}/${modelId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Key ${keyResult.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.error("generate-video submit network error:", err.message);
+    return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
+  }
 
   if (!res.ok) {
-    const text = await res.text();
-    return Response.json({ error: `fal.ai error (${res.status}): ${text}` }, { status: res.status });
+    const text = (await res.text()).slice(0, 400);
+    console.error(`generate-video fal error ${res.status}: ${text}`);
+    return Response.json({ error: PROVIDER_UNAVAILABLE, provider_status: res.status }, { status: 503 });
   }
 
   const data = await res.json();
@@ -91,7 +104,10 @@ export async function POST(request) {
 export async function GET(request) {
   const keyResult = await getFalKey();
   if (!keyResult.hasKey) {
-    return Response.json({ error: keyResult.error, setupRequired: true }, { status: 200 });
+    return Response.json(
+      { error: "Generation service is not configured yet.", setupRequired: true },
+      { status: 503 }
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -102,13 +118,20 @@ export async function GET(request) {
     return Response.json({ error: "Missing requestId or modelId" }, { status: 400 });
   }
 
-  const statusRes = await fetch(`${FAL_BASE}/${modelId}/requests/${requestId}/status`, {
-    headers: { Authorization: `Key ${keyResult.key}` },
-  });
+  let statusRes;
+  try {
+    statusRes = await fetch(`${FAL_BASE}/${modelId}/requests/${requestId}/status`, {
+      headers: { Authorization: `Key ${keyResult.key}` },
+    });
+  } catch (err) {
+    console.error("generate-video status network error:", err.message);
+    return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
+  }
 
   if (!statusRes.ok) {
-    const text = await statusRes.text();
-    return Response.json({ error: `fal.ai status error (${statusRes.status}): ${text}` }, { status: statusRes.status });
+    const text = (await statusRes.text()).slice(0, 400);
+    console.error(`generate-video status error ${statusRes.status}: ${text}`);
+    return Response.json({ error: PROVIDER_UNAVAILABLE, provider_status: statusRes.status }, { status: 503 });
   }
 
   const statusData = await statusRes.json();

@@ -96,12 +96,12 @@ export default function ModulePage({ params }) {
         throw new Error(genData.error || "Generation failed");
       }
 
-      const { requestId } = genData;
+      const { requestId, credits_required } = genData;
 
       let done = false;
       while (!done) {
         await new Promise((r) => setTimeout(r, 2000));
-        const statusRes = await fetch(`/api/modules/${moduleId}/status?requestId=${requestId}`);
+        const statusRes = await fetch(`/api/modules/${moduleId}/status?requestId=${requestId}&credits=${credits_required || ""}`);
         const statusData = await statusRes.json();
 
         if (statusData.status === "COMPLETED") {
@@ -110,7 +110,7 @@ export default function ModulePage({ params }) {
           }
           done = true;
         } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
-          throw new Error(`Generation ${statusData.status.toLowerCase()}`);
+          throw new Error("The AI generation failed on the provider. No credits were charged.");
         }
       }
 

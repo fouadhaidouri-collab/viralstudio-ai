@@ -373,7 +373,7 @@ export default function AIVideoPage() {
       if (statusData.status === "COMPLETED") {
         return statusData.videoUrl;
       } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
-        throw new Error(`Generation ${statusData.status.toLowerCase()}`);
+        throw new Error("The AI generation failed on the provider. No credits were charged.");
       }
     }
   };
