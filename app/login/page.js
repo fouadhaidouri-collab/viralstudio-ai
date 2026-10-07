@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [refCode, setRefCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState("");
-  const [otp, setOtp] = useState(Array(6).fill(""));
+  const [otp, setOtp] = useState(Array(8).fill(""));
   const [otpError, setOtpError] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -67,7 +67,7 @@ export default function LoginPage() {
         return;
       }
       setVerifyEmail(email.trim());
-      setOtp(Array(6).fill(""));
+      setOtp(Array(8).fill(""));
       setOtpError("");
       setResendTimer(60);
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
@@ -83,7 +83,7 @@ export default function LoginPage() {
     newOtp[index] = value;
     setOtp(newOtp);
     setOtpError("");
-    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+    if (value && index < 7) otpRefs.current[index + 1]?.focus();
   };
 
   const handleOtpKeyDown = (index, e) => {
@@ -94,18 +94,18 @@ export default function LoginPage() {
   };
 
   const handleOtpPaste = (e) => {
-    const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (text.length === 6) {
+    const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 8);
+    if (text.length === 8) {
       const newOtp = text.split("");
       setOtp(newOtp);
-      otpRefs.current[5]?.focus();
+      otpRefs.current[7]?.focus();
     }
   };
 
   const handleVerifyOtp = async () => {
     const code = otp.join("");
-    if (code.length !== 6) {
-      setOtpError("Enter the full 6-digit code");
+    if (code.length !== 8) {
+      setOtpError("Enter the full 8-digit code");
       return;
     }
     setOtpLoading(true);
@@ -164,7 +164,7 @@ export default function LoginPage() {
           </h1>
           <p className="text-sm text-on-surface-variant mt-1">
             {verifyEmail
-              ? `Enter the 6-digit code sent to ${verifyEmail}`
+              ? `Enter the 8-digit code sent to ${verifyEmail}`
               : tab === "signin" ? "Sign in to your account" : "Sign up to get started"}
           </p>
         </div>
@@ -188,7 +188,7 @@ export default function LoginPage() {
 
         {verifyEmail ? (
           <div className="glass-card rounded-2xl p-6 border border-white/5 card-glow" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            <div className="flex justify-center gap-2 mb-6" onPaste={handleOtpPaste}>
+            <div className="flex justify-center gap-1.5 mb-6" onPaste={handleOtpPaste}>
               {otp.map((digit, i) => (
                 <input
                   key={i}
@@ -199,7 +199,7 @@ export default function LoginPage() {
                   value={digit}
                   onChange={e => handleOtpChange(i, e.target.value)}
                   onKeyDown={e => handleOtpKeyDown(i, e)}
-                  className="w-11 h-14 md:w-14 md:h-16 text-center text-2xl font-bold rounded-xl border-2 transition-all duration-150 ${digit ? 'bg-primary/10 border-primary text-primary shadow-lg shadow-primary/20' : 'bg-surface-container border-surface-border/40 text-white hover:border-primary/40 hover:bg-surface-container-high'}"
+                  className="w-9 h-12 text-center text-xl font-bold rounded-xl border-2 transition-all duration-150 ${digit ? 'bg-primary/10 border-primary text-primary shadow-lg shadow-primary/20' : 'bg-surface-container border-surface-border/40 text-white hover:border-primary/40 hover:bg-surface-container-high'}"
                   autoFocus={i === 0}
                 />
               ))}
