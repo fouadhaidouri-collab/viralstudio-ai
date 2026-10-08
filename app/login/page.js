@@ -57,6 +57,9 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) {
         setLoginError(data.error || "Failed to create account");
+        // If the email is already registered, route the user to the sign-in
+        // form (their email stays prefilled) so they can just log in.
+        if (res.status === 409) setTab("login");
         setLoading(false);
         return;
       }

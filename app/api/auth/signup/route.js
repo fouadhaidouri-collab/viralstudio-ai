@@ -1,6 +1,5 @@
 import crypto from "crypto";
-import { run } from "../../../../lib/db";
-import { findUser } from "../../../lib/userStore";
+import { run, get } from "../../../../lib/db";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -42,10 +41,11 @@ export async function POST(request) {
       return Response.json({ ok: true, verification_required: false, email: user.email }, { status: 201 });
     }
 
-    // If the email already belongs to an account, do not send a code for it.
-    const existing = await findUser(email.trim());
+    // If the email already belongs to an account (case-insensitive), do not
+    // send a code for it — tell the user it's already registered.
+    const existing = await get("SELECT id FROM users WHERE lower(email) = lower(?)", [email.trim()]);
     if (existing) {
-      return Response.json({ error: "An account with this email already exists" }, { status: 409 });
+      return Response.json({ error: "This email is already registered. Please sign in." }, { status: 409 });
     }
 
     const password_hash = crypto.createHash("sha256").update(password).digest("hex");
