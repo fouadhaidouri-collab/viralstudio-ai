@@ -37,10 +37,18 @@ export default function AffiliatePage() {
   const couponCode = data?.affiliate?.referral_code || "";
   const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
 
+  const loadStats = () => {
+    fetch("/api/affiliate/stats")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && !d.error && typeof d.clicks_total === "number") setData(d); })
+      .catch(() => {});
+  };
+
   useEffect(() => {
-    fetch("/api/affiliate/stats").then((r) => r.json()).then(setData).catch(() => {});
-    fetch("/api/affiliate/referrals").then((r) => r.json()).then((d) => setReferrals(d.referrals || [])).catch(() => {});
-    fetch("/api/affiliate/withdrawals").then((r) => r.json()).then((d) => setWithdrawals(d.withdrawals || [])).catch(() => {});
+    loadStats();
+    fetch("/api/affiliate/referrals").then((r) => (r.ok ? r.json() : null)).then((d) => setReferrals(d?.referrals || [])).catch(() => {});
+    fetch("/api/affiliate/withdrawals").then((r) => (r.ok ? r.json() : null)).then((d) => setWithdrawals(d?.withdrawals || [])).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const copyLink = () => {
@@ -81,7 +89,7 @@ export default function AffiliatePage() {
       if (res.ok) {
         setWithdrawStatus("success");
         setWithdrawAmount("");
-        fetch("/api/affiliate/stats").then((r) => r.json()).then(setData).catch(() => {});
+        loadStats();
         fetch("/api/affiliate/withdrawals").then((r) => r.json()).then((d) => setWithdrawals(d.withdrawals || [])).catch(() => {});
         setTimeout(() => setWithdrawStatus(""), 3000);
       } else {
@@ -96,12 +104,12 @@ export default function AffiliatePage() {
   };
 
   const stats = data ? [
-    { label: "Total Clicks", value: data.clicks_total.toLocaleString() },
-    { label: "Signups", value: data.signups_total.toLocaleString() },
-    { label: "Paid Customers", value: data.paid_customers.toLocaleString() },
-    { label: "Conversion", value: `${data.conversion_rate}%` },
-    { label: "Total Profit", value: `$${data.paid.toFixed(2)}`, green: true },
-    { label: "Commission", value: `${data.commission_rate}%` },
+    { label: "Total Clicks", value: Number(data.clicks_total || 0).toLocaleString() },
+    { label: "Signups", value: Number(data.signups_total || 0).toLocaleString() },
+    { label: "Paid Customers", value: Number(data.paid_customers || 0).toLocaleString() },
+    { label: "Conversion", value: `${data.conversion_rate ?? 0}%` },
+    { label: "Total Profit", value: `$${Number(data.paid || 0).toFixed(2)}`, green: true },
+    { label: "Commission", value: `${data.commission_rate ?? 20}%` },
   ] : [];
 
   const statusLabel = data?.affiliate?.status === "active" ? "Active" : "Inactive";
@@ -254,7 +262,7 @@ export default function AffiliatePage() {
             )}
             {data && (
               <div className="flex items-center justify-between mt-3">
-                <p className="text-xs text-on-surface-variant">Available: <span className="text-white font-semibold">${data.pending.toFixed(2)}</span></p>
+                <p className="text-xs text-on-surface-variant">Available: <span className="text-white font-semibold">${Number(data.pending || 0).toFixed(2)}</span></p>
                 <p className="text-xs text-on-surface-variant">Min $100 · Max $10,000 · Once per 30 days</p>
               </div>
             )}
@@ -301,7 +309,7 @@ export default function AffiliatePage() {
                           {w.status === "pending" && (
                             <>
                               <button onClick={() => { setEditingWdr(w); const meth = (w.payment_method || w.method || "").replace("USDT (TRC20)","Crypto"); setEditMethod(meth); const pa = w.payment_account || ""; try { const p = JSON.parse(pa); if (p.iban) { setEditBankName(p.name || ""); setEditIban(p.iban); setEditAccount(""); } else if (p.coin) { setEditNetwork(p.coin); setEditWallet((p.network||"").toUpperCase()); setEditAccount(p.wallet || ""); } else if (p.wallet) { setEditNetwork(p.coin || "USDT"); setEditWallet((p.network||p.wallet||"").toUpperCase()); setEditAccount(p.wallet || ""); } else { setEditAccount(p.email || pa); } } catch { setEditAccount(pa); } }} className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-all">Edit</button>
-                              <button onClick={async () => { if (!confirm("Cancel this withdrawal request?")) return; await fetch(`/api/affiliate/withdrawals/${w.id}`, { method: "DELETE" }); fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{}); fetch("/api/affiliate/stats").then(r=>r.json()).then(setData).catch(()=>{}); }} className="text-xs font-semibold text-red-400 hover:text-red-300 transition-all">Cancel</button>
+                              <button onClick={async () => { if (!confirm("Cancel this withdrawal request?")) return; await fetch(`/api/affiliate/withdrawals/${w.id}`, { method: "DELETE" }); fetch("/api/affiliate/withdrawals").then(r=>r.json()).then(d=>setWithdrawals(d.withdrawals||[])).catch(()=>{}); loadStats(); }} className="text-xs font-semibold text-red-400 hover:text-red-300 transition-all">Cancel</button>
                             </>
                           )}
                           <button onClick={() => setWithdrawDetail(w)} className="text-xs font-semibold text-secondary hover:text-primary transition-all">View</button>
