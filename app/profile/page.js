@@ -398,20 +398,6 @@ export default function ProfilePage() {
                     </div>
                   </button>
                   {!isGoogleUser && (
-                    <button onClick={() => setTab("security")} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/40 hover:bg-surface-container-high hover:translate-y-[-1px] transition-all text-left group shadow-sm">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/10 transition-all">
-                        <Icon name="lock" className="text-primary" size={20} />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-white">Reset Password</div>
-                        <div className="text-[11px] text-on-surface-variant">Change your password</div>
-                      </div>
-                      <div className="ml-auto text-on-surface-variant/30 group-hover:text-primary/50 transition-all">
-                        <Icon name="chevron_right" size={18} />
-                      </div>
-                    </button>
-                  )}
-                  {!isGoogleUser && (
                     <button onClick={() => router.push("/forgot-password")} className="flex items-center gap-4 px-5 py-4 rounded-xl bg-surface-container-low border border-surface-border/50 hover:border-primary/40 hover:bg-surface-container-high hover:translate-y-[-1px] transition-all text-left group shadow-sm">
                       <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/10 transition-all">
                         <Icon name="refresh" className="text-primary" size={20} />
