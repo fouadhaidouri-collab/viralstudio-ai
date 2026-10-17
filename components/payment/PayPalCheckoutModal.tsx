@@ -8,12 +8,12 @@ import {
 } from "@paypal/react-paypal-js";
 
 const PLANS_DATA = {
-  beginner: { name: "Beginner", price: 10, baseCredits: 1000, bonusPercent: 0 },
-  builder:  { name: "Builder",  price: 25, baseCredits: 2500, bonusPercent: 5 },
-  creator:  { name: "Creator",  price: 50, baseCredits: 5000, bonusPercent: 10 },
-  pro:      { name: "Pro",      price: 100, baseCredits: 10000, bonusPercent: 15 },
-  elite:    { name: "Elite",    price: 200, baseCredits: 20000, bonusPercent: 20 },
-  ultimate: { name: "Ultimate", price: 500, baseCredits: 50000, bonusPercent: 20 },
+  beginner: { name: "Starter",  price: 10, baseCredits: 1000, bonusPercent: 0 },
+  builder:  { name: "Basic",    price: 25, baseCredits: 2500, bonusPercent: 5 },
+  creator:  { name: "Pro",      price: 50, baseCredits: 5000, bonusPercent: 10 },
+  pro:      { name: "Business", price: 100, baseCredits: 10000, bonusPercent: 15 },
+  elite:    { name: "Premium",  price: 200, baseCredits: 20000, bonusPercent: 20 },
+  ultimate: { name: "Elite",    price: 500, baseCredits: 50000, bonusPercent: 20 },
 };
 
 function PayPalButtonGroup({ planId, billingCycle, refCode, couponCode, onSuccess, onError }) {
