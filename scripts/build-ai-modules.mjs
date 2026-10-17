@@ -31,9 +31,9 @@ const baseSchema = (extra) => ({
 });
 
 const baseCreditPricing = (markup, estimated = null) => ({
-  credit_pack_price_usd: 29,
+  credit_pack_price_usd: 10,
   credit_pack_credits: 1000,
-  credit_usd_value: 0.029,
+  credit_usd_value: 0.01,
   markup_multiplier: markup,
   minimum_credits: 1,
   estimated_credits: estimated,

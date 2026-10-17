@@ -25,8 +25,7 @@ export async function POST(req) {
       return Response.json({ error: "YouCan Pay not configured" }, { status: 500 });
     }
 
-    const annual = billingCycle === "annual";
-    const amount = getPlanPrice(planId, annual);
+    const amount = getPlanPrice(planId);
     if (!amount) {
       return Response.json({ error: "Could not determine price" }, { status: 400 });
     }
@@ -38,7 +37,7 @@ export async function POST(req) {
     const payload = {
       amount: (amount * 100).toFixed(0),
       currency: "USD",
-      description: `${planName} ${annual ? "Yearly" : billingCycle === "weekly" ? "Weekly" : "Monthly"}`,
+      description: `${planName} Credits Pack`,
       success_url: `${appUrl}/pricing?paid=success`,
       cancel_url: `${appUrl}/pricing`,
       metadata: JSON.stringify({

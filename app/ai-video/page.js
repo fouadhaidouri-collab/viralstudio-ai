@@ -43,7 +43,7 @@ const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/templat
 const calcModelCredits = (unitPrice, quantity, settings, modelMarkup) => {
   if (unitPrice == null) return null;
   const markup = modelMarkup ?? settings?.default_markup_multiplier ?? 1.0;
-  const usdValue = settings?.credit_usd_value || 0.029;
+  const usdValue = settings?.credit_usd_value || 0.01;
   const minCredits = settings?.minimum_generation_credits || 1;
   const sellCost = unitPrice * quantity * markup;
   const credits = Math.ceil(sellCost / usdValue);
@@ -173,7 +173,7 @@ export default function AIVideoPage() {
   const [videoUrls, setVideoUrls] = useState([]);
   const [videoError, setVideoError] = useState(null);
   const [pricing, setPricing] = useState({});
-  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
+  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.01, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
   const [credits, setCredits] = useState(0);
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);

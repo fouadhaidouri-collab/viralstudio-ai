@@ -38,13 +38,12 @@ export async function POST(req) {
       }
     }
 
-    const annual = billingCycle === "annual";
-    let amount = getPlanPrice(planId, annual);
-    const credits = getPlanCredits(planId, annual);
+    let amount = getPlanPrice(planId);
+    const credits = getPlanCredits(planId);
     if (discountPercent > 0) {
       amount = Math.round(amount * (100 - discountPercent)) / 100;
     }
-    const userId = session.user.email;
+    const userId = session.user.id || session.user.email;
 
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const secret = process.env.PAYPAL_CLIENT_SECRET;
@@ -71,7 +70,7 @@ export async function POST(req) {
       return Response.json({ error: `PayPal auth failed: ${tokenData.error_description || tokenData.error || "unknown"}` }, { status: 500 });
     }
 
-    const tx = createTransaction({
+    const tx = await createTransaction({
       userId,
       provider: "paypal",
       planId,
@@ -92,7 +91,7 @@ export async function POST(req) {
         purchase_units: [
           {
             reference_id: tx.id,
-            description: `${PLANS[planId].name} Plan - ${annual ? "Annual" : "Monthly"}`,
+            description: `${PLANS[planId].name} Credits Pack (${credits.toLocaleString()} credits)`,
             amount: { currency_code: "USD", value: amount.toFixed(2) },
             custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits, refCode: refCode || "", couponCode: couponCode || "" }),
           },
@@ -103,11 +102,11 @@ export async function POST(req) {
     const orderData = await orderRes.json();
     if (!orderRes.ok) {
       console.error("PayPal order error:", orderData);
-      updateTransaction(tx.id, { status: "failed", raw_payload: orderData });
+      await updateTransaction(tx.id, { status: "failed", metadata: orderData });
       return Response.json({ error: orderData.message || "PayPal order failed" }, { status: orderRes.status });
     }
 
-    updateTransaction(tx.id, { provider_payment_id: orderData.id });
+    await updateTransaction(tx.id, { transaction_id: orderData.id });
 
     return Response.json({
       orderId: orderData.id,

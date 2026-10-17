@@ -25,11 +25,9 @@ export async function POST(req) {
       return Response.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    const annual = billingCycle === "annual";
-    const amount = getPlanPrice(planId, annual);
-    const credits = getPlanCredits(planId, annual);
-    const creditsPerMonth = PLANS[planId].creditsPerMonth;
-    const userId = session.user.email;
+    const amount = getPlanPrice(planId);
+    const credits = getPlanCredits(planId);
+    const userId = session.user.id || session.user.email;
 
     const tx = createTransaction({
       userId,
@@ -49,9 +47,7 @@ export async function POST(req) {
       }
       const stripe = new Stripe(stripeSecretKey);
 
-      const description = annual
-        ? `${PLANS[planId].name} Plan - Annual (${credits} credits/year)`
-        : `${PLANS[planId].name} Plan - Monthly (${creditsPerMonth} credits/month)`;
+      const description = `${PLANS[planId].name} Credits Pack (${credits.toLocaleString()} credits)`;
 
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -61,7 +57,7 @@ export async function POST(req) {
             price_data: {
               currency: "usd",
               product_data: {
-                name: `${PLANS[planId].name} Plan - ${annual ? "Annual" : "Monthly"}`,
+                name: `${PLANS[planId].name} Credits Pack`,
                 description,
               },
               unit_amount: Math.round(amount * 100),
@@ -117,7 +113,7 @@ export async function POST(req) {
           purchase_units: [
             {
               reference_id: tx.id,
-              description: `${PLANS[planId].name} Plan - ${annual ? "Annual" : "Monthly"}`,
+              description: `${PLANS[planId].name} Credits Pack`,
               amount: { currency_code: "USD", value: amount.toFixed(2) },
               custom_id: JSON.stringify({ transactionId: tx.id, userId, planId, billingCycle, credits, refCode: refCode || "" }),
             },

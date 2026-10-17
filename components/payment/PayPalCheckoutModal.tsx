@@ -7,13 +7,13 @@ import {
   usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
 
-const DISCOUNT = 0.30;
-
 const PLANS_DATA = {
-  micro:   { name: "Micro", weekly: 9, credits: 306 },
-  starter: { name: "Starter", monthly: 25, credits: 10200 },
-  professional: { name: "Professional", monthly: 35, credits: 14280 },
-  team:   { name: "Team", monthly: 119, credits: 48552 },
+  beginner: { name: "Beginner", price: 10, baseCredits: 1000, bonusPercent: 0 },
+  builder:  { name: "Builder",  price: 25, baseCredits: 2500, bonusPercent: 5 },
+  creator:  { name: "Creator",  price: 50, baseCredits: 5000, bonusPercent: 10 },
+  pro:      { name: "Pro",      price: 100, baseCredits: 10000, bonusPercent: 15 },
+  elite:    { name: "Elite",    price: 200, baseCredits: 20000, bonusPercent: 20 },
+  ultimate: { name: "Ultimate", price: 500, baseCredits: 50000, bonusPercent: 20 },
 };
 
 function PayPalButtonGroup({ planId, billingCycle, refCode, couponCode, onSuccess, onError }) {
@@ -96,26 +96,14 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
   const [refCode, setRefCode] = useState("");
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
-  const plan = PLANS_DATA[planId] || { name: planId, monthly: 0, credits: 0 };
+  const plan = PLANS_DATA[planId] || { name: planId, price: 0, baseCredits: 0, bonusPercent: 0 };
   const planName = plan.name;
 
   const discountMultiplier = (100 - couponDiscount) / 100;
 
-  let amount, credits, billingLabel;
-  if (billingCycle === "weekly") {
-    amount = plan.weekly || 0;
-    credits = plan.credits;
-    billingLabel = "Weekly";
-  } else if (billingCycle === "annual") {
-    const annualPerMonth = plan.monthly ? Math.round(plan.monthly * (1 - DISCOUNT)) : 0;
-    amount = annualPerMonth * 12;
-    credits = Math.round(plan.credits * (1 + DISCOUNT));
-    billingLabel = "Annual";
-  } else {
-    amount = plan.monthly || 0;
-    credits = Math.round(plan.credits / 12);
-    billingLabel = "Monthly";
-  }
+  const amount = plan.price || 0;
+  const credits = Math.round((plan.baseCredits || 0) * (1 + (plan.bonusPercent || 0) / 100));
+  const billingLabel = "One-time";
 
   const handleSuccess = (result) => {
     setSuccess(result);
@@ -167,17 +155,17 @@ export default function PayPalCheckoutModal({ isOpen, onClose, planId, billingCy
         {step === "payment" && (
           <div className="p-6 md:p-8">
             <h2 className="text-xl md:text-2xl font-extrabold text-white mb-2 pr-8">
-              Get Instant Access to {planName} Plan
+              Get {planName} Credits
             </h2>
             <p className="text-sm text-on-surface-variant/60 mb-6 leading-relaxed">
-              Everything you need to create more, faster — pro-level tools, priority speed, secure payment, and cancel anytime.
+              One-time purchase — your credits are added instantly and never expire.
             </p>
 
             <div className="bg-white/[0.03] border border-white/5 rounded-xl px-5 py-3 mb-4 flex items-center justify-between">
               <div>
-                <span className="text-sm font-semibold text-white">{planName} Plan</span>
-                <span className="text-[11px] text-on-surface-variant/50 ml-2 capitalize">{billingLabel}</span>
-                <p className="text-[10px] text-yellow-400 font-medium mt-0.5">{credits.toLocaleString()} credits/{billingCycle === "weekly" ? "week" : billingCycle === "annual" ? "year" : "month"}</p>
+                <span className="text-sm font-semibold text-white">{planName} Pack</span>
+                <span className="text-[11px] text-on-surface-variant/50 ml-2">{billingLabel}</span>
+                <p className="text-[10px] text-yellow-400 font-medium mt-0.5">{credits.toLocaleString()} credits</p>
               </div>
               <div className="text-right">
                 {couponDiscount > 0 ? (

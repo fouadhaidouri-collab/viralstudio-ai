@@ -32,7 +32,7 @@ import {
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
 
 const resMap = { "4k": 2160, "1080p": 1080, "720p": 720 };
-const CREDIT_USD_VALUE = 0.029;
+const CREDIT_USD_VALUE = 0.01;
 
 function calcImageCredits(model, aspectRatio, resolution, quantity) {
   if (model.unit === "megapixels") {
@@ -147,7 +147,7 @@ export default function AIImagePage() {
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
   const [pricing, setPricing] = useState({});
-  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.029, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
+  const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.01, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
   const fileInputRef = useRef();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
   const { setMobileOpen } = useSidebar();

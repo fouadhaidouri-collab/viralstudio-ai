@@ -16,7 +16,7 @@ export default function InsufficientCreditsModal({ needed, available, onClose })
             <p className="text-xs text-on-surface-variant/80 leading-relaxed">
               You need <span className="text-yellow-400 font-semibold">{needed}</span> credits but you have <span className="text-on-surface-variant font-semibold">{current}</span>.
             </p>
-            <p className="text-[10px] text-yellow-400/70 font-medium">$29 = 1000 credits</p>
+            <p className="text-[10px] text-yellow-400/70 font-medium">$10 = 1,000 credits</p>
           </div>
           <div className="flex gap-2 w-full pt-1">
             <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-surface-border/60 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high transition-all">

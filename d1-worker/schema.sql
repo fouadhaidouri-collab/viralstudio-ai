@@ -128,6 +128,15 @@ CREATE TABLE IF NOT EXISTS payments (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS credit_ledger (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  transaction_id TEXT,
+  credits_added INTEGER DEFAULT 0,
+  reason TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS affiliate_accounts (
   id TEXT PRIMARY KEY,
   user_id TEXT UNIQUE NOT NULL,
@@ -227,7 +236,7 @@ CREATE TABLE IF NOT EXISTS module_credit_prices (
   unit TEXT,
   provider_cost_usd REAL,
   markup_multiplier REAL DEFAULT 2.0,
-  credit_usd_value REAL DEFAULT 0.029,
+  credit_usd_value REAL DEFAULT 0.01,
   pricing_unavailable INTEGER DEFAULT 0,
   last_calculated_at TEXT
 );

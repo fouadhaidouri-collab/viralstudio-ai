@@ -8,103 +8,76 @@ import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
 import PayPalCheckoutModal from "../../components/payment/PayPalCheckoutModal";
 
-const DISCOUNT = 0.30;
-
-const plans = [
+// Credit packs: $10 = 1,000 credits (1 credit = $0.01).
+// The bonus % is added on top of the base credits for each pack.
+const packs = [
   {
-    name: "Micro",
-    sub: "For creators starting their video journey",
-    weekly: 9,
-    popular: false,
-    badge: "Weekly",
-    credits: 306,
-    cta: "Buy Now",
-    features: [
-      "306 AI credits/week",
-      "2 GB storage",
-      "Up to 50 images",
-      "Basic AI tools",
-      "NO ADS",
-    ],
+    id: "beginner",
+    name: "Beginner",
+    price: 10,
+    base: 1000,
+    bonus: 0,
+    sub: "Perfect to try every AI tool",
   },
   {
-    name: "Starter",
-    sub: "For creators starting their video journey",
-    monthly: 25,
-    popular: false,
-    badge: "Save 30%",
-    credits: 10200,
-    cta: "Buy Now",
-    features: [
-      "1 user",
-      "200 min of video",
-      "5 GB storage",
-      "5M Getty Images & Storyblocks",
-      "10,200 AI credits/year",
-      "Up to 2,000 images",
-      "Up to 40 min avatar video",
-      "No watermark",
-      "Basic AI tools",
-    ],
+    id: "builder",
+    name: "Builder",
+    price: 25,
+    base: 2500,
+    bonus: 5,
+    sub: "For regular creators",
   },
   {
-    name: "Professional",
-    sub: "For creators who need pro-quality results",
-    monthly: 35,
+    id: "creator",
+    name: "Creator",
+    price: 50,
+    base: 5000,
+    bonus: 10,
     popular: true,
-    credits: 14280,
-    badge: "Save 30%",
-    cta: "Buy Now",
-    features: [
-      "1 user",
-      "600 min of video",
-      "20 GB storage",
-      "120 min AI voices (29 languages)",
-      "18M Getty Images & Storyblocks",
-      "14,280 AI credits/year",
-      "Up to 20,000 images",
-      "Up to 400 min avatar video",
-      "Custom avatars",
-    ],
+    sub: "Our most popular pack",
   },
   {
-    name: "Team",
-    sub: "For teams collaborating on video creation",
-    monthly: 119,
-    popular: false,
-    credits: 48552,
-    badge: "Save 30%",
-    cta: "Buy Now",
-    features: [
-      "3+ users",
-      "1,800 min video",
-      "100 GB storage",
-      "240 min AI voices (29 languages)",
-      "18M Getty Images & Storyblocks",
-      "48,552 AI credits/year",
-      "Up to 48,000 images",
-      "Up to 300 min video",
-      "Up to 960 min avatar video",
-    ],
+    id: "pro",
+    name: "Pro",
+    price: 100,
+    base: 10000,
+    bonus: 15,
+    sub: "For serious content production",
+  },
+  {
+    id: "elite",
+    name: "Elite",
+    price: 200,
+    base: 20000,
+    bonus: 20,
+    bestValue: true,
+    sub: "Best value per credit",
+  },
+  {
+    id: "ultimate",
+    name: "Ultimate",
+    price: 500,
+    base: 50000,
+    bonus: 20,
+    sub: "For studios and agencies",
   },
 ];
 
-const cryptoOptions = [
-  { id: "btc", label: "Bitcoin", symbol: "BTC", icon: "₿", color: "#f7931a", address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh" },
-  { id: "eth", label: "Ethereum", symbol: "ETH", icon: "♦", color: "#627eea", address: "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18" },
-  { id: "usdt", label: "Tether", symbol: "USDT", icon: "₮", color: "#26a17b", address: "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18" },
-];
+const RATE = 100; // credits per $1
 
 export default function PricingPage() {
   const router = useRouter();
   const { setMobileOpen } = useSidebar();
   const { isAuthenticated } = useAuth();
-  const [annual, setAnnual] = useState(true);
   const [credits, setCredits] = useState(null);
   const [modalPlan, setModalPlan] = useState(null);
 
-  useEffect(() => {
+  const loadCredits = () => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
+  };
+
+  useEffect(() => {
+    loadCredits();
   }, []);
 
   return (
@@ -135,143 +108,103 @@ export default function PricingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 mb-4">
               <Icon name="auto_awesome" className="text-[12px] text-primary" />
-              <span className="text-[11px] text-primary font-semibold tracking-wide">Annual pricing (save up to 30%)</span>
+              <span className="text-[11px] text-primary font-semibold tracking-wide">$10 = 1,000 credits · bigger packs get up to 20% bonus</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-              Create Professional Videos
+              Buy Credits
             </h1>
             <p className="text-on-surface-variant text-sm max-w-lg mx-auto leading-relaxed">
-              Faster, easier, and cheaper with our flexible plans
+              One-time purchase. Every credit works across all AI tools, and bigger packs earn bonus credits on top.
             </p>
-
-            <div className="flex items-center justify-center gap-1 mt-8 p-1 bg-surface-container-low border border-surface-border/60 rounded-xl w-fit mx-auto">
-              <button onClick={() => setAnnual(false)} className={`px-6 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 ${!annual ? "primary-gradient text-white shadow-lg shadow-primary/30" : "text-on-surface-variant hover:text-white"}`}>
-                Monthly
-              </button>
-              <button onClick={() => setAnnual(true)} className={`px-6 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 flex items-center gap-1.5 ${annual ? "primary-gradient text-white shadow-lg shadow-primary/30" : "text-on-surface-variant hover:text-white"}`}>
-                Years
-                {annual && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-md">Save 30%</span>}
-              </button>
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan) => {
-              const monthlyPrice = plan.monthly;
-              const annualPerMonth = monthlyPrice ? (monthlyPrice * (1 - DISCOUNT)).toFixed(0) : null;
-              const displayPrice = annual && annualPerMonth ? annualPerMonth : monthlyPrice;
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {packs.map((pack) => {
+              const total = Math.round(pack.base * (1 + pack.bonus / 100));
               return (
                 <div
-                  key={plan.name}
+                  key={pack.id}
                   className={`relative rounded-2xl border p-6 flex flex-col transition-all duration-500 group ${
-                    plan.popular
+                    pack.popular
                       ? "border-primary/40 bg-gradient-to-br from-primary/[0.06] via-primary/[0.02] to-transparent shadow-2xl shadow-primary/10 scale-[1.02] hover:scale-[1.04]"
-                      : "border-surface-border/60 bg-surface-container-lowest/50 hover:border-primary/30 hover:scale-[1.02]"
+                      : pack.bestValue
+                        ? "border-yellow-400/40 bg-gradient-to-br from-yellow-400/[0.05] via-yellow-400/[0.02] to-transparent shadow-2xl shadow-yellow-400/10 scale-[1.02] hover:scale-[1.04]"
+                        : "border-surface-border/60 bg-surface-container-lowest/50 hover:border-primary/30 hover:scale-[1.02]"
                   }`}
-                  style={plan.popular ? {
+                  style={pack.popular ? {
                     boxShadow: '0 8px 50px rgba(139,92,246,0.15), 0 0 100px rgba(139,92,246,0.04)',
                     background: 'linear-gradient(145deg, rgba(139,92,246,0.06) 0%, rgba(0,0,0,0.2) 100%)'
+                  } : pack.bestValue ? {
+                    boxShadow: '0 8px 50px rgba(250,204,21,0.12), 0 0 100px rgba(250,204,21,0.04)',
+                    background: 'linear-gradient(145deg, rgba(250,204,21,0.05) 0%, rgba(0,0,0,0.2) 100%)'
                   } : {}}
                 >
-                  {plan.popular && (
+                  {pack.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                       <div className="px-5 py-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-full text-[8px] text-black font-extrabold uppercase tracking-[0.15em] shadow-[0_0_20px_rgba(250,204,21,0.4)] flex items-center gap-1.5">
                         <span className="text-[10px]">⭐</span> Most Popular
                       </div>
                     </div>
                   )}
-
-                  <div className="mb-6 mt-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h2 className="text-lg font-bold text-white">{plan.name}</h2>
-                      {plan.weekly && plan.badge && (
-                        <span className="px-2 py-0.5 bg-surface-container-high text-white text-[9px] font-semibold rounded-md border border-surface-border/40">{plan.badge}</span>
-                      )}
-                      {!plan.weekly && plan.badge && annual && (
-                        <span className="px-2 py-0.5 bg-secondary/15 text-secondary text-[9px] font-semibold rounded-md border border-secondary/20">{plan.badge}</span>
-                      )}
+                  {pack.bestValue && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                      <div className="px-5 py-1 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 rounded-full text-[8px] text-black font-extrabold uppercase tracking-[0.15em] shadow-[0_0_20px_rgba(250,204,21,0.4)] flex items-center gap-1.5">
+                        <span className="text-[10px]">💎</span> Best Value
+                      </div>
                     </div>
-                    <p className="text-[11px] text-on-surface-variant/70 leading-relaxed">{plan.sub}</p>
+                  )}
+
+                  <div className="mb-5 mt-1">
+                    <h2 className="text-lg font-bold text-white">{pack.name}</h2>
+                    <p className="text-[11px] text-on-surface-variant/70 leading-relaxed mt-1">{pack.sub}</p>
                   </div>
 
-                  <div className="mb-6">
-                    {plan.weekly ? (
-                      <>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-extrabold text-white tracking-tight">${plan.weekly}</span>
-                          <span className="text-[11px] text-on-surface-variant/60 font-medium">/wk</span>
-                        </div>
-                        <p className="text-[10px] text-on-surface-variant/50 mt-1.5">${plan.weekly * 4}/month — <span className="text-green-400">cancel anytime</span></p>
-                      </>
-                    ) : plan.monthly ? (
-                      <>
-                        <div className="flex items-baseline gap-2">
-                          {annual && (
-                            <span className="text-lg text-on-surface-variant/40 line-through font-medium">${plan.monthly}</span>
-                          )}
-                          <span className="text-4xl font-extrabold text-white tracking-tight">${displayPrice}</span>
-                          <span className="text-[11px] text-on-surface-variant/60 font-medium">/mo</span>
-                        </div>
-                        {annual && (
-                          <p className="text-[10px] text-on-surface-variant/50 mt-1.5">
-                            ${plan.monthly * 12}/year value — <span className="text-green-400">${(monthlyPrice * (1 - DISCOUNT) * 12).toFixed(0)}/year</span>
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-4xl font-extrabold text-white tracking-tight">Custom</span>
-                    )}
+                  <div className="mb-5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-extrabold text-white tracking-tight">${pack.price}</span>
+                      <span className="text-[11px] text-on-surface-variant/60 font-medium">one-time</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-surface-border/50 bg-surface-container-low/40 p-4 mb-5 space-y-2">
+                    <div className="flex items-center justify-between text-[12px]">
+                      <span className="text-on-surface-variant/70">Base credits</span>
+                      <span className="text-white font-semibold">{pack.base.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[12px]">
+                      <span className="text-on-surface-variant/70">Bonus</span>
+                      <span className={pack.bonus > 0 ? "text-green-400 font-semibold" : "text-on-surface-variant/50 font-semibold"}>
+                        {pack.bonus > 0 ? `+${pack.bonus}%` : "0%"}
+                      </span>
+                    </div>
+                    <div className="border-t border-surface-border/50 pt-2 flex items-center justify-between">
+                      <span className="text-[12px] text-on-surface-variant/80">You get</span>
+                      <span className="flex items-center gap-1.5 text-yellow-400 font-extrabold text-lg">
+                        <Icon name="bolt" size={16} className="text-yellow-400" />
+                        {total.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
 
                   <button
                     onClick={() => {
                       if (!isAuthenticated) { router.push("/login"); return; }
-                      if (plan.weekly) {
-                        setModalPlan({ planId: plan.name.toLowerCase(), billingCycle: "weekly" });
-                      } else {
-                        setModalPlan({ planId: plan.name.toLowerCase(), billingCycle: annual ? "annual" : "monthly" });
-                      }
+                      setModalPlan({ planId: pack.id, billingCycle: "one_time" });
                     }}
-                    className={`w-full py-3 rounded-xl font-semibold text-sm mb-6 transition-all duration-200 active:scale-[0.97] hover:translate-y-[-1px] ${
-                      plan.popular
+                    className={`w-full py-3 rounded-xl font-semibold text-sm mb-4 transition-all duration-200 active:scale-[0.97] hover:translate-y-[-1px] ${
+                      pack.popular
                         ? "primary-gradient text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40"
-                        : "btn-subtle text-white hover:bg-primary/10 hover:border-primary/30"
+                        : pack.bestValue
+                          ? "bg-gradient-to-r from-yellow-400 to-amber-500 text-black shadow-lg shadow-yellow-400/25 hover:shadow-xl hover:shadow-yellow-400/40"
+                          : "btn-subtle text-white hover:bg-primary/10 hover:border-primary/30"
                     }`}
                   >
-                    {plan.cta === "Let's Talk" ? "Contact Sales" : plan.cta}
+                    Buy Now
                   </button>
 
-                  {(plan.monthly || plan.weekly) && (
-                    <p className="text-center text-sm text-yellow-400 font-bold mt-[-16px] mb-4 flex items-center justify-center gap-1.5">
-                      <Icon name="bolt" size={16} className="text-yellow-400" />
-                      {plan.weekly ? plan.credits.toLocaleString() : annual ? Math.round(plan.credits * (1 + DISCOUNT)).toLocaleString() : Math.round(plan.credits / 12).toLocaleString()} credits/{plan.weekly ? "week" : annual ? "year" : "month"}
-                    </p>
-                  )}
-
-                  <div className="space-y-2.5 flex-1">
-                    {plan.features.map((f, i) => {
-                      const creditMatch = f.match(/^([\d,]+) AI credits\/(year|week)$/);
-                      const storageMatch = f.match(/^(\d+) GB storage$/);
-                      let displayFeature = f;
-                      if (creditMatch && !plan.weekly) {
-                        const base = parseInt(creditMatch[1].replace(/,/g, ''));
-                        const num = annual ? Math.round(base * (1 + DISCOUNT)) : Math.round(base / 12);
-                        displayFeature = `${num.toLocaleString()} AI credits/${annual ? "year" : "month"}`;
-                      } else if (storageMatch && !plan.weekly && annual) {
-                        const base = parseInt(storageMatch[1]);
-                        displayFeature = `${base * 5} GB storage`;
-                      }
-                      return (
-                      <div key={i} className="flex items-start gap-2.5 group/feature">
-                        <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary/20 transition-colors">
-                          <Icon name="check" className="text-[10px] text-primary" />
-                        </div>
-                        <span className="text-[12px] text-on-surface-variant/90 group-hover/feature:text-on-surface transition-colors">{displayFeature}</span>
-                      </div>
-                      );
-                    })}
-                  </div>
+                  <p className="text-center text-[10px] text-on-surface-variant/50">
+                    {RATE} credits per $1 · credits never expire
+                  </p>
                 </div>
               );
             })}
@@ -281,9 +214,9 @@ export default function PricingPage() {
 
       <PayPalCheckoutModal
         isOpen={modalPlan !== null}
-        onClose={() => setModalPlan(null)}
-        planId={modalPlan?.planId || "professional"}
-        billingCycle={modalPlan?.billingCycle || "monthly"}
+        onClose={() => { setModalPlan(null); loadCredits(); }}
+        planId={modalPlan?.planId || "creator"}
+        billingCycle={modalPlan?.billingCycle || "one_time"}
       />
 
       </SidebarProvider>

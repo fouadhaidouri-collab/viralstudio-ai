@@ -34,8 +34,7 @@ export async function PATCH(req) {
       if (existing) {
         await run("UPDATE credits SET current_balance = current_balance + ?, total_purchased = total_purchased + ?, updated_at = datetime('now') WHERE user_id = ?", [amount, amount, userId]);
       } else {
-        const credId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        await run("INSERT INTO credits (id, user_id, current_balance, total_purchased, total_used, updated_at) VALUES (?, ?, ?, ?, 0, datetime('now'))", [credId, userId, amount, amount]);
+        await run("INSERT INTO credits (user_id, current_balance, total_purchased, total_used, updated_at) VALUES (?, ?, ?, 0, datetime('now'))", [userId, amount, amount]);
       }
       const id = `ledger_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       await run(
