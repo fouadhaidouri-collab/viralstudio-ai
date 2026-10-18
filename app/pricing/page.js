@@ -24,7 +24,6 @@ export default function PricingPage() {
   const { setMobileOpen } = useSidebar();
   const { isAuthenticated } = useAuth();
   const [credits, setCredits] = useState(null);
-  const [selectedIdx, setSelectedIdx] = useState(3);
   const [modalPlan, setModalPlan] = useState(null);
 
   const loadCredits = () => {
@@ -33,12 +32,9 @@ export default function PricingPage() {
 
   useEffect(() => { loadCredits(); }, []);
 
-  const sel = packs[selectedIdx];
-  const total = Math.round(sel.base * (1 + sel.bonus / 100));
-
-  const payNow = () => {
+  const buy = (pack) => {
     if (!isAuthenticated) { router.push("/login"); return; }
-    setModalPlan(sel.id);
+    setModalPlan(pack.id);
   };
 
   return (
@@ -76,29 +72,14 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {packs.map((pack, i) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {packs.map((pack) => {
                 const total = Math.round(pack.base * (1 + pack.bonus / 100));
-                const selected = i === selectedIdx;
                 return (
-                  <button
+                  <div
                     key={pack.id}
-                    onClick={() => setSelectedIdx(i)}
-                    className={`relative text-left rounded-2xl border p-6 flex flex-col transition-all duration-300 group ${
-                      selected
-                        ? "border-primary/60 bg-primary/[0.06] shadow-2xl shadow-primary/10 scale-[1.02]"
-                        : "border-surface-border/60 bg-surface-container-lowest/50 hover:border-primary/30 hover:scale-[1.02]"
-                    }`}
-                    style={selected ? {
-                      boxShadow: '0 8px 50px rgba(139,92,246,0.15), 0 0 100px rgba(139,92,246,0.04)',
-                      background: 'linear-gradient(145deg, rgba(139,92,246,0.06) 0%, rgba(0,0,0,0.2) 100%)'
-                    } : {}}
+                    className="relative rounded-2xl border border-surface-border/60 bg-surface-container-lowest/50 p-6 flex flex-col transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5"
                   >
-                    {selected && (
-                      <div className="absolute top-4 right-4 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                        <Icon name="check" className="text-[12px] text-white" />
-                      </div>
-                    )}
                     {pack.badge && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                         <div className="px-4 py-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-full text-[8px] text-black font-extrabold uppercase tracking-[0.15em] shadow-[0_0_20px_rgba(250,204,21,0.4)]">
@@ -107,33 +88,32 @@ export default function PricingPage() {
                       </div>
                     )}
 
-                    <div className="mb-4 mt-1">
-                      <h2 className="text-sm font-bold text-on-surface-variant uppercase tracking-wide">{pack.name}</h2>
-                      <div className="flex items-baseline gap-2 mt-2">
-                        <span className="text-4xl font-extrabold text-white tracking-tight">${pack.price}</span>
-                        <span className="text-[11px] text-on-surface-variant/60 font-medium">USD</span>
-                      </div>
+                    <h2 className="text-sm font-bold text-on-surface-variant uppercase tracking-wide mt-1">{pack.name}</h2>
+                    <div className="flex items-baseline gap-2 mt-2">
+                      <span className="text-4xl font-extrabold text-white tracking-tight">${pack.price}</span>
+                      <span className="text-[11px] text-on-surface-variant/60 font-medium">USD</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-yellow-400 font-extrabold text-lg">
-                      <Icon name="bolt" size={16} className="text-yellow-400" />
-                      {pack.base.toLocaleString()} credits
+                    <div className="mt-5 flex items-end justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 text-yellow-400 font-extrabold text-lg whitespace-nowrap">
+                          <Icon name="bolt" size={16} className="text-yellow-400" />
+                          {pack.base.toLocaleString()} credits
+                        </div>
+                        <div className="text-[12px] text-green-400 font-semibold mt-1 h-4 whitespace-nowrap">
+                          {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits +${pack.bonus}%` : ""}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => buy(pack)}
+                        className="shrink-0 px-5 py-2.5 rounded-lg primary-gradient text-white font-bold text-sm shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200 active:scale-95"
+                      >
+                        Buy
+                      </button>
                     </div>
-                    <div className="text-[12px] text-green-400 font-semibold mt-1 h-4">
-                      {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits \u00b7 ${pack.bonus}%` : ""}
-                    </div>
-                  </button>
+                  </div>
                 );
               })}
-            </div>
-
-            <div className="mt-8 max-w-xl mx-auto">
-              <button
-                onClick={payNow}
-                className="w-full py-4 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-200 active:scale-[0.98] hover:translate-y-[-1px]"
-              >
-                {`Pay $${sel.price} & Get ${total.toLocaleString()} Credits`}
-              </button>
             </div>
           </div>
         </div>
