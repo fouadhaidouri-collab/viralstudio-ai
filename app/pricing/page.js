@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
@@ -9,7 +9,7 @@ import Icon from "../components/Icon";
 import PayPalCheckoutModal from "../../components/payment/PayPalCheckoutModal";
 
 // Credit packs: $10 = 1,000 credits (1 credit = $0.01).
-// The bonus % is added on top of the base credits for each pack.
+// Bonus % is added on top of the base credits for each pack.
 const packs = [
   { id: "beginner", name: "Starter", price: 10, base: 1000, bonus: 0 },
   { id: "builder", name: "Basic", price: 25, base: 2500, bonus: 5 },
@@ -24,7 +24,7 @@ export default function PricingPage() {
   const { setMobileOpen } = useSidebar();
   const { isAuthenticated } = useAuth();
   const [credits, setCredits] = useState(null);
-  const [selectedIdx, setSelectedIdx] = useState(3); // Business ($100) selected by default
+  const [selectedIdx, setSelectedIdx] = useState(3);
   const [modalPlan, setModalPlan] = useState(null);
 
   const loadCredits = () => {
@@ -66,7 +66,7 @@ export default function PricingPage() {
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 mb-4">
                 <Icon name="auto_awesome" className="text-[12px] text-primary" />
-                <span className="text-[11px] text-primary font-semibold tracking-wide">$10 = 1,000 credits · bigger packs get up to 20% bonus</span>
+                <span className="text-[11px] text-primary font-semibold tracking-wide">$10 = 1,000 credits Â· bigger packs get up to 20% bonus</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
                 Buy Credits
@@ -117,10 +117,10 @@ export default function PricingPage() {
 
                     <div className="flex items-center gap-1.5 text-yellow-400 font-extrabold text-lg">
                       <Icon name="bolt" size={16} className="text-yellow-400" />
-                      {total.toLocaleString()} credits
+                      {pack.base.toLocaleString()} credits
                     </div>
                     <div className="text-[12px] text-green-400 font-semibold mt-1 h-4">
-                      {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits · ${pack.bonus}%` : ""}
+                      {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits Â· ${pack.bonus}%` : ""}
                     </div>
                   </button>
                 );
