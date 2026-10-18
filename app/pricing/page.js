@@ -120,7 +120,7 @@ export default function PricingPage() {
                       {total.toLocaleString()} credits
                     </div>
                     <div className="text-[12px] text-green-400 font-semibold mt-1 h-4">
-                      {pack.bonus > 0 ? `+${pack.bonus}% bonus` : ""}
+                      {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits · ${pack.bonus}%` : ""}
                     </div>
                   </button>
                 );
