@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
@@ -66,7 +66,7 @@ export default function PricingPage() {
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 mb-4">
                 <Icon name="auto_awesome" className="text-[12px] text-primary" />
-                <span className="text-[11px] text-primary font-semibold tracking-wide">$10 = 1,000 credits Â· bigger packs get up to 20% bonus</span>
+                <span className="text-[11px] text-primary font-semibold tracking-wide">$10 = 1,000 credits &middot; bigger packs get up to 20% bonus</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
                 Buy Credits
@@ -120,7 +120,7 @@ export default function PricingPage() {
                       {pack.base.toLocaleString()} credits
                     </div>
                     <div className="text-[12px] text-green-400 font-semibold mt-1 h-4">
-                      {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits Â· ${pack.bonus}%` : ""}
+                      {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits \u00b7 ${pack.bonus}%` : ""}
                     </div>
                   </button>
                 );
