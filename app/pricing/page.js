@@ -36,14 +36,28 @@ export default function PricingPage() {
     loadCredits();
 
     const sp = new URLSearchParams(window.location.search);
+    // YouCan Pay appends these to success_url / error_url:
+    //   ?transaction_id=<youcanpay id>&order_id=<our tx id>&is_success=1&code=000
+    const providerTransactionId = sp.get("transaction_id");
+    const orderId = sp.get("order_id") || sp.get("transactionId");
+    const isSuccess = sp.get("is_success") || sp.get("success");
     const paid = sp.get("paid");
-    const transactionId = sp.get("transactionId");
 
-    if (paid) window.history.replaceState({}, "", "/pricing");
+    if (providerTransactionId || orderId || paid) {
+      window.history.replaceState({}, "", "/pricing");
+    }
 
-    if (paid === "success" && transactionId) {
+    if (paid === "failed" || isSuccess === "0") {
+      setPaidResult({ success: false, message: "Payment was cancelled or failed." });
+      return;
+    }
+
+    if (orderId || providerTransactionId) {
       setVerifying(true);
-      fetch(`/api/payments/youcanpay/verify?transactionId=${encodeURIComponent(transactionId)}`)
+      const params = new URLSearchParams();
+      if (orderId) params.set("orderId", orderId);
+      if (providerTransactionId) params.set("providerTransactionId", providerTransactionId);
+      fetch(`/api/payments/youcanpay/verify?${params.toString()}`)
         .then(r => r.json())
         .then(d => {
           setPaidResult(d);
@@ -51,11 +65,9 @@ export default function PricingPage() {
           loadCredits();
         })
         .catch(() => {
-          setPaidResult({ success: false, message: "Could not verify payment" });
+          setPaidResult({ success: false, pending: true, message: "Payment received — confirming with YouCan Pay." });
           setVerifying(false);
         });
-    } else if (paid === "failed") {
-      setPaidResult({ success: false, message: "Payment was cancelled or failed." });
     }
   }, []);
 
@@ -174,6 +186,17 @@ export default function PricingPage() {
                   <p className="text-lg font-bold text-yellow-400 mb-6">{(paidResult.credits || 0).toLocaleString()} credits</p>
                   <button onClick={() => setPaidResult(null)} className="px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-primary to-purple-700 text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all">
                     Continue
+                  </button>
+                </>
+              ) : paidResult?.pending ? (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-yellow-400/10 flex items-center justify-center mx-auto mb-4">
+                    <Icon name="schedule" className="text-yellow-400" size={30} />
+                  </div>
+                  <h2 className="text-xl font-extrabold text-white mb-2">Payment received</h2>
+                  <p className="text-sm text-on-surface-variant/60 mb-6">{paidResult?.message || "We are confirming your payment. Your credits will be added shortly."}</p>
+                  <button onClick={() => setPaidResult(null)} className="px-8 py-3.5 rounded-xl font-bold text-sm bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
+                    Close
                   </button>
                 </>
               ) : (

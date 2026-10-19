@@ -62,8 +62,10 @@ export async function POST(req) {
       amountMinor: Math.round(amount * 100),
       currency: "USD",
       customerIp,
-      successUrl: `${appUrl}/pricing?paid=success&transactionId=${encodeURIComponent(tx.id)}`,
-      errorUrl: `${appUrl}/pricing?paid=failed&transactionId=${encodeURIComponent(tx.id)}`,
+      // Keep these URLs free of query params: YouCan Pay appends
+      // ?transaction_id=...&order_id=...&is_success=1&code=000 on return.
+      successUrl: `${appUrl}/pricing`,
+      errorUrl: `${appUrl}/pricing`,
       customer: { name: session.user.name || "", email: session.user.email },
       metadata: {
         transactionId: tx.id,

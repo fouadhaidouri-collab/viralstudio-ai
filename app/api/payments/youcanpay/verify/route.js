@@ -1,6 +1,7 @@
 import { auth } from "../../../../lib/auth";
 import {
   getTransaction,
+  getTransactionByProviderId,
   updateTransaction,
   addCreditLedgerEntry,
   isTransactionProcessed,
@@ -12,11 +13,12 @@ import { processCommissionForPayment } from "@/lib/affiliateStore";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// GET /api/payments/youcanpay/verify?transactionId=tx_xxx
+// GET /api/payments/youcanpay/verify?orderId=<our tx id>&providerTransactionId=<youcanpay tx id>
 //
-// Called when the buyer lands back on /pricing after YouCan Pay. It confirms the
-// payment with YouCan Pay directly, so credits land even if the webhook has not
-// been registered yet. Credit granting is idempotent (guarded by the ledger).
+// YouCan Pay sends the buyer back to success_url with:
+//   ?transaction_id=<youcanpay id>&order_id=<our tx id>&is_success=1&code=000
+// so we confirm the payment directly with YouCan Pay. Crediting is idempotent
+// (guarded by the credit ledger).
 export async function GET(req) {
   try {
     const session = await auth();
@@ -25,12 +27,22 @@ export async function GET(req) {
     }
 
     const { searchParams } = new URL(req.url);
-    const transactionId = searchParams.get("transactionId");
-    if (!transactionId) {
-      return Response.json({ error: "Missing transactionId" }, { status: 400 });
+    const orderId = searchParams.get("orderId") || searchParams.get("transactionId");
+    const providerTransactionId =
+      searchParams.get("providerTransactionId") || searchParams.get("provider_transaction_id");
+    const isSuccess = searchParams.get("is_success");
+
+    if (!orderId && !providerTransactionId) {
+      return Response.json({ error: "Missing transaction reference" }, { status: 400 });
+    }
+    if (isSuccess === "0") {
+      return Response.json({ success: false, status: "failed", message: "Payment was cancelled or failed" });
     }
 
-    const tx = await getTransaction(transactionId);
+    let tx = orderId ? await getTransaction(orderId) : null;
+    if (!tx && providerTransactionId) {
+      tx = await getTransactionByProviderId("youcanpay", providerTransactionId);
+    }
     if (!tx) {
       return Response.json({ error: "Transaction not found" }, { status: 404 });
     }
@@ -45,17 +57,43 @@ export async function GET(req) {
       return Response.json({ success: true, alreadyProcessed: true, credits: tx.credits || 0 });
     }
 
-    if (!tx.transaction_id) {
-      return Response.json({ success: false, status: tx.status, message: "Payment reference missing" });
+    // Prefer the YouCan Pay transaction id from the return URL. The value stored
+    // at tokenize time may be the payment token id, which cannot be looked up.
+    const ycpId = providerTransactionId || tx.transaction_id;
+    if (!ycpId) {
+      return Response.json({
+        success: false,
+        pending: true,
+        status: tx.status,
+        message: "Payment received — waiting for confirmation",
+      });
     }
 
-    const remote = await fetchTransaction(tx.transaction_id);
+    const remote = await fetchTransaction(ycpId);
     if (!remote.ok) {
-      return Response.json({ success: false, status: tx.status, message: "Could not verify payment" });
+      return Response.json({
+        success: false,
+        pending: true,
+        status: tx.status,
+        message: "Payment received — confirming with YouCan Pay",
+      });
     }
 
     if (remote.status !== "paid") {
-      return Response.json({ success: false, status: remote.status, message: "Payment not completed" });
+      const pending = remote.status === "pending" || remote.status === "authorized";
+      return Response.json({
+        success: false,
+        pending,
+        status: remote.status,
+        message: pending
+          ? "Payment received — waiting for confirmation"
+          : "Payment not completed",
+      });
+    }
+
+    // If YouCan Pay echoes our order id, it must match the transaction we know.
+    if (remote.orderId && String(remote.orderId) !== String(tx.id)) {
+      return Response.json({ error: "Order mismatch" }, { status: 409 });
     }
 
     const credits = tx.credits || 0;
@@ -69,8 +107,11 @@ export async function GET(req) {
       return Response.json({ success: true, alreadyProcessed: true, credits });
     }
 
-    await updateTransaction(tx.id, { status: "completed" });
-    await addUserCredits(tx.user_id, credits, "purchase", { transactionId: tx.id, provider: "youcanpay" });
+    await updateTransaction(tx.id, { status: "completed", transaction_id: ycpId });
+    await addUserCredits(tx.user_id, credits, "purchase", {
+      transactionId: tx.id,
+      provider: "youcanpay",
+    });
     await processCommissionForPayment(tx.user_id, null, tx.amount);
 
     return Response.json({ success: true, credits });
