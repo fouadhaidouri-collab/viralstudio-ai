@@ -6,7 +6,7 @@ import ProfileDropdown from "../components/ProfileDropdown";
 import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
-import PayPalCheckoutModal from "../../components/payment/PayPalCheckoutModal";
+import YouCanPayCheckoutModal from "../../components/payment/YouCanPayCheckoutModal";
 
 // Credit packs: $10 = 1,000 credits (1 credit = $0.01).
 // Bonus % is added on top of the base credits for each pack.
@@ -25,12 +25,39 @@ export default function PricingPage() {
   const { isAuthenticated } = useAuth();
   const [credits, setCredits] = useState(null);
   const [modalPlan, setModalPlan] = useState(null);
+  const [paidResult, setPaidResult] = useState(null);
+  const [verifying, setVerifying] = useState(false);
 
   const loadCredits = () => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
   };
 
-  useEffect(() => { loadCredits(); }, []);
+  useEffect(() => {
+    loadCredits();
+
+    const sp = new URLSearchParams(window.location.search);
+    const paid = sp.get("paid");
+    const transactionId = sp.get("transactionId");
+
+    if (paid) window.history.replaceState({}, "", "/pricing");
+
+    if (paid === "success" && transactionId) {
+      setVerifying(true);
+      fetch(`/api/payments/youcanpay/verify?transactionId=${encodeURIComponent(transactionId)}`)
+        .then(r => r.json())
+        .then(d => {
+          setPaidResult(d);
+          setVerifying(false);
+          loadCredits();
+        })
+        .catch(() => {
+          setPaidResult({ success: false, message: "Could not verify payment" });
+          setVerifying(false);
+        });
+    } else if (paid === "failed") {
+      setPaidResult({ success: false, message: "Payment was cancelled or failed." });
+    }
+  }, []);
 
   const buy = (pack) => {
     if (!isAuthenticated) { router.push("/login"); return; }
@@ -118,12 +145,52 @@ export default function PricingPage() {
           </div>
         </div>
 
-        <PayPalCheckoutModal
+        <YouCanPayCheckoutModal
           isOpen={modalPlan !== null}
           onClose={() => { setModalPlan(null); loadCredits(); }}
           planId={modalPlan || "pro"}
           billingCycle="one_time"
         />
+
+        {(paidResult || verifying) && (
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={verifying ? undefined : () => setPaidResult(null)} />
+            <div className="relative w-full max-w-md rounded-3xl border border-white/10 p-8 text-center shadow-2xl" style={{ background: "#161616" }}>
+              {verifying ? (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-yellow-400/10 flex items-center justify-center mx-auto mb-4">
+                    <span className="w-6 h-6 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <h2 className="text-xl font-extrabold text-white mb-2">Confirming payment...</h2>
+                  <p className="text-sm text-on-surface-variant/60">Verifying with YouCan Pay.</p>
+                </>
+              ) : paidResult?.success ? (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                    <Icon name="check_circle" className="text-green-400" size={30} />
+                  </div>
+                  <h2 className="text-xl font-extrabold text-white mb-2">Payment confirmed!</h2>
+                  <p className="text-sm text-on-surface-variant/60 mb-2">Your credits have been added to your account.</p>
+                  <p className="text-lg font-bold text-yellow-400 mb-6">{(paidResult.credits || 0).toLocaleString()} credits</p>
+                  <button onClick={() => setPaidResult(null)} className="px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-primary to-purple-700 text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all">
+                    Continue
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                    <Icon name="error" className="text-red-400" size={30} />
+                  </div>
+                  <h2 className="text-xl font-extrabold text-white mb-2">Payment not completed</h2>
+                  <p className="text-sm text-on-surface-variant/60 mb-6">{paidResult?.message || "Please try again."}</p>
+                  <button onClick={() => setPaidResult(null)} className="px-8 py-3.5 rounded-xl font-bold text-sm bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
+                    Close
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </SidebarProvider>
     </div>
   );

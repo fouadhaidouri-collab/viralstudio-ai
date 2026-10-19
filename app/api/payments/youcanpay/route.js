@@ -1,87 +1,98 @@
 import { auth } from "../../../lib/auth";
-import { findUser } from "../../../lib/userStore";
-import { PLANS, getPlanPrice } from "../../../../lib/paymentTransactions";
+import {
+  PLANS,
+  getPlanPrice,
+  getPlanCredits,
+  createTransaction,
+  updateTransaction,
+} from "@/lib/paymentTransactions";
+import { get } from "@/lib/db";
+import { tokenizePayment, paymentFormUrl } from "@/lib/youcanpay";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+// POST /api/payments/youcanpay
+// Creates our pending transaction, then asks YouCan Pay for a payment token
+// and hands back the hosted payment form URL the browser should redirect to.
 export async function POST(req) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
       return Response.json({ error: "Authentication required" }, { status: 401 });
     }
-    const user = await findUser(session.user.email);
-    if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
-    const { planId, billingCycle } = await req.json();
-    if (!planId || !billingCycle) {
-      return Response.json({ error: "Missing planId or billingCycle" }, { status: 400 });
-    }
-    if (!PLANS[planId]) {
-      return Response.json({ error: "Invalid plan" }, { status: 400 });
-    }
+    const { planId, billingCycle, couponCode, refCode } = await req.json();
+    if (!planId) return Response.json({ error: "Missing planId" }, { status: 400 });
+    if (!PLANS[planId]) return Response.json({ error: "Invalid plan" }, { status: 400 });
 
-    const publicKey = process.env.YOYCANPAY_PUBLIC_KEY;
-    const privateKey = process.env.YOYCANPAY_PRIVATE_KEY;
-    if (!publicKey || !privateKey) {
-      return Response.json({ error: "YouCan Pay not configured" }, { status: 500 });
+    let discountPercent = 0;
+    if (couponCode) {
+      const coupon = await get("SELECT * FROM coupons WHERE code = ? AND is_active = 1", [couponCode]);
+      if (coupon) {
+        const expired = coupon.expires_at && new Date(coupon.expires_at) < new Date();
+        const maxed = coupon.max_uses > 0 && coupon.current_uses >= coupon.max_uses;
+        if (!expired && !maxed) discountPercent = coupon.discount_percent || 0;
+      }
     }
 
-    const amount = getPlanPrice(planId);
-    if (!amount) {
-      return Response.json({ error: "Could not determine price" }, { status: 400 });
+    let amount = getPlanPrice(planId);
+    const credits = getPlanCredits(planId);
+    if (discountPercent > 0) {
+      amount = Math.round(amount * (100 - discountPercent)) / 100;
     }
 
-    const planName = PLANS[planId].name;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://viralstudio-ai-rho.vercel.app";
-    const isSandbox = publicKey.startsWith("pub_sandbox_");
+    const userId = session.user.id || session.user.email;
 
-    const payload = {
-      amount: (amount * 100).toFixed(0),
-      currency: "USD",
-      description: `${planName} Credits Pack`,
-      success_url: `${appUrl}/pricing?paid=success`,
-      cancel_url: `${appUrl}/pricing`,
-      metadata: JSON.stringify({
-        user_id: user.id,
-        plan_id: planId,
-        billing_cycle: billingCycle,
-      }),
-    };
-
-    const baseUrl = isSandbox ? "https://api.youcanpay.com/sandbox" : "https://api.youcanpay.com";
-    const apiUrl = `${baseUrl}/v1/transactions`;
-
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "API-KEY": privateKey,
-        "PUBLIC-KEY": publicKey,
-      },
-      body: JSON.stringify(payload),
+    const tx = await createTransaction({
+      userId,
+      provider: "youcanpay",
+      planId,
+      billingCycle: billingCycle || "one_time",
+      amount,
+      credits,
+      status: "pending",
     });
 
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("json")) {
-      const text = await res.text();
-      console.error("YouCan Pay non-JSON response:", text.slice(0, 500));
-      return Response.json({ error: "YouCan Pay returned an unexpected response. Check your API keys." }, { status: 502 });
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://viralstudio-ai-rho.vercel.app";
+    const customerIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "127.0.0.1";
+
+    const result = await tokenizePayment({
+      orderId: tx.id,
+      amountMinor: Math.round(amount * 100),
+      currency: "USD",
+      customerIp,
+      successUrl: `${appUrl}/pricing?paid=success&transactionId=${encodeURIComponent(tx.id)}`,
+      errorUrl: `${appUrl}/pricing?paid=failed&transactionId=${encodeURIComponent(tx.id)}`,
+      customer: { name: session.user.name || "", email: session.user.email },
+      metadata: {
+        transactionId: tx.id,
+        userId: String(userId),
+        planId,
+        billingCycle: billingCycle || "one_time",
+        credits: String(credits),
+        refCode: refCode || "",
+      },
+    });
+
+    if (!result.ok) {
+      console.error("YouCanPay tokenize failed:", result);
+      await updateTransaction(tx.id, { status: "failed" });
+      return Response.json({ error: result.error || "YouCanPay request failed" }, { status: result.status || 502 });
     }
 
-    const data = await res.json();
-    if (!res.ok) {
-      console.error("YouCan Pay error:", data);
-      return Response.json({ error: data.message || data.error || "YouCan Pay failed" }, { status: res.status });
-    }
+    await updateTransaction(tx.id, {
+      transaction_id: result.transactionId || result.tokenId,
+    });
 
-    const paymentUrl = data.payment_url || data.url || (data._links?.payment_url?.href);
-    if (!paymentUrl) {
-      console.error("YouCan Pay no payment URL in response:", data);
-      return Response.json({ error: "No payment URL returned from YouCan Pay" }, { status: 502 });
-    }
-
-    return Response.json({ paymentUrl, transactionId: data.id });
+    return Response.json({
+      paymentUrl: paymentFormUrl(result.tokenId),
+      tokenId: result.tokenId,
+      transactionId: tx.id,
+      credits,
+    });
   } catch (err) {
-    console.error("YouCan Pay create error:", err);
+    console.error("YouCanPay create error:", err);
     return Response.json({ error: err.message || "Internal server error" }, { status: 500 });
   }
 }
