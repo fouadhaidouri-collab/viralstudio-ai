@@ -8,7 +8,6 @@ const menuGroups = [
     heading: "Main",
     items: [
       { href: "/admin/users", label: "Users", icon: "group_add" },
-      { href: "/admin/payment-methods", label: "Payments", icon: "credit_card" },
       { href: "/admin/payment-logs", label: "Payment Logs", icon: "webhook" },
     ],
   },
