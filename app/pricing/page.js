@@ -228,7 +228,7 @@ export default function PricingPage() {
                     <Icon name="error" className="text-red-400" size={30} />
                   </div>
                   <h2 className="text-xl font-extrabold text-white mb-2">Payment not completed</h2>
-                  <p className="text-sm text-on-surface-variant/60 mb-6">{paidResult?.message || "Please try again."}</p>
+                  <p className="text-sm text-on-surface-variant/60 mb-6">{paidResult?.message || paidResult?.error || "Please try again."}</p>
                   <button onClick={() => setPaidResult(null)} className="px-8 py-3.5 rounded-xl font-bold text-sm bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
                     Close
                   </button>

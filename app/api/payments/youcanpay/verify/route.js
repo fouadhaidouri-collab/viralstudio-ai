@@ -87,6 +87,13 @@ export async function GET(req) {
     }
 
     const remote = await waitForPaid(ycpId);
+    console.log("youcanpay verify lookup", {
+      orderId: tx.id,
+      ycpId,
+      ok: Boolean(remote?.ok),
+      status: remote?.status ?? null,
+      orderMatch: remote?.orderId ? String(remote.orderId) === String(tx.id) : null,
+    });
     if (!remote?.ok) {
       return Response.json({
         success: false,
