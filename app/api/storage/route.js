@@ -1,4 +1,4 @@
-import { get, run } from "../../../lib/db";
+import { get, run, query } from "../../../lib/db";
 import { STORAGE_LIMITS } from "../../../lib/paymentTransactions";
 
 export async function GET(req) {
@@ -10,24 +10,55 @@ export async function GET(req) {
     [userId]
   );
 
+  let storage = await get("SELECT * FROM storage WHERE user_id = ?", [userId]);
+
+  // Storage can come from an active subscription, a completed credit pack, or
+  // a limit already granted on the storage row. The highest one wins.
   let limitBytes = 0;
   if (sub?.plan_id && STORAGE_LIMITS[sub.plan_id]) {
     limitBytes = STORAGE_LIMITS[sub.plan_id];
   } else if (sub?.storage_limit) {
-    limitBytes = Number(sub.storage_limit);
+    limitBytes = Number(sub.storage_limit) || 0;
   }
 
-  let storage = await get("SELECT * FROM storage WHERE user_id = ?", [userId]);
+  const paidPlans = await query(
+    "SELECT DISTINCT plan_id FROM payments WHERE user_id = ? AND status IN ('completed', 'paid')",
+    [userId]
+  );
+  for (const row of paidPlans) {
+    const planLimit = STORAGE_LIMITS[row.plan_id] || 0;
+    if (planLimit > limitBytes) limitBytes = planLimit;
+  }
+
+  const grantedBytes = Number(storage?.limit_bytes) || 0;
+  if (grantedBytes > limitBytes) limitBytes = grantedBytes;
+
+  // Usage is the total size of the user's stored files; keep the counter in sync.
+  const fileStats = await get(
+    "SELECT COALESCE(SUM(size), 0) AS total, COUNT(*) AS count FROM files WHERE user_id = ?",
+    [userId]
+  );
+  const filesTotal = Number(fileStats?.total) || 0;
+  const filesCount = Number(fileStats?.count) || 0;
+  const usedBytes = Math.max(Number(storage?.used_bytes) || 0, filesTotal);
+
   if (!storage) {
     const id = `st_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     await run(
-      "INSERT INTO storage (id, user_id, used_bytes, limit_bytes, files_count) VALUES (?, ?, 0, ?, 0)",
-      [id, userId, limitBytes]
+      "INSERT INTO storage (id, user_id, used_bytes, limit_bytes, files_count) VALUES (?, ?, ?, ?, ?)",
+      [id, userId, usedBytes, limitBytes, filesCount]
     );
-    storage = { used_bytes: 0, limit_bytes: limitBytes, files_count: 0 };
+  } else if (
+    Number(storage.limit_bytes) !== limitBytes ||
+    Number(storage.used_bytes) !== usedBytes ||
+    Number(storage.files_count) !== filesCount
+  ) {
+    await run(
+      "UPDATE storage SET used_bytes = ?, limit_bytes = ?, files_count = ?, updated_at = datetime('now') WHERE user_id = ?",
+      [usedBytes, limitBytes, filesCount, userId]
+    );
   }
 
-  const usedBytes = Number(storage.used_bytes) || 0;
   const freeBytes = Math.max(0, limitBytes - usedBytes);
   const usedPercent = limitBytes > 0 ? Math.min(100, Math.round((usedBytes / limitBytes) * 100)) : 0;
 
@@ -36,6 +67,6 @@ export async function GET(req) {
     used_bytes: usedBytes,
     free_bytes: freeBytes,
     used_percent: usedPercent,
-    files_count: storage.files_count || 0,
+    files_count: filesCount,
   });
 }

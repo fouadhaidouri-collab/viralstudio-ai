@@ -11,7 +11,8 @@ import Icon from "../components/Icon";
 
 function formatBytes(bytes) {
   if (!bytes || bytes <= 0) return "0 GB";
-  return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+  const gb = bytes / (1024 * 1024 * 1024);
+  return `${Number.isInteger(gb) ? gb : gb.toFixed(1)} GB`;
 }
 
 function gravatarUrl(email) {
