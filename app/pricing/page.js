@@ -27,9 +27,34 @@ export default function PricingPage() {
   const [modalPlan, setModalPlan] = useState(null);
   const [paidResult, setPaidResult] = useState(null);
   const [verifying, setVerifying] = useState(false);
+  const [verifyParams, setVerifyParams] = useState(null);
 
   const loadCredits = () => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
+  };
+
+  // YouCan Pay can redirect back before the transaction is marked paid, so keep
+  // polling for a while instead of showing "pending" on the first attempt.
+  const runVerify = (params, attempt = 0) => {
+    fetch(`/api/payments/youcanpay/verify?${params.toString()}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.pending && attempt < 8) {
+          setTimeout(() => runVerify(params, attempt + 1), 2500);
+          return;
+        }
+        setPaidResult(d);
+        setVerifying(false);
+        loadCredits();
+      })
+      .catch(() => {
+        if (attempt < 8) {
+          setTimeout(() => runVerify(params, attempt + 1), 2500);
+          return;
+        }
+        setPaidResult({ success: false, pending: true, message: "Payment received — confirming with YouCan Pay." });
+        setVerifying(false);
+      });
   };
 
   useEffect(() => {
@@ -57,17 +82,8 @@ export default function PricingPage() {
       const params = new URLSearchParams();
       if (orderId) params.set("orderId", orderId);
       if (providerTransactionId) params.set("providerTransactionId", providerTransactionId);
-      fetch(`/api/payments/youcanpay/verify?${params.toString()}`)
-        .then(r => r.json())
-        .then(d => {
-          setPaidResult(d);
-          setVerifying(false);
-          loadCredits();
-        })
-        .catch(() => {
-          setPaidResult({ success: false, pending: true, message: "Payment received — confirming with YouCan Pay." });
-          setVerifying(false);
-        });
+      setVerifyParams(params);
+      runVerify(params);
     }
   }, []);
 
@@ -195,9 +211,16 @@ export default function PricingPage() {
                   </div>
                   <h2 className="text-xl font-extrabold text-white mb-2">Payment received</h2>
                   <p className="text-sm text-on-surface-variant/60 mb-6">{paidResult?.message || "We are confirming your payment. Your credits will be added shortly."}</p>
-                  <button onClick={() => setPaidResult(null)} className="px-8 py-3.5 rounded-xl font-bold text-sm bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
-                    Close
-                  </button>
+                  <div className="flex items-center justify-center gap-3">
+                    {verifyParams && (
+                      <button onClick={() => { setPaidResult(null); setVerifying(true); runVerify(verifyParams); }} className="px-6 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-primary to-purple-700 text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all">
+                        Check again
+                      </button>
+                    )}
+                    <button onClick={() => setPaidResult(null)} className="px-6 py-3.5 rounded-xl font-bold text-sm bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
+                      Close
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>

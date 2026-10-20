@@ -12,6 +12,23 @@ import { processCommissionForPayment } from "@/lib/affiliateStore";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
+
+// Right after YouCan Pay redirects the buyer back, its transaction can still be
+// marked "pending" for a few seconds while the charge settles. Poll briefly so
+// the first return credits the account instead of asking the buyer to retry.
+async function waitForPaid(transactionId) {
+  let last = null;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    last = await fetchTransaction(transactionId);
+    if (last.ok) {
+      if (last.status === "paid") return last;
+      if (["failed", "canceled", "refunded"].includes(last.status)) return last;
+    }
+    if (attempt < 5) await new Promise((resolve) => setTimeout(resolve, 1200));
+  }
+  return last;
+}
 
 // GET /api/payments/youcanpay/verify?orderId=<our tx id>&providerTransactionId=<youcanpay tx id>
 //
@@ -69,8 +86,8 @@ export async function GET(req) {
       });
     }
 
-    const remote = await fetchTransaction(ycpId);
-    if (!remote.ok) {
+    const remote = await waitForPaid(ycpId);
+    if (!remote?.ok) {
       return Response.json({
         success: false,
         pending: true,
