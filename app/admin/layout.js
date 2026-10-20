@@ -29,7 +29,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <SidebarProvider>
-      <div className="h-screen overflow-hidden bg-background text-white flex">
+      <div className="admin-shell overflow-hidden bg-background text-white flex">
         <AdminSidebar mobileOpen={mobileSidebarOpen} setMobileOpen={setMobileSidebarOpen} />
         <div className="flex-1 flex flex-col min-w-0">
           <AdminTopbar setMobileOpen={setMobileSidebarOpen} />

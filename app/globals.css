@@ -345,3 +345,16 @@ body::before {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a855f7;
 }
+
+/* === Admin shell ===
+   The global `html { zoom: 0.8 }` on desktop also scales viewport units, so a
+   plain h-screen ends ~20% short and leaves a black band at the bottom.
+   125vh / 0.8 = 100vh visually. Mobile keeps zoom: 1. */
+.admin-shell {
+  height: 125vh;
+}
+@media (max-width: 768px) {
+  .admin-shell {
+    height: 100dvh;
+  }
+}
