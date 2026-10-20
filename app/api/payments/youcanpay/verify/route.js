@@ -65,13 +65,25 @@ export async function GET(req) {
     }
 
     const ownerId = session.user.id || session.user.email;
-    if (String(tx.user_id) !== String(ownerId)) {
-      return Response.json({ error: "Not your transaction" }, { status: 403 });
+    const isOwner = String(tx.user_id) === String(ownerId);
+    if (!isOwner) {
+      // The buyer may have signed out or switched accounts while paying. The
+      // provider still confirms the charge for tx.user_id, so keep going and
+      // credit the transaction owner — never block a paid order.
+      console.warn("youcanpay verify: session/tx owner mismatch", {
+        transactionId: tx.id,
+        transactionOwner: tx.user_id,
+        sessionUser: ownerId,
+      });
     }
 
     const processed = await isTransactionProcessed(tx.id);
     if (processed || tx.status === "completed") {
-      return Response.json({ success: true, alreadyProcessed: true, credits: tx.credits || 0 });
+      return Response.json(
+        isOwner
+          ? { success: true, alreadyProcessed: true, credits: tx.credits || 0 }
+          : { success: true, alreadyProcessed: true }
+      );
     }
 
     // Prefer the YouCan Pay transaction id from the return URL. The value stored
@@ -84,6 +96,12 @@ export async function GET(req) {
         status: tx.status,
         message: "Payment received — waiting for confirmation",
       });
+    }
+
+    // Persist the real provider id right away (even if the lookup fails or is
+    // still pending) so this payment can be reconciled later.
+    if (String(ycpId) !== String(tx.transaction_id || "")) {
+      await updateTransaction(tx.id, { transaction_id: ycpId });
     }
 
     const remote = await waitForPaid(ycpId);
@@ -101,12 +119,6 @@ export async function GET(req) {
         status: tx.status,
         message: "Payment received — confirming with YouCan Pay",
       });
-    }
-
-    // Remember the real provider id even while pending, so a later check can
-    // reconcile this payment if the buyer closes the page before it settles.
-    if (String(ycpId) !== String(tx.transaction_id || "")) {
-      await updateTransaction(tx.id, { transaction_id: ycpId });
     }
 
     if (remote.status !== "paid") {

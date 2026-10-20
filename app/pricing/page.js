@@ -84,6 +84,25 @@ export default function PricingPage() {
       if (providerTransactionId) params.set("providerTransactionId", providerTransactionId);
       setVerifyParams(params);
       runVerify(params);
+      return;
+    }
+
+    // No return params: re-check recently pending payments. This recovers a
+    // payment that settled after the buyer closed the tab or lost the redirect.
+    if (!paid) {
+      fetch("/api/payments/youcanpay/pending")
+        .then(r => r.json())
+        .then(async (d) => {
+          for (const id of (d.orders || [])) {
+            const res = await fetch(`/api/payments/youcanpay/verify?orderId=${encodeURIComponent(id)}`).then(r => r.json()).catch(() => null);
+            if (res?.success) {
+              setPaidResult(res);
+              loadCredits();
+              break;
+            }
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
