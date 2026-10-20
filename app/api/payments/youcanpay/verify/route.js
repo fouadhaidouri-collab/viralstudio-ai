@@ -96,6 +96,12 @@ export async function GET(req) {
       });
     }
 
+    // Remember the real provider id even while pending, so a later check can
+    // reconcile this payment if the buyer closes the page before it settles.
+    if (String(ycpId) !== String(tx.transaction_id || "")) {
+      await updateTransaction(tx.id, { transaction_id: ycpId });
+    }
+
     if (remote.status !== "paid") {
       const pending = remote.status === "pending" || remote.status === "authorized";
       return Response.json({
