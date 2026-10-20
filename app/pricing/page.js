@@ -11,12 +11,12 @@ import YouCanPayCheckoutModal from "../../components/payment/YouCanPayCheckoutMo
 // Credit packs: $10 = 1,000 credits (1 credit = $0.01).
 // Bonus % is added on top of the base credits for each pack.
 const packs = [
-  { id: "beginner", name: "Starter", price: 10, base: 1000, bonus: 0, storage: 5 },
-  { id: "builder", name: "Basic", price: 25, base: 2500, bonus: 5, storage: 10 },
-  { id: "creator", name: "Pro", price: 50, base: 5000, bonus: 10, storage: 25 },
-  { id: "pro", name: "Business", price: 100, base: 10000, bonus: 15, badge: "Most Popular", storage: 50 },
-  { id: "elite", name: "Premium", price: 200, base: 20000, bonus: 20, badge: "Best Value", storage: 100 },
-  { id: "ultimate", name: "Elite", price: 500, base: 50000, bonus: 20, storage: 250 },
+  { id: "beginner", name: "Starter", price: 10, base: 1000, bonus: 0 },
+  { id: "builder", name: "Basic", price: 25, base: 2500, bonus: 5 },
+  { id: "creator", name: "Pro", price: 50, base: 5000, bonus: 10 },
+  { id: "pro", name: "Business", price: 100, base: 10000, bonus: 15, badge: "Most Popular" },
+  { id: "elite", name: "Premium", price: 200, base: 20000, bonus: 20, badge: "Best Value" },
+  { id: "ultimate", name: "Elite", price: 500, base: 50000, bonus: 20 },
 ];
 
 export default function PricingPage() {
@@ -141,10 +141,6 @@ export default function PricingPage() {
                         </div>
                         <div className="text-[12px] text-green-400 font-semibold mt-1 h-4 whitespace-nowrap">
                           {pack.bonus > 0 ? `+${(total - pack.base).toLocaleString()} credits +${pack.bonus}%` : ""}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-blue-400 text-[12px] font-semibold mt-1.5 whitespace-nowrap">
-                          <Icon name="folder" size={14} className="text-blue-400" />
-                          {pack.storage} GB storage
                         </div>
                       </div>
                       <button
