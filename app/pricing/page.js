@@ -121,7 +121,7 @@ export default function PricingPage() {
         <Sidebar />
         <div className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
           <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 relative z-10">
-            <div className="flex justify-between items-center gap-4 mb-6">
+            <div className="flex justify-between md:justify-end items-center gap-4 mb-6">
               <MenuButton />
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
