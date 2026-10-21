@@ -44,34 +44,6 @@ export default function ProfilePage() {
   const memberSince = user?.memberSince || "Jan 2026";
   const isGoogleUser = user?.provider === "google";
 
-  const [cpCurrent, setCpCurrent] = useState("");
-  const [cpNew, setCpNew] = useState("");
-  const [cpConfirm, setCpConfirm] = useState("");
-  const [cpError, setCpError] = useState("");
-  const [cpMessage, setCpMessage] = useState("");
-  const [cpLoading, setCpLoading] = useState(false);
-
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    setCpError(""); setCpMessage("");
-    if (!cpCurrent) { setCpError("Enter your current password"); return; }
-    if (!cpNew) { setCpError("Enter a new password"); return; }
-    if (cpNew.length < 6) { setCpError("New password must be at least 6 characters"); return; }
-    if (cpNew !== cpConfirm) { setCpError("Passwords do not match"); return; }
-    setCpLoading(true);
-    try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword: cpCurrent, newPassword: cpNew }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setCpError(data.error || "Failed"); return; }
-      setCpMessage("Password updated successfully!");
-      setCpCurrent(""); setCpNew(""); setCpConfirm("");
-    } catch { setCpError("Network error"); }
-    finally { setCpLoading(false); }
-  };
-
   const handleCancelSubscription = async () => {
     setCancelLoading(true);
     setCancelMsg("");
@@ -451,40 +423,6 @@ export default function ProfilePage() {
                   <button className="shrink-0 ml-3 px-4 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all">Change</button>
                 </div>
               </div>
-
-              {!isGoogleUser && (
-                <div className="rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                      <Icon name="lock" className="text-primary" size={18} />
-                    </div>
-                    <div>
-                      <h2 className="text-sm font-semibold text-white">Password</h2>
-                      <p className="text-[11px] text-on-surface-variant">Set a strong password to protect your account</p>
-                    </div>
-                  </div>
-                  <form onSubmit={handleChangePassword} className="space-y-4">
-                    {cpError && <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2"><Icon name="error" size={14} className="shrink-0" />{cpError}</div>}
-                    {cpMessage && <div className="p-3.5 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs flex items-center gap-2"><Icon name="check_circle" size={14} className="shrink-0" />{cpMessage}</div>}
-                    <div>
-                      <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Current Password</label>
-                      <input type="password" value={cpCurrent} onChange={(e) => setCpCurrent(e.target.value)} placeholder="Enter current password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">New Password</label>
-                      <input type="password" value={cpNew} onChange={(e) => setCpNew(e.target.value)} placeholder="Enter new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-medium text-on-surface-variant mb-1.5 block">Confirm New Password</label>
-                      <input type="password" value={cpConfirm} onChange={(e) => setCpConfirm(e.target.value)} placeholder="Confirm new password" className="w-full bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
-                    </div>
-                    <button type="submit" disabled={cpLoading} className="w-full primary-gradient text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                      {cpLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="lock" size={14} />}
-                      Update Password
-                    </button>
-                  </form>
-                </div>
-              )}
 
               {!isGoogleUser && (
                 <div className="rounded-2xl p-6 md:p-8 border border-white/5 hover:border-primary/20 transition-all" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.04), transparent)' }}>
