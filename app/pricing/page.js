@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
-import { SidebarProvider, useSidebar } from "../components/SidebarContext";
+import { SidebarProvider } from "../components/SidebarContext";
+import MenuButton from "../components/MenuButton";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
 import YouCanPayCheckoutModal from "../../components/payment/YouCanPayCheckoutModal";
@@ -21,7 +22,6 @@ const packs = [
 
 export default function PricingPage() {
   const router = useRouter();
-  const { setMobileOpen } = useSidebar();
   const { isAuthenticated } = useAuth();
   const [credits, setCredits] = useState(null);
   const [modalPlan, setModalPlan] = useState(null);
@@ -121,16 +121,16 @@ export default function PricingPage() {
         <Sidebar />
         <div className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
           <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6 relative z-10">
-            <div className="flex justify-between md:justify-end items-center gap-4 mb-6">
-              <button onClick={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all" style={{ touchAction: 'manipulation' }}>
-                <Icon name="menu" className="text-white text-xl" />
-              </button>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
-                <Icon name="bolt" className="text-sm text-yellow-400" />
-                <span className="text-sm font-bold text-yellow-400">{credits ?? 0}</span>
-                <span className="text-[9px] text-yellow-400/50 font-medium mr-1">remaining</span>
+            <div className="flex justify-between items-center gap-4 mb-6">
+              <MenuButton />
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
+                  <Icon name="bolt" className="text-sm text-yellow-400" />
+                  <span className="text-sm font-bold text-yellow-400">{credits ?? 0}</span>
+                  <span className="text-[9px] text-yellow-400/50 font-medium mr-1">remaining</span>
+                </div>
+                <ProfileDropdown />
               </div>
-              <ProfileDropdown />
             </div>
 
             <div className="text-center mb-12">

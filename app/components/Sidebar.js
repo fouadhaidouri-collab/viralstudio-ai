@@ -119,8 +119,8 @@ export default function Sidebar() {
         <SidebarContent />
       </div>
 
-      {/* Mobile sidebar - overlay */}
-      <div className={`md:hidden ${isMobileOpen ? '' : 'pointer-events-none'}`}>
+      {/* Slide-over navigation drawer (works on mobile and desktop) */}
+      <div className={`${isMobileOpen ? '' : 'pointer-events-none'}`}>
         <div className={`mobile-sidebar-overlay transition-opacity duration-300 ${isMobileOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setMobileOpen(false)} />
         <div className={`fixed inset-0 z-[70] flex transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <SidebarContent />

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import ProfileDropdown from "../components/ProfileDropdown";
 import { SidebarProvider } from "../components/SidebarContext";
-import { useSidebar } from "../components/SidebarContext";
+import MenuButton from "../components/MenuButton";
 import { useAuth } from "../lib/AuthContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 import ModelSelector from "../components/ModelSelector";
@@ -180,7 +180,6 @@ export default function AIVideoPage() {
   const [modelCapabilities, setModelCapabilities] = useState({});
   const fileInputRef = useRef();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
-  const { setMobileOpen } = useSidebar();
 
   const caps = videoModelCapabilities[model.label] || videoModelCapabilities["Veo 3.1 Fast"];
   const defaultDurations = caps.durations.length > 0 ? caps.durations : ["5 seconds"];
@@ -460,10 +459,8 @@ export default function AIVideoPage() {
         })()}
         <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-background/10 to-background/30"></div>
       </div>
-      <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 z-40 flex items-center justify-between md:justify-end px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
-        <button onClick={() => setMobileOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-low border border-surface-border/50 hover:bg-surface-container-high transition-all" style={{ touchAction: 'manipulation' }}>
-          <Icon name="menu" className="text-white text-xl" />
-        </button>
+      <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/70 backdrop-blur-xl border-b border-surface-border/50 z-40 flex items-center justify-between px-4 md:px-8" style={{ boxShadow: '0 1px 20px rgba(0,0,0,0.3)' }}>
+        <MenuButton />
         <div className="flex items-center gap-3 md:gap-6">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-surface-border/60 rounded-xl hover:border-yellow-400/30 transition-all duration-200">
             <Icon name="bolt" className="text-sm text-yellow-400" />
