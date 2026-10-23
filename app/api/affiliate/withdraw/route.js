@@ -1,6 +1,6 @@
 import { auth } from "../../../lib/auth";
 import { findUser } from "../../../lib/userStore";
-import { getOrCreateAffiliate, createWithdrawalRequest } from "../../../../lib/affiliateStore";
+import { getAffiliateByUserId, createWithdrawalRequest } from "../../../../lib/affiliateStore";
 
 export async function POST(req) {
   try {
@@ -18,7 +18,10 @@ export async function POST(req) {
     if (!account_details) {
       return Response.json({ error: "Please provide your payment details" }, { status: 400 });
     }
-    await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
+    const affiliate = await getAffiliateByUserId(user.id);
+    if (!affiliate) {
+      return Response.json({ error: "Please join the Affiliate Program first." }, { status: 403 });
+    }
     const wd = await createWithdrawalRequest({ user_id: user.id, amount, payment_method: method, payment_account: account_details });
     if (wd?.error) {
       return Response.json({ error: wd.error }, { status: 400 });

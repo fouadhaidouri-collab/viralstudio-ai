@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import AuthGuard from "../components/AuthGuard";
@@ -10,9 +11,16 @@ import Icon from "../components/Icon";
 
 export default function AffiliatePage() {
   const { user } = useAuth();
+  const router = useRouter();
   const email = user?.email || "";
   const name = user?.name || email.split("@")[0];
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [needsJoin, setNeedsJoin] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [joinBusy, setJoinBusy] = useState(false);
+  const [joinError, setJoinError] = useState("");
   const [referrals, setReferrals] = useState([]);
   const [copied, setCopied] = useState(false);
   const [withdrawMethod, setWithdrawMethod] = useState("PayPal");
@@ -37,11 +45,30 @@ export default function AffiliatePage() {
   const couponCode = data?.affiliate?.referral_code || "";
   const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
 
-  const loadStats = () => {
-    fetch("/api/affiliate/stats")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d && !d.error && typeof d.clicks_total === "number") setData(d); })
-      .catch(() => {});
+  const loadStats = async () => {
+    try {
+      const res = await fetch("/api/affiliate/stats");
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setLoadError(d.error || "Could not load affiliate data");
+        return null;
+      }
+      if (d.has_affiliate === false) {
+        setNeedsJoin(true);
+        setData(null);
+        setLoadError("");
+        return d;
+      }
+      setNeedsJoin(false);
+      setData(d);
+      setLoadError("");
+      return d;
+    } catch {
+      setLoadError("Network error. Please try again.");
+      return null;
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -50,6 +77,28 @@ export default function AffiliatePage() {
     fetch("/api/affiliate/withdrawals").then((r) => (r.ok ? r.json() : null)).then((d) => setWithdrawals(d?.withdrawals || [])).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleJoin = async () => {
+    if (!agreed || joinBusy) return;
+    setJoinBusy(true);
+    setJoinError("");
+    try {
+      const res = await fetch("/api/affiliate/join", { method: "POST" });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setJoinError(d.error || "Could not join the Affiliate Program");
+        return;
+      }
+      setNeedsJoin(false);
+      await loadStats();
+      fetch("/api/affiliate/referrals").then((r) => (r.ok ? r.json() : null)).then((d) => setReferrals(d?.referrals || [])).catch(() => {});
+      fetch("/api/affiliate/withdrawals").then((r) => (r.ok ? r.json() : null)).then((d) => setWithdrawals(d?.withdrawals || [])).catch(() => {});
+    } catch {
+      setJoinError("Network error. Please try again.");
+    } finally {
+      setJoinBusy(false);
+    }
+  };
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -125,6 +174,94 @@ export default function AffiliatePage() {
       <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="max-w-full mx-auto px-4 md:px-8 py-6 md:py-10">
 
+          {loading ? (
+            <div className="min-h-[60vh] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-9 h-9 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                <p className="text-xs text-on-surface-variant">Loading affiliate...</p>
+              </div>
+            </div>
+          ) : needsJoin ? (
+            <div className="min-h-[70vh] flex items-center justify-center py-4">
+              <div className="w-full max-w-2xl rounded-3xl border border-white/10 p-7 md:p-10 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(99,102,241,0.05), transparent)' }}>
+                <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full opacity-20 blur-3xl bg-primary pointer-events-none" />
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/5 border border-primary/20 flex items-center justify-center mb-6">
+                    <Icon name="share" className="text-primary" size={26} />
+                  </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary mb-2">Affiliate Program</p>
+                  <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight">Earn 20% on every referral</h1>
+                  <p className="text-sm text-on-surface-variant mt-3 max-w-lg leading-relaxed">
+                    Share your unique link with creators. When they subscribe, you earn commission on every successful payment.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-7">
+                    <div className="rounded-xl bg-surface-container-low/70 border border-white/5 p-4">
+                      <Icon name="trending_up" className="text-green-400 mb-2" size={18} />
+                      <div className="text-sm font-semibold text-white">20% commission</div>
+                      <div className="text-[11px] text-on-surface-variant mt-1">On every successful payment.</div>
+                    </div>
+                    <div className="rounded-xl bg-surface-container-low/70 border border-white/5 p-4">
+                      <Icon name="share" className="text-primary mb-2" size={18} />
+                      <div className="text-sm font-semibold text-white">Your own link</div>
+                      <div className="text-[11px] text-on-surface-variant mt-1">Share it anywhere, anytime.</div>
+                    </div>
+                    <div className="rounded-xl bg-surface-container-low/70 border border-white/5 p-4">
+                      <Icon name="credit_card" className="text-yellow-400 mb-2" size={18} />
+                      <div className="text-sm font-semibold text-white">Fast withdrawals</div>
+                      <div className="text-[11px] text-on-surface-variant mt-1">Cash out from $100.</div>
+                    </div>
+                  </div>
+
+                  <label className="flex items-start gap-3 mt-7 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 shrink-0 accent-[#a855f7]"
+                    />
+                    <span className="text-xs text-on-surface-variant leading-relaxed">
+                      I agree to the Affiliate Program terms and commission policy.
+                    </span>
+                  </label>
+
+                  {joinError && (
+                    <p className="mt-3 text-xs text-red-400">{joinError}</p>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                    <button
+                      onClick={handleJoin}
+                      disabled={!agreed || joinBusy}
+                      className="flex-1 px-6 py-3.5 rounded-xl primary-gradient text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {joinBusy ? "Creating your affiliate account..." : "Agree & Become an Affiliate"}
+                    </button>
+                    <button
+                      onClick={() => router.push("/")}
+                      disabled={joinBusy}
+                      className="px-6 py-3.5 rounded-xl text-sm font-medium text-on-surface-variant bg-surface-container-low border border-surface-border/50 hover:text-white hover:bg-surface-container-high transition-all disabled:opacity-50"
+                    >
+                      Maybe later
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : loadError && !data ? (
+            <div className="min-h-[50vh] flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-sm text-red-400">{loadError}</p>
+                <button
+                  onClick={() => { setLoading(true); loadStats(); }}
+                  className="mt-4 px-5 py-2.5 rounded-xl text-xs font-semibold primary-gradient text-white hover:opacity-90 transition-all"
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-white">Affiliate Dashboard</h1>
@@ -487,6 +624,8 @@ export default function AffiliatePage() {
             )}
           </div>
 
+            </>
+          )}
         </div>
       </main>
       </SidebarProvider>

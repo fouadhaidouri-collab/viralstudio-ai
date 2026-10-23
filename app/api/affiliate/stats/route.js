@@ -1,6 +1,6 @@
 import { auth } from "../../../lib/auth";
 import { findUser } from "../../../lib/userStore";
-import { getOrCreateAffiliate, getClicksForAffiliate } from "../../../../lib/affiliateStore";
+import { getAffiliateByUserId, getClicksForAffiliate } from "../../../../lib/affiliateStore";
 import { query } from "../../../../lib/db";
 
 export async function GET() {
@@ -12,8 +12,10 @@ export async function GET() {
     const user = await findUser(session.user.email);
     if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
-    const affiliate = await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
-    if (!affiliate) return Response.json({ error: "Affiliate not found" }, { status: 404 });
+    const affiliate = await getAffiliateByUserId(user.id);
+    if (!affiliate) {
+      return Response.json({ has_affiliate: false, commission_rate: 20 });
+    }
 
     const clicks = await getClicksForAffiliate(affiliate.id, 1000);
     const signups_count = affiliate.signups || 0;
@@ -28,6 +30,7 @@ export async function GET() {
     );
     const paid_count = paid[0]?.cnt || 0;
     return Response.json({
+      has_affiliate: true,
       affiliate,
       clicks_total: affiliate.clicks || 0,
       signups_total: signups_count,

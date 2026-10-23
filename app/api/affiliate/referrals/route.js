@@ -1,6 +1,6 @@
 import { auth } from "../../../lib/auth";
 import { findUser } from "../../../lib/userStore";
-import { getOrCreateAffiliate, getReferralsForAffiliate } from "../../../../lib/affiliateStore";
+import { getAffiliateByUserId, getReferralsForAffiliate } from "../../../../lib/affiliateStore";
 import { query } from "../../../../lib/db";
 
 export async function GET() {
@@ -12,7 +12,8 @@ export async function GET() {
     const user = await findUser(session.user.email);
     if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
-    const affiliate = await getOrCreateAffiliate({ user_id: user.id, name: user.name || session.user.name || user.email.split("@")[0], email: user.email });
+    const affiliate = await getAffiliateByUserId(user.id);
+    if (!affiliate) return Response.json({ referrals: [] });
     const referrals = await query(
       `SELECT r.id, r.referred_user_id, r.commission AS commission_earned, r.status, r.created_at,
               u.name AS referred_name, u.email AS referred_email,
