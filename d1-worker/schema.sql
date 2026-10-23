@@ -270,3 +270,17 @@ CREATE TABLE IF NOT EXISTS user_emails (
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_emails_user ON user_emails(user_id);
+
+CREATE TABLE IF NOT EXISTS page_visits (
+  id TEXT PRIMARY KEY,
+  user_id TEXT,
+  email TEXT,
+  path TEXT NOT NULL,
+  ip TEXT,
+  user_agent TEXT,
+  referrer TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_visits_path_created ON page_visits(path, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_page_visits_user_created ON page_visits(user_id, created_at DESC);

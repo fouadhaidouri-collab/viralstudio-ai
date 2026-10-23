@@ -253,6 +253,24 @@ body::before {
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
+/* === Settings splash loading bar === */
+@keyframes settings-loader-bar {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(420%); }
+}
+
+.settings-loader-bar {
+  width: 26%;
+  animation: settings-loader-bar 0.85s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-loader-bar {
+    animation-duration: 1.8s;
+  }
+}
+
 /* === Dropdown === */
 @keyframes dropdown-open {
   from { opacity: 0; transform: translateY(-8px) scale(0.97); }

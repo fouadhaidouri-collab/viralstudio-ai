@@ -1,8 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
 import StatusBadge from "../components/StatusBadge";
+import SettingsSplash from "../components/SettingsSplash";
 
 const defaultSettings = {
   general: { app_name: "", logo: null, default_language: "en", default_currency: "USD", maintenance_mode: false, signup_enabled: true },
@@ -43,6 +44,33 @@ function SettingCard({ title, description, icon, children }) {
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState(defaultSettings);
   const [toast, setToast] = useState(null);
+  const [splash, setSplash] = useState(true);
+  const [splashLeaving, setSplashLeaving] = useState(false);
+  const trackedRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setSplash(false);
+      return;
+    }
+    const leaveTimer = setTimeout(() => setSplashLeaving(true), 320);
+    const removeTimer = setTimeout(() => setSplash(false), 520);
+    return () => {
+      clearTimeout(leaveTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (trackedRef.current) return;
+    trackedRef.current = true;
+    fetch("/api/track/visit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: "/admin/settings", referrer: document.referrer || "" }),
+      keepalive: true,
+    }).catch(() => {});
+  }, []);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -56,7 +84,9 @@ export default function AdminSettingsPage() {
   const updateBranding = (key, value) => setSettings({ ...settings, branding: { ...settings.branding, [key]: value } });
 
   return (
-    <div className="space-y-5 animate-fade-in-up">
+    <>
+      {splash && <SettingsSplash leaving={splashLeaving} />}
+      <div className="space-y-5 animate-fade-in-up">
       <PageHeader
         title="Settings"
         subtitle="Configure your ViralStudio AI platform"
@@ -226,5 +256,6 @@ export default function AdminSettingsPage() {
         </SettingCard>
       </div>
     </div>
+    </>
   );
 }
