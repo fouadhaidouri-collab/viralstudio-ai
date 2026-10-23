@@ -16,13 +16,13 @@ export default function SettingsSplash({ leaving = false }) {
           <div className="relative shrink-0">
             <div className="absolute inset-0 rounded-xl bg-primary/40 blur-xl animate-pulse-glow" />
             <div
-              className="relative flex h-11 w-11 items-center justify-center rounded-[14px]"
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl"
               style={{
                 background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #3b0764 100%)",
-                boxShadow: "0 0 30px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+                boxShadow: "0 0 24px rgba(168,85,247,0.38), inset 0 1px 0 rgba(255,255,255,0.2)",
               }}
             >
-              <Icon name="bolt" className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" size={20} />
+              <Icon name="bolt" className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" size={17} />
             </div>
           </div>
 
