@@ -11,6 +11,7 @@ const AuthContext = createContext({
   loading: true,
   loginError: "",
   setLoginError: () => {},
+  refreshUser: async () => {},
 });
 
 export function AuthProvider({ children }) {
@@ -77,9 +78,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const res = await fetch("/api/auth/session");
+      const data = await res.json();
+      setUser(data.user || null);
+    } catch {}
+  };
+
   return (
     <AuthContext.Provider value={{
-      user, login, signUp, logout,
+      user, login, signUp, logout, refreshUser,
       isAuthenticated: !!user,
       loading,
       loginError, setLoginError,

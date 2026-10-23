@@ -8,6 +8,7 @@ import AuthGuard from "../components/AuthGuard";
 import { SidebarProvider } from "../components/SidebarContext";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
+import EmailManager from "../components/EmailManager";
 
 function formatBytes(bytes) {
   if (!bytes || bytes <= 0) return "0 GB";
@@ -405,24 +406,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
 
               {/* Email Section */}
-              <div className="rounded-2xl p-6 md:p-8 border border-white/5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                    <Icon name="mail" className="text-primary" size={18} />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-white">Email Address</h2>
-                    <p className="text-[11px] text-on-surface-variant">Your current login email</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-5 py-3.5 bg-surface-container-low rounded-xl border border-surface-border/40">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-2 h-2 rounded-full bg-green-500 shrink-0 shadow-sm shadow-green-500/50" />
-                    <span className="text-sm text-white truncate font-medium">{email}</span>
-                  </div>
-                  <button className="shrink-0 ml-3 px-4 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all">Change</button>
-                </div>
-              </div>
+              <EmailManager />
 
               {!isGoogleUser && (
                 <div className="rounded-2xl p-6 md:p-8 border border-white/5 hover:border-primary/20 transition-all" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.04), transparent)' }}>
