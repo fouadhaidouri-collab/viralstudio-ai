@@ -42,6 +42,17 @@ function shortPath(path) {
   return path.length > 34 ? `${path.slice(0, 31)}...` : path;
 }
 
+function mapUrl(latitude, longitude) {
+  if (latitude == null || longitude == null) return "";
+  return `https://www.google.com/maps?q=${latitude},${longitude}`;
+}
+
+function locationLine(visit) {
+  const parts = [visit.city, visit.region].filter(Boolean);
+  if (visit.postal_code) parts.push(visit.postal_code);
+  return parts.join(", ");
+}
+
 export default function AdminPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -113,7 +124,7 @@ export default function AdminPage() {
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">Site Visitors</h2>
-              <p className="text-[10px] text-on-surface-variant">Live IP, country and device data for every visitor</p>
+              <p className="text-[10px] text-on-surface-variant">Live IP, approximate location, country and device data</p>
             </div>
             <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-[10px] font-semibold text-green-400">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
@@ -169,7 +180,7 @@ export default function AdminPage() {
                 <thead>
                   <tr className="bg-surface-container-higher/50">
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">IP</th>
-                    <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Country</th>
+                    <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Country / Location</th>
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Device</th>
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Page</th>
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Source</th>
@@ -184,10 +195,10 @@ export default function AdminPage() {
                       <tr key={visit.id} className="border-t border-surface-border/50 transition-colors hover:bg-white/[0.02]">
                         <td className="px-5 py-3.5">
                           <div className="font-mono text-xs font-medium text-white">{visit.ip || "Unknown"}</div>
-                          {visit.city && <div className="mt-0.5 text-[10px] text-on-surface-variant">{visit.city}</div>}
+                          {visit.timezone && <div className="mt-0.5 text-[10px] text-on-surface-variant">{visit.timezone}</div>}
                         </td>
                         <td className="px-5 py-3.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-start gap-2">
                             {flag ? (
                               <img
                                 src={flag}
@@ -195,20 +206,36 @@ export default function AdminPage() {
                                 width={20}
                                 height={15}
                                 loading="lazy"
-                                className="h-[15px] w-5 rounded-[2px] object-cover"
+                                className="mt-0.5 h-[15px] w-5 rounded-[2px] object-cover"
                               />
                             ) : (
-                              <span className="flex h-[15px] w-5 items-center justify-center rounded-[2px] bg-surface-container-high text-on-surface-variant">
+                              <span className="mt-0.5 flex h-[15px] w-5 items-center justify-center rounded-[2px] bg-surface-container-high text-on-surface-variant">
                                 <Icon name="globe" size={11} />
                               </span>
                             )}
                             <div>
-                              <div className="text-xs font-medium text-white">
-                                {visit.country_name || visit.country_code || "Unknown"}
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="text-xs font-medium text-white">
+                                  {visit.country_name || visit.country_code || "Unknown"}
+                                </span>
+                                {visit.country_code && (
+                                  <span className="text-[9px] text-on-surface-variant">{visit.country_code}</span>
+                                )}
                               </div>
                               <div className="mt-0.5 text-[10px] text-on-surface-variant">
-                                {visit.country_code || "No country code"}
+                                {locationLine(visit) || "Location unavailable"}
                               </div>
+                              {mapUrl(visit.latitude, visit.longitude) && (
+                                <a
+                                  href={mapUrl(visit.latitude, visit.longitude)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+                                >
+                                  <Icon name="external_link" size={10} />
+                                  Open map
+                                </a>
+                              )}
                             </div>
                           </div>
                         </td>
