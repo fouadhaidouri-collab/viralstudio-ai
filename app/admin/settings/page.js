@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
 import StatusBadge from "../components/StatusBadge";
 import SettingsSplash from "../components/SettingsSplash";
@@ -74,56 +75,11 @@ export default function AdminSettingsPage() {
     <>
       {splash && <SettingsSplash leaving={splashLeaving} />}
       <div className="space-y-5 animate-fade-in-up">
-      <div className="mb-5">
-        <div className="mb-2 flex items-center gap-1.5">
-          <a href="/admin" className="text-[10px] text-on-surface-variant transition-colors hover:text-primary">Admin</a>
-          <Icon name="chevron_right" className="text-on-surface-variant/30" size={12} />
-          <span className="text-[10px] text-on-surface-variant/60">Settings</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          <div className="flex items-center gap-3">
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 rounded-xl bg-primary/40 blur-xl" />
-              <div
-                className="relative flex h-11 w-11 items-center justify-center rounded-[14px]"
-                style={{
-                  background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #3b0764 100%)",
-                  boxShadow: "0 0 30px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-                }}
-              >
-                <Icon name="bolt" className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" size={20} />
-              </div>
-            </div>
-            <div>
-              <h1
-                className="font-extrabold leading-none tracking-tight"
-                style={{
-                  background: "linear-gradient(135deg, #fff 30%, #a855f7 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  fontSize: "20px",
-                  fontFamily: "Geist, sans-serif",
-                }}
-              >
-                ViralStudio AI
-              </h1>
-              <div className="mt-1 flex items-center gap-1.5">
-                <span className="h-1 w-1 rounded-full bg-primary" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-on-surface-variant">
-                  Premium Suite
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="hidden h-8 w-px bg-surface-border/60 sm:block" />
-          <div>
-            <h2 className="text-lg font-bold text-white md:text-xl" style={{ fontFamily: "Geist, sans-serif" }}>
-              Settings
-            </h2>
-            <p className="mt-0.5 text-xs text-on-surface-variant">Configure your ViralStudio AI platform</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Settings"
+        subtitle="Configure your ViralStudio AI platform"
+        breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Settings" }]}
+      />
 
       {toast && (
         <div className="px-4 py-2.5 bg-surface-container border border-surface-border/80 rounded-xl text-xs text-white flex items-center gap-2 animate-dropdown-open">

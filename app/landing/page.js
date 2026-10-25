@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import BrandLogo from "../components/BrandLogo";
 
 const faqs = [
   { q: "What is ViralStudio AI?", a: "ViralStudio AI is a comprehensive AI-powered content creation suite that helps you generate videos, images, scripts, and more in minutes." },
@@ -19,9 +20,8 @@ export default function LandingPage() {
           {/* Nav */}
           <nav className="fixed top-0 left-0 right-0 z-50 py-3" style={{ background: "rgba(3,3,3,0.8)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
             <div className="max-w-[1200px] mx-auto px-5 flex items-center justify-between gap-4">
-              <a href="#" className="flex items-center gap-2 text-base font-bold text-white shrink-0" translate="no">
-                <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0" style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)" }}>B</span>
-                ViralStudio AI
+              <a href="#" className="shrink-0 text-white" aria-label="ViralStudio AI — Premium Suite">
+                <BrandLogo subtitle="Premium Suite" size="md" />
               </a>
               <div className={`items-center gap-6 ${mobileOpen ? "flex flex-col absolute top-full left-0 right-0 p-5 pb-6" : "hidden"} md:flex`} style={mobileOpen ? { background: "rgba(3,3,3,0.98)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" } : {}}>
                 <a href="#features" className="text-sm text-[#a1a1aa] hover:text-white transition-colors whitespace-nowrap" onClick={() => setMobileOpen(false)}>Features</a>
@@ -213,10 +213,9 @@ export default function LandingPage() {
           {/* Footer */}
           <footer className="border-t px-5 py-8" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
             <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-2 text-sm font-bold text-white" translate="no">
-                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] shrink-0" style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)" }}>B</span>
-                ViralStudio AI
-              </div>
+              <a href="#" className="shrink-0 text-white" aria-label="ViralStudio AI — Premium Suite">
+                <BrandLogo subtitle="Premium Suite" size="sm" />
+              </a>
               <p className="text-xs text-[#52525b]">&copy; 2026 All Rights Reserved.</p>
               <nav className="flex gap-4 flex-wrap">
                 <a href="#" className="text-xs text-[#52525b] hover:text-white transition-colors">Privacy Policy</a>
