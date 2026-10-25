@@ -7,6 +7,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
+import UserAvatar from "../../components/UserAvatar";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -183,9 +184,7 @@ export default function AdminUsersPage() {
                       <td className="px-4 py-3 text-xs font-mono text-on-surface-variant">{user.id}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
-                            {user.name.charAt(0)}
-                          </div>
+                          <UserAvatar name={user.name} email={user.email} size={28} />
                           <span className="text-xs font-medium text-white">{user.name}</span>
                         </div>
                       </td>

@@ -9,10 +9,10 @@ import EmptyState from "../components/EmptyState";
 import Icon from "../../components/Icon";
 
 function generateCouponCode() {
-  const prefixes = ["VIP", "PRO", "MAX", "ELITE", "MEGA", "ULTRA", "POWER", "STAR", "GOLD", "TOP"];
+  const prefixes = ["VIP", "PRO", "MAX", "ELT", "MEG", "ULT", "PWR", "STR", "GLD", "TOP"];
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
   const num = String(Math.floor(100 + Math.random() * 900));
-  return `${prefix}${num}`;
+  return `${prefix}${num}`.slice(0, 6);
 }
 
 export default function AdminCouponsPage() {
@@ -217,7 +217,8 @@ export default function AdminCouponsPage() {
                   <input
                     type="text"
                     value={newCode}
-                    onChange={(e) => setNewCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                    maxLength={6}
+                    onChange={(e) => setNewCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))}
                     placeholder="e.g. PRO123"
                     className="flex-1 bg-surface-container-lowest border border-surface-border/60 rounded-xl px-4 py-2.5 text-sm text-white uppercase font-mono font-bold tracking-wider placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50 transition-colors"
                   />

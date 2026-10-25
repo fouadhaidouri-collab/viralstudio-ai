@@ -20,17 +20,21 @@ export async function POST(request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { code, discount_percent, max_uses, expires_at } = await request.json();
-  if (!code || !discount_percent) {
+  const normalizedCode = String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!normalizedCode || !discount_percent) {
     return Response.json({ error: "Code and discount percent are required" }, { status: 400 });
   }
-  const existing = await get("SELECT id FROM coupons WHERE code = ?", [code]);
+  if (normalizedCode.length > 6) {
+    return Response.json({ error: "Coupon code must be 6 characters or fewer" }, { status: 400 });
+  }
+  const existing = await get("SELECT id FROM coupons WHERE code = ?", [normalizedCode]);
   if (existing) {
     return Response.json({ error: "Coupon code already exists" }, { status: 409 });
   }
   const id = makeId();
   await run(
     "INSERT INTO coupons (id, code, discount_percent, max_uses, expires_at) VALUES (?, ?, ?, ?, ?)",
-    [id, code.toUpperCase(), discount_percent, max_uses || 0, expires_at || null]
+    [id, normalizedCode, discount_percent, max_uses || 0, expires_at || null]
   );
   const coupon = await get("SELECT * FROM coupons WHERE id = ?", [id]);
   return Response.json({ coupon }, { status: 201 });

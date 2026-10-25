@@ -9,19 +9,12 @@ import { SidebarProvider } from "../components/SidebarContext";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
 import EmailManager from "../components/EmailManager";
+import UserAvatar from "../components/UserAvatar";
 
 function formatBytes(bytes) {
   if (!bytes || bytes <= 0) return "0 GB";
   const gb = bytes / (1024 * 1024 * 1024);
   return `${Number.isInteger(gb) ? gb : gb.toFixed(1)} GB`;
-}
-
-function gravatarUrl(email) {
-  let hash = 0;
-  const str = email.trim().toLowerCase();
-  for (let i = 0; i < str.length; i++) { const chr = str.charCodeAt(i); hash = ((hash << 5) - hash) + chr; hash |= 0; }
-  const h = Math.abs(hash).toString(16).padStart(8, "0");
-  return `https://www.gravatar.com/avatar/${h}?s=200&d=retro`;
 }
 
 export default function ProfilePage() {
@@ -31,7 +24,6 @@ export default function ProfilePage() {
   const email = user?.email || "user@example.com";
   const name = user?.name || email.split("@")[0];
   const username = email.split("@")[0];
-  const photoURL = user?.photoURL || gravatarUrl(email);
   const [realCredits, setRealCredits] = useState(null);
   const [storageData, setStorageData] = useState(null);
   const [subData, setSubData] = useState(null);
@@ -88,11 +80,7 @@ export default function ProfilePage() {
             <div className="absolute bottom-0 left-0 w-48 h-48 opacity-[0.03]" style={{ background: 'radial-gradient(circle, #6366f1, transparent 70%)' }} />
             <div className="relative z-10 flex items-start gap-5">
               <div className="relative shrink-0">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)' }}>
-                  <div className="w-full h-full rounded-full bg-surface overflow-hidden">
-                    <img src={photoURL} alt={email} className="w-full h-full object-cover" />
-                  </div>
-                </div>
+                <UserAvatar name={name} email={email} size={72} ring />
                 <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-green-500 border-2 border-surface rounded-full" />
               </div>
               <div className="min-w-0 flex-1">

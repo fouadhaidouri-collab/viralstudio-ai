@@ -6,6 +6,7 @@ import StatusBadge from "../../components/StatusBadge";
 import PlanBadge from "../../components/PlanBadge";
 import CreditBadge from "../../components/CreditBadge";
 import Icon from "../../../components/Icon";
+import UserAvatar from "../../../components/UserAvatar";
 
 function formatDate(d) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -313,9 +314,7 @@ export default function AdminUserDetailPage() {
 
       <div className="glass-card rounded-xl p-4 md:p-5 card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold text-primary shrink-0">
-            {user.name.charAt(0)}
-          </div>
+          <UserAvatar name={user.name} email={user.email} size={56} ring />
           <div className="flex-1">
             <h1 className="text-lg md:text-xl font-bold text-white">{user.name}</h1>
             <p className="text-xs text-on-surface-variant mt-0.5">{user.email}</p>

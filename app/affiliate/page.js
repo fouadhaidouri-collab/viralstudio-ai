@@ -8,6 +8,7 @@ import AuthGuard from "../components/AuthGuard";
 import { SidebarProvider } from "../components/SidebarContext";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
+import UserAvatar from "../components/UserAvatar";
 
 export default function AffiliatePage() {
   const { user } = useAuth();
@@ -43,7 +44,7 @@ export default function AffiliatePage() {
   const [editWallet, setEditWallet] = useState("");
 
   const couponCode = data?.affiliate?.referral_code || "";
-  const referralLink = `https://viralstudio-ai.com/ref/${data?.affiliate?.referral_code || name}`;
+  const referralLink = couponCode ? `https://viralstudio-ai.com/ref/${couponCode}` : "";
 
   const loadStats = async () => {
     try {
@@ -273,9 +274,7 @@ export default function AffiliatePage() {
             <div className="absolute top-0 right-0 w-48 h-48 opacity-5" style={{ background: 'radial-gradient(circle, #a855f7, transparent 70%)' }} />
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center shadow-lg shadow-primary/20">
-                  <span className="text-lg font-bold text-white">{name?.charAt(0) || "?"}</span>
-                </div>
+                <UserAvatar name={name} email={email} size={48} ring />
                 <div>
                   <h3 className="text-base font-bold text-white">{name}</h3>
                   <p className="text-xs text-on-surface-variant">Affiliate Program</p>
