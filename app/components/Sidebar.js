@@ -53,7 +53,7 @@ function SidebarContent() {
           </div>
         </div>
         <div>
-          <h1 className="font-extrabold tracking-tight leading-none" style={{ background: 'linear-gradient(135deg, #fff 30%, #a855f7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '20px', fontFamily: 'Geist, sans-serif' }}>ViralStudio AI</h1>
+          <h1 className="whitespace-nowrap font-extrabold tracking-tight leading-none" style={{ background: 'linear-gradient(135deg, #fff 30%, #a855f7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '16px', fontFamily: 'Geist, sans-serif' }}>ViralStudio AI</h1>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="w-1 h-1 rounded-full bg-primary" />
             <span className="text-[9px] text-on-surface-variant font-bold uppercase tracking-[0.15em]">Premium Suite</span>
