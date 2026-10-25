@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { trackPageVisit } from "./lib/analytics";
 
 const protectedPaths = ["/ugc-engine", "/hook-gen", "/clipping", "/profile", "/affiliate", "/admin"];
 const publicPaths = ["/login", "/signup", "/forgot-password", "/landing"];
 
-export function middleware(request) {
+export function middleware(request, event) {
   const { pathname } = request.nextUrl;
   const sessionToken = request.cookies.get("next-auth.session-token")?.value;
 
@@ -20,6 +21,10 @@ export function middleware(request) {
 
   if (isPublic && sessionToken && pathname === "/login") {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (event?.waitUntil) {
+    event.waitUntil(trackPageVisit(request));
   }
 
   return NextResponse.next();

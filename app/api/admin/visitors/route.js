@@ -4,7 +4,21 @@ import { query } from "../../../../lib/db";
 
 export const runtime = "nodejs";
 
-const TRACKED_PATH = "/admin/settings";
+let regionNames = null;
+try {
+  regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+} catch {
+  regionNames = null;
+}
+
+function getCountryName(code) {
+  if (!code) return "Unknown";
+  try {
+    return regionNames?.of(code) || code;
+  } catch {
+    return code;
+  }
+}
 
 export async function GET() {
   try {
@@ -22,45 +36,44 @@ export async function GET() {
     const [summary] = await query(
       `SELECT
          COUNT(*) AS total,
-         COUNT(DISTINCT user_id) AS unique_visitors,
+         COUNT(DISTINCT ip) AS unique_ips,
+         COUNT(DISTINCT NULLIF(country_code, '')) AS countries,
          SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END) AS today,
          SUM(CASE WHEN created_at >= datetime('now', '-7 days') THEN 1 ELSE 0 END) AS last7
-       FROM page_visits
-       WHERE path = ?`,
-      [TRACKED_PATH]
+       FROM page_visits`
     );
 
     const visits = await query(
-      `SELECT id, user_id, email, ip, user_agent, referrer, created_at
+      `SELECT id, ip, country_code, city, device, path, referrer, user_agent, created_at
        FROM page_visits
-       WHERE path = ?
        ORDER BY created_at DESC
-       LIMIT 50`,
-      [TRACKED_PATH]
+       LIMIT 50`
     );
 
     const daily = await query(
       `SELECT date(created_at) AS day, COUNT(*) AS count
        FROM page_visits
-       WHERE path = ? AND created_at >= datetime('now', '-6 days')
+       WHERE created_at >= datetime('now', '-6 days')
        GROUP BY date(created_at)
-       ORDER BY day ASC`,
-      [TRACKED_PATH]
+       ORDER BY day ASC`
     );
 
     return Response.json({
-      path: TRACKED_PATH,
       summary: {
         total: Number(summary?.total || 0),
-        unique_visitors: Number(summary?.unique_visitors || 0),
+        unique_ips: Number(summary?.unique_ips || 0),
+        countries: Number(summary?.countries || 0),
         today: Number(summary?.today || 0),
         last7: Number(summary?.last7 || 0),
       },
-      visits,
+      visits: visits.map((visit) => ({
+        ...visit,
+        country_name: getCountryName(visit.country_code),
+      })),
       daily,
     });
   } catch (err) {
-    console.error("settings visits error:", err);
-    return Response.json({ error: "Could not load settings visits" }, { status: 500 });
+    console.error("visitors error:", err);
+    return Response.json({ error: "Could not load visitors" }, { status: 500 });
   }
 }

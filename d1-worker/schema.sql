@@ -277,6 +277,9 @@ CREATE TABLE IF NOT EXISTS page_visits (
   email TEXT,
   path TEXT NOT NULL,
   ip TEXT,
+  country_code TEXT,
+  city TEXT,
+  device TEXT,
   user_agent TEXT,
   referrer TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -284,3 +287,6 @@ CREATE TABLE IF NOT EXISTS page_visits (
 
 CREATE INDEX IF NOT EXISTS idx_page_visits_path_created ON page_visits(path, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_page_visits_user_created ON page_visits(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_page_visits_ip_created ON page_visits(ip, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_page_visits_created ON page_visits(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_page_visits_country ON page_visits(country_code);

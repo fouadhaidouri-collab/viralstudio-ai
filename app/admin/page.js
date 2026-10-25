@@ -32,6 +32,16 @@ function shortReferrer(referrer) {
   }
 }
 
+function countryFlagUrl(code) {
+  if (!code || !/^[A-Za-z]{2}$/.test(code)) return "";
+  return `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+}
+
+function shortPath(path) {
+  if (!path) return "/";
+  return path.length > 34 ? `${path.slice(0, 31)}...` : path;
+}
+
 export default function AdminPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,10 +51,10 @@ export default function AdminPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/settings-visits", { cache: "no-store" });
+      const res = await fetch("/api/admin/visitors", { cache: "no-store" });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(json.error || "Could not load settings visitors");
+        setError(json.error || "Could not load visitors");
         return;
       }
       setData(json);
@@ -102,8 +112,8 @@ export default function AdminPage() {
               <Icon name="visibility" size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white">Settings Visitors</h2>
-              <p className="text-[10px] text-on-surface-variant">Tracking everyone who opens Admin → Settings</p>
+              <h2 className="text-sm font-bold text-white">Site Visitors</h2>
+              <p className="text-[10px] text-on-surface-variant">Live IP, country and device data for every visitor</p>
             </div>
             <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-[10px] font-semibold text-green-400">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
@@ -112,18 +122,18 @@ export default function AdminPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <StatCard title="Total Visits" value={summary.total ?? 0} icon="visibility" color="primary" subtitle="All time" />
-            <StatCard title="Unique Visitors" value={summary.unique_visitors ?? 0} icon="person" color="secondary" subtitle="Distinct admins" />
+            <StatCard title="Total Visits" value={summary.total ?? 0} icon="visibility" color="primary" subtitle="All page views" />
+            <StatCard title="Unique IPs" value={summary.unique_ips ?? 0} icon="person" color="secondary" subtitle="Distinct addresses" />
+            <StatCard title="Countries" value={summary.countries ?? 0} icon="globe" color="accentCyan" subtitle="Detected countries" />
             <StatCard title="Today" value={summary.today ?? 0} icon="schedule" color="green" subtitle="Since midnight" />
-            <StatCard title="Last 7 Days" value={summary.last7 ?? 0} icon="analytics" color="accentCyan" subtitle="Rolling week" />
           </div>
         </section>
 
         <section className="glass-card card-glow overflow-hidden rounded-2xl border border-white/5">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-surface-border/50 px-5 py-4">
             <div>
-              <h3 className="text-sm font-semibold text-white">Recent Settings Visits</h3>
-              <p className="mt-0.5 text-[10px] text-on-surface-variant">Latest accounts that entered the Settings page</p>
+              <h3 className="text-sm font-semibold text-white">Recent Visitors</h3>
+              <p className="mt-0.5 text-[10px] text-on-surface-variant">Latest browsers that opened your site</p>
             </div>
             <span className="text-[10px] text-on-surface-variant">{visits.length} shown</span>
           </div>
@@ -131,7 +141,7 @@ export default function AdminPage() {
           {loading ? (
             <div className="flex items-center justify-center gap-3 px-5 py-12 text-xs text-on-surface-variant">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-              Loading settings visitors...
+              Loading visitors...
             </div>
           ) : error ? (
             <div className="px-5 py-12 text-center">
@@ -148,43 +158,76 @@ export default function AdminPage() {
               <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon name="visibility" size={20} />
               </div>
-              <p className="text-sm font-semibold text-white">No settings visits yet</p>
+              <p className="text-sm font-semibold text-white">No visitors yet</p>
               <p className="mt-1 text-xs text-on-surface-variant">
-                Open Admin → Settings once and the visit will appear here.
+                Open your site from any PC or phone and the visit will appear here.
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-sm">
+              <table className="w-full min-w-[860px] text-sm">
                 <thead>
                   <tr className="bg-surface-container-higher/50">
-                    <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Visitor</th>
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">IP</th>
+                    <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Country</th>
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Device</th>
+                    <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Page</th>
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Source</th>
                     <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Visited</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {visits.map((visit) => (
-                    <tr key={visit.id} className="border-t border-surface-border/50 transition-colors hover:bg-white/[0.02]">
-                      <td className="px-5 py-3.5">
-                        <div className="text-xs font-medium text-white">{visit.email || "Unknown"}</div>
-                        <div className="mt-0.5 text-[10px] text-on-surface-variant">ID {visit.user_id || "-"}</div>
-                      </td>
-                      <td className="px-5 py-3.5 text-xs text-on-surface-variant">{visit.ip || "-"}</td>
-                      <td className="px-5 py-3.5">
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-surface-border/60 bg-surface-container-low px-2 py-1 text-[10px] font-medium text-on-surface-variant">
-                          <Icon name={deviceLabel(visit.user_agent) === "Mobile" ? "smartphone" : "smart_display"} size={11} />
-                          {deviceLabel(visit.user_agent)}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-xs text-on-surface-variant">{shortReferrer(visit.referrer)}</td>
-                      <td className="px-5 py-3.5 text-xs text-on-surface-variant" title={visit.created_at || ""}>
-                        {formatWhen(visit.created_at)}
-                      </td>
-                    </tr>
-                  ))}
+                  {visits.map((visit) => {
+                    const device = visit.device || deviceLabel(visit.user_agent);
+                    const flag = countryFlagUrl(visit.country_code);
+                    return (
+                      <tr key={visit.id} className="border-t border-surface-border/50 transition-colors hover:bg-white/[0.02]">
+                        <td className="px-5 py-3.5">
+                          <div className="font-mono text-xs font-medium text-white">{visit.ip || "Unknown"}</div>
+                          {visit.city && <div className="mt-0.5 text-[10px] text-on-surface-variant">{visit.city}</div>}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            {flag ? (
+                              <img
+                                src={flag}
+                                alt=""
+                                width={20}
+                                height={15}
+                                loading="lazy"
+                                className="h-[15px] w-5 rounded-[2px] object-cover"
+                              />
+                            ) : (
+                              <span className="flex h-[15px] w-5 items-center justify-center rounded-[2px] bg-surface-container-high text-on-surface-variant">
+                                <Icon name="globe" size={11} />
+                              </span>
+                            )}
+                            <div>
+                              <div className="text-xs font-medium text-white">
+                                {visit.country_name || visit.country_code || "Unknown"}
+                              </div>
+                              <div className="mt-0.5 text-[10px] text-on-surface-variant">
+                                {visit.country_code || "No country code"}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span className="inline-flex items-center gap-1.5 rounded-md border border-surface-border/60 bg-surface-container-low px-2 py-1 text-[10px] font-medium text-on-surface-variant">
+                            <Icon name={device === "Desktop" ? "smart_display" : "smartphone"} size={11} />
+                            {device}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5" title={visit.path || ""}>
+                          <span className="font-mono text-[11px] text-white/80">{shortPath(visit.path)}</span>
+                        </td>
+                        <td className="px-5 py-3.5 text-xs text-on-surface-variant">{shortReferrer(visit.referrer)}</td>
+                        <td className="px-5 py-3.5 text-xs text-on-surface-variant" title={visit.created_at || ""}>
+                          {formatWhen(visit.created_at)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -194,8 +237,8 @@ export default function AdminPage() {
         <section className="glass-card card-glow rounded-2xl border border-white/5 p-5">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-white">Settings Visits — Last 7 Days</h3>
-              <p className="mt-0.5 text-[10px] text-on-surface-variant">Daily traffic to the Settings page</p>
+              <h3 className="text-sm font-semibold text-white">Visitors — Last 7 Days</h3>
+              <p className="mt-0.5 text-[10px] text-on-surface-variant">Daily traffic across the whole site</p>
             </div>
             <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
               {summary.last7 ?? 0} total
