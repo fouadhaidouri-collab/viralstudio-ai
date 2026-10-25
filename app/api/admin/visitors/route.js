@@ -44,7 +44,7 @@ export async function GET() {
     );
 
     const visits = await query(
-      `SELECT id, ip, country_code, region, city, postal_code, latitude, longitude, timezone, device, path, referrer, user_agent, created_at
+      `SELECT id, ip, country_code, device, path, referrer, user_agent, created_at
        FROM page_visits
        ORDER BY created_at DESC
        LIMIT 50`
