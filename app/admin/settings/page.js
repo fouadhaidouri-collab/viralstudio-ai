@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
 import Icon from "../../components/Icon";
 import StatusBadge from "../components/StatusBadge";
@@ -46,7 +46,6 @@ export default function AdminSettingsPage() {
   const [toast, setToast] = useState(null);
   const [splash, setSplash] = useState(true);
   const [splashLeaving, setSplashLeaving] = useState(false);
-  const trackedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
@@ -59,17 +58,6 @@ export default function AdminSettingsPage() {
       clearTimeout(leaveTimer);
       clearTimeout(removeTimer);
     };
-  }, []);
-
-  useEffect(() => {
-    if (trackedRef.current) return;
-    trackedRef.current = true;
-    fetch("/api/track/visit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: "/admin/settings", referrer: document.referrer || "" }),
-      keepalive: true,
-    }).catch(() => {});
   }, []);
 
   const showToast = (msg) => {
