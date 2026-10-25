@@ -46,19 +46,83 @@ export default function AdminSettingsPage() {
   const [toast, setToast] = useState(null);
   const [splash, setSplash] = useState(true);
   const [splashLeaving, setSplashLeaving] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingError, setLoadingError] = useState(null);
+  const [loadingAttempt, setLoadingAttempt] = useState(0);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      setSplash(false);
-      return;
-    }
-    const leaveTimer = setTimeout(() => setSplashLeaving(true), 320);
-    const removeTimer = setTimeout(() => setSplash(false), 520);
-    return () => {
-      clearTimeout(leaveTimer);
-      clearTimeout(removeTimer);
+    let cancelled = false;
+    const controller = new AbortController();
+
+    const waitForPaint = () => new Promise((resolve) => {
+      if (typeof window === "undefined" || !window.requestAnimationFrame || document.visibilityState === "hidden") {
+        return resolve();
+      }
+      window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+    });
+
+    const waitForFonts = () => {
+      if (typeof document === "undefined" || !document.fonts?.ready) return Promise.resolve();
+      return document.fonts.ready;
     };
-  }, []);
+
+    const run = async () => {
+      const tasks = [
+        async () => {
+          const sessionResponse = await fetch("/api/auth/session", {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          if (!sessionResponse.ok) {
+            throw new Error("We couldn't verify your session. Please try again.");
+          }
+          const session = await sessionResponse.json().catch(() => null);
+          if (!session?.user) {
+            throw new Error("Your session has expired. Please sign in and try again.");
+          }
+        },
+        waitForFonts,
+        waitForPaint,
+      ];
+
+      try {
+        for (let index = 0; index < tasks.length; index++) {
+          await tasks[index]();
+          if (cancelled) return;
+          setLoadingProgress(Math.round(((index + 1) / tasks.length) * 100));
+          await waitForPaint();
+          if (cancelled) return;
+        }
+
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || document.visibilityState === "hidden") {
+          setSplash(false);
+        } else {
+          setSplashLeaving(true);
+        }
+      } catch (err) {
+        if (cancelled || err?.name === "AbortError") return;
+        setLoadingError(
+          err?.name === "TypeError"
+            ? "Network error. Check your connection and try again."
+            : err?.message || "We couldn't load Settings. Please try again."
+        );
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [loadingAttempt]);
+
+  const retrySettingsLoad = () => {
+    setLoadingError(null);
+    setLoadingProgress(0);
+    setSplashLeaving(false);
+    setSplash(true);
+    setLoadingAttempt((attempt) => attempt + 1);
+  };
 
   const showToast = (msg) => {
     setToast(msg);
@@ -73,7 +137,15 @@ export default function AdminSettingsPage() {
 
   return (
     <>
-      {splash && <SettingsSplash leaving={splashLeaving} />}
+      {splash && (
+        <SettingsSplash
+          leaving={splashLeaving}
+          progress={loadingProgress}
+          error={loadingError}
+          onRetry={retrySettingsLoad}
+          onExited={() => setSplash(false)}
+        />
+      )}
       <div className="space-y-5 animate-fade-in-up">
       <PageHeader
         title="Settings"
