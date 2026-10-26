@@ -1,19 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 import ProfileDropdown from "./ProfileDropdown";
 import { useSidebar } from "./SidebarContext";
+import useLiveCredits from "../lib/useLiveCredits";
 import Icon from "./Icon";
 
 export default function TopBar() {
   const router = useRouter();
   const { setMobileOpen } = useSidebar();
-  const [credits, setCredits] = useState(null);
-
-  useEffect(() => {
-    fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
-  }, []);
+  const credits = useLiveCredits();
 
   return (
     <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-14 md:h-16 bg-surface/60 backdrop-blur-2xl border-b border-surface-border/40 z-40 flex justify-between items-center px-4 md:px-8" style={{ boxShadow: '0 1px 24px rgba(0,0,0,0.3)' }}>

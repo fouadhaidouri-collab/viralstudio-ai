@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
 import { useState, useEffect } from "react";
+import useLiveCredits from "../lib/useLiveCredits";
 import Icon from "./Icon";
 
 const homeItem = { href: "/", label: "Home", icon: "dashboard" };
@@ -20,8 +21,8 @@ function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
   const { setMobileOpen } = useSidebar();
+  const credits = useLiveCredits();
   const [showAdmin, setShowAdmin] = useState(false);
-  const [credits, setCredits] = useState(null);
 
   useEffect(() => {
     const host = window.location.hostname;
@@ -36,10 +37,6 @@ function SidebarContent() {
     ];
     routes.forEach((href) => router.prefetch(href));
   }, [router, showAdmin]);
-
-  useEffect(() => {
-    fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
-  }, []);
 
   const handleNav = () => setMobileOpen(false);
 

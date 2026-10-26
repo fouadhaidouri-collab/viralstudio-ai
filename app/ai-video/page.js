@@ -10,6 +10,8 @@ import { useAuth } from "../lib/AuthContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
 import ModelSelector from "../components/ModelSelector";
 import Icon from "../components/Icon";
+import useScrollActivated from "../lib/useScrollActivated";
+import useLiveCredits from "../lib/useLiveCredits";
 
 function AspectIcon({ label, size = "text-sm" }) {
   const ratioStr = label.split(" ").find(s => s.includes(":")) || label;
@@ -174,12 +176,13 @@ export default function AIVideoPage() {
   const [videoError, setVideoError] = useState(null);
   const [pricing, setPricing] = useState({});
   const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.01, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
-  const [credits, setCredits] = useState(0);
+  const credits = useLiveCredits();
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
   const [modelCapabilities, setModelCapabilities] = useState({});
   const fileInputRef = useRef();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
+  const scrollActivated = useScrollActivated();
 
   const caps = videoModelCapabilities[model.label] || videoModelCapabilities["Veo 3.1 Fast"];
   const defaultDurations = caps.durations.length > 0 ? caps.durations : ["5 seconds"];
@@ -230,11 +233,12 @@ export default function AIVideoPage() {
   };
 
   useEffect(() => {
+    if (!scrollActivated) return;
     const interval = setInterval(() => {
       setBgVideoIdx((prev) => (prev + 1) % TEMPLATE_VIDEOS.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [scrollActivated]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -264,12 +268,6 @@ export default function AIVideoPage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.credit_usd_value) setCreditSettings(data);
-      })
-      .catch(() => {});
-    fetch("/api/credits")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.balance != null) setCredits(data.balance);
       })
       .catch(() => {});
   }, []);
@@ -441,7 +439,15 @@ export default function AIVideoPage() {
       <SidebarProvider>
       <Sidebar />
       <div className="fixed inset-0 overflow-hidden z-0">
-        {(() => {
+        {!scrollActivated && (
+          <img
+            src={TEMPLATE_VIDEOS[0].replace(".mp4", ".jpg")}
+            alt=""
+            fetchPriority="high"
+            className="absolute inset-0 w-full h-full object-fill opacity-70"
+          />
+        )}
+        {scrollActivated && (() => {
           const cur = bgVideoIdx % TEMPLATE_VIDEOS.length;
           const nxt = (cur + 1) % TEMPLATE_VIDEOS.length;
           return [cur, nxt].map((idx, pos) => (
