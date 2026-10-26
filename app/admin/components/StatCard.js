@@ -5,11 +5,13 @@ export default function StatCard({ title, value, icon, color = "primary", prefix
   const colorMap = {
     primary: { bg: "bg-primary/10", text: "text-primary", glow: "rgba(168,85,247,0.3)" },
     secondary: { bg: "bg-secondary/10", text: "text-secondary", glow: "rgba(34,211,238,0.3)" },
+    info: { bg: "bg-secondary/10", text: "text-secondary", glow: "rgba(34,211,238,0.3)" },
     tertiary: { bg: "bg-tertiary/10", text: "text-tertiary", glow: "rgba(251,146,60,0.3)" },
     accentOrange: { bg: "bg-accent-orange/10", text: "text-accent-orange", glow: "rgba(249,115,22,0.3)" },
     accentCyan: { bg: "bg-accent-cyan/10", text: "text-accent-cyan", glow: "rgba(6,182,212,0.3)" },
     accentPink: { bg: "bg-accent-pink/10", text: "text-accent-pink", glow: "rgba(236,72,153,0.3)" },
     error: { bg: "bg-error/10", text: "text-error", glow: "rgba(248,113,113,0.3)" },
+    red: { bg: "bg-error/10", text: "text-error", glow: "rgba(248,113,113,0.3)" },
     green: { bg: "bg-green-500/10", text: "text-green-400", glow: "rgba(74,222,128,0.3)" },
     yellow: { bg: "bg-yellow-500/10", text: "text-yellow-400", glow: "rgba(250,204,21,0.3)" },
   };
