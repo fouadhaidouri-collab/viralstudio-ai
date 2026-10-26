@@ -77,6 +77,24 @@ const features = [
   },
 ];
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    if (mq.addEventListener) mq.addEventListener("change", update);
+    else mq.addListener(update);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", update);
+      else mq.removeListener(update);
+    };
+  }, []);
+
+  return isDesktop;
+}
+
 function InViewVideo({ src, poster, className }) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -120,21 +138,71 @@ function InViewVideo({ src, poster, className }) {
   );
 }
 
+function TemplateMedia({ src, poster, mobilePoster, className, isDesktop }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  const mobileWebp = mobilePoster.replace(/\.jpg$/, ".webp");
+
+  useEffect(() => {
+    if (isDesktop) return;
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      const frame = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(frame);
+    }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [isDesktop]);
+
+  if (isDesktop) {
+    return <InViewVideo src={src} poster={poster} className={className} />;
+  }
+
+  return (
+    <picture ref={ref} className="block w-full h-full">
+      {visible && (
+        <source type="image/webp" media="(max-width: 767px)" srcSet={mobileWebp} />
+      )}
+      {visible && <source media="(max-width: 767px)" srcSet={mobilePoster} />}
+      {visible && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={poster} alt="" loading="lazy" decoding="async" fetchPriority="low" className={className} />
+      )}
+    </picture>
+  );
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
+  const isDesktop = useIsDesktop();
 
   useEffect(() => {
+    if (!isDesktop) return;
     const interval = setInterval(() => {
       setBgVideoIdx((prev) => (prev + 1) % templates.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isDesktop]);
   const handleTemplateClick = (prompt) => {
     const params = new URLSearchParams();
     params.set("prompt", prompt);
     router.push(`/ai-video?${params.toString()}`);
   };
+  const heroTemplate = templates[bgVideoIdx % templates.length];
+  const heroPoster = heroTemplate.video.replace(".mp4", ".jpg");
+  const heroMobilePoster = heroTemplate.video.replace(".mp4", "-mobile.jpg");
+  const heroMobileWebp = heroTemplate.video.replace(".mp4", "-mobile.webp");
   return (
     <div className="h-screen overflow-hidden no-x-scroll">
       <SidebarProvider>
@@ -143,7 +211,26 @@ export default function Dashboard() {
         <main className="fixed top-14 md:top-16 right-0 w-full md:w-[calc(100%-16rem)] bottom-0 overflow-y-auto smooth-scroll">
         <div className="px-3 md:px-5 lg:px-6 py-4 md:py-5 lg:py-6">
           <section className="hero-glow relative rounded-2xl overflow-hidden mb-6 border border-primary/20 min-h-[360px] md:min-h-[540px] flex items-end" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.04))' }}>
-            {(() => {
+            {!isDesktop && (
+              <picture className="absolute inset-0">
+                <source
+                  type="image/webp"
+                  media="(max-width: 767px)"
+                  srcSet={heroMobileWebp}
+                />
+                <source
+                  media="(max-width: 767px)"
+                  srcSet={heroMobilePoster}
+                />
+                <img
+                  src={heroPoster}
+                  alt=""
+                  fetchPriority="high"
+                  className="w-full h-full object-fill opacity-60"
+                />
+              </picture>
+            )}
+            {isDesktop && (() => {
               const cur = bgVideoIdx % templates.length;
               const nxt = (cur + 1) % templates.length;
               return [cur, nxt].map((idx, pos) => (
@@ -172,7 +259,7 @@ export default function Dashboard() {
             {templates.slice(0, 5).map((t, i) => (
               <button key={i} onClick={() => handleTemplateClick(t.prompt)} className="card-glow group rounded-xl overflow-hidden border border-surface-border/60 text-left hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <div className="relative aspect-[3/4] bg-surface-container-highest">
-                  <InViewVideo src={t.video} poster={t.video.replace(".mp4", ".jpg")} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <TemplateMedia src={t.video} poster={t.video.replace(".mp4", ".jpg")} mobilePoster={t.video.replace(".mp4", "-thumb.jpg")} isDesktop={isDesktop} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
                   <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                       <p className="text-[9px] text-white/80 line-clamp-2 leading-tight">{t.prompt}</p>
@@ -224,7 +311,7 @@ export default function Dashboard() {
               {templates.map((t, i) => (
                 <button key={i} onClick={() => handleTemplateClick(t.prompt)} className="card-glow group rounded-xl overflow-hidden border border-surface-border/60 text-left hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                   <div className="relative aspect-[3/4] bg-surface-container-highest">
-                    <InViewVideo src={t.video} poster={t.video.replace(".mp4", ".jpg")} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <TemplateMedia src={t.video} poster={t.video.replace(".mp4", ".jpg")} mobilePoster={t.video.replace(".mp4", "-thumb.jpg")} isDesktop={isDesktop} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
                     <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                       <p className="text-[8px] text-white/80 line-clamp-1 leading-tight">{t.prompt}</p>
