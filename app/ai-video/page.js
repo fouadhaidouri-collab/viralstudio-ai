@@ -53,6 +53,19 @@ const calcModelCredits = (unitPrice, quantity, settings, modelMarkup) => {
   return Math.max(credits, minCredits);
 };
 
+const normalizeProgress = (value) => {
+  let progress = null;
+  if (typeof value === "number") {
+    progress = value;
+  } else if (typeof value === "string" && value.trim() !== "") {
+    progress = Number(value);
+  } else if (value && typeof value === "object") {
+    progress = Number(value.percent ?? value.percentage ?? value.progress ?? value.value);
+  }
+  if (!Number.isFinite(progress)) return null;
+  return Math.max(0, Math.min(100, progress));
+};
+
 function compressImage(file, maxSide = 1024, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -187,6 +200,8 @@ export default function AIVideoPage() {
   const [videoCount, setVideoCount] = useState(1);
   const [images, setImages] = useState([]);
   const [generating, setGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [videoUrls, setVideoUrls] = useState([]);
   const [videoError, setVideoError] = useState(null);
   const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.01, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
@@ -215,6 +230,12 @@ export default function AIVideoPage() {
     const q = durationMultiplier(startDur) * resolutionMultiplier("720p");
     return calcModelCredits(m.unitPrice ?? 0.05, q, creditSettings, m.markup);
   };
+  const creditsPerVideo = (m = model, config = currentConfig) => {
+    const q = durationMultiplier(config.duration) * resolutionMultiplier(config.resolution);
+    return calcModelCredits(m.unitPrice ?? 0.05, q, creditSettings, m.markup) ?? 0;
+  };
+  const totalCredits = (m = model, config = currentConfig, count = videoCount) =>
+    creditsPerVideo(m, config) * count;
 
   useEffect(() => {
     if (!scrollActivated) return;
@@ -223,6 +244,19 @@ export default function AIVideoPage() {
     }, 4000);
     return () => clearInterval(interval);
   }, [scrollActivated]);
+
+  useEffect(() => {
+    if (!generating) {
+      setElapsedSeconds(0);
+      return;
+    }
+    const startedAt = Date.now();
+    setElapsedSeconds(0);
+    const interval = setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [generating]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -291,6 +325,29 @@ export default function AIVideoPage() {
     setImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const deductCredits = async (amount) => {
+    const res = await fetch("/api/credits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "deduct",
+        amount,
+        module_id: model.model_id,
+        endpoint_id: model.model_id,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || "Could not deduct credits.");
+    }
+    if (typeof window !== "undefined" && typeof data.balance === "number") {
+      window.dispatchEvent(
+        new CustomEvent("viralstudio:credits-updated", { detail: { balance: data.balance } })
+      );
+    }
+    return data;
+  };
+
   const generateOne = async () => {
     const modelId = model.model_id;
     if (!modelId) throw new Error(`Unknown model: ${model.label}`);
@@ -327,6 +384,9 @@ export default function AIVideoPage() {
 
       const statusData = await statusRes.json();
 
+      const progress = normalizeProgress(statusData.progress);
+      if (progress != null) setGenerationProgress(progress);
+
       if (statusData.status === "COMPLETED") {
         return statusData.videoUrl;
       } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
@@ -343,15 +403,16 @@ export default function AIVideoPage() {
     }
     if (!isAuthenticated) { router.push("/login"); return; }
 
-    const quantity = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
-    const needed = calcModelCredits(model.unitPrice ?? 0.05, quantity, creditSettings, model.markup);
-    if (needed != null && credits < needed) {
+    const perVideoCredits = creditsPerVideo();
+    const needed = perVideoCredits * videoCount;
+    if (needed > 0 && credits < needed) {
       setNeededCredits(needed);
       setShowCreditModal(true);
       return;
     }
 
     setGenerating(true);
+    setGenerationProgress(null);
     setVideoUrls([]);
     setVideoError(null);
 
@@ -361,17 +422,29 @@ export default function AIVideoPage() {
         const url = await generateOne();
         results.push(url);
         setVideoUrls([...results]);
+
+        let creditsUsed = 0;
+        if (perVideoCredits > 0) {
+          try {
+            await deductCredits(perVideoCredits);
+            creditsUsed = perVideoCredits;
+          } catch (err) {
+            setVideoError(`Video ready, but credits could not be deducted: ${err.message}`);
+          }
+        }
+
         const prov = familyProviders[model.family] || model.family || "Unknown";
         fetch("/api/generations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "AI Video", provider: prov, model: model.model_id, prompt, output_url: url, thumbnail_url: url, credits_used: 0 }),
+          body: JSON.stringify({ type: "AI Video", provider: prov, model: model.model_id, prompt, output_url: url, thumbnail_url: url, credits_used: creditsUsed }),
         }).catch(() => {});
       }
     } catch (err) {
       setVideoError(err.message);
     } finally {
       setGenerating(false);
+      setGenerationProgress(null);
     }
   };
 
@@ -499,11 +572,7 @@ export default function AIVideoPage() {
                   {generating ? (
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
-                    <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
-                      const qty = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
-                      const c = calcModelCredits(model.unitPrice ?? 0.05, qty, creditSettings, model.markup);
-                      return <span className="text-yellow-300/90 font-semibold">({c} credits)</span>;
-                    })()}</>
+                    <><Icon name="auto_videocam" className="text-sm" /> Generate Video <span className="text-yellow-300/90 font-semibold">({totalCredits()} credits)</span></>
                   )}
                 </button>
 
@@ -517,26 +586,80 @@ export default function AIVideoPage() {
               <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
                 <div style={{ background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.08) 0%, transparent 70%)' }} className="absolute inset-0"></div>
                 {videoUrls.length > 0 ? (
-                  <video
-                    key={videoUrls[0]}
-                    src={videoUrls[0]}
-                    controls
-                    autoPlay
-                    loop
-                    playsInline
-                    className="relative z-10 max-w-full max-h-full object-contain rounded-xl"
-                    style={{ aspectRatio: (currentConfig.aspectRatio?.label || "9:16").replace(":", "/") }}
-                  />
-                ) : (
-                  <div className="relative z-10 flex flex-col items-center">
-                    <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center animate-pulse mb-4">
-                      <Icon name="circle_play" className="text-primary text-3xl" />
+                  <>
+                    <video
+                      key={videoUrls[0]}
+                      src={videoUrls[0]}
+                      controls
+                      autoPlay
+                      loop
+                      playsInline
+                      className="relative z-10 max-w-full max-h-full object-contain rounded-xl"
+                      style={{ aspectRatio: (currentConfig.aspectRatio?.label || "9:16").replace(":", "/") }}
+                    />
+                    {generating && (
+                      <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur">
+                        <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        {videoCount > 1 ? `Generating ${Math.min(videoUrls.length + 1, videoCount)} of ${videoCount}...` : "Generating..."}
+                      </div>
+                    )}
+                  </>
+                ) : generating ? (
+                  <div className="relative z-10 flex flex-col items-center px-6 text-center">
+                    <div className="relative mb-5 h-20 w-20">
+                      <div className="absolute inset-0 rounded-full border-2 border-primary/20"></div>
+                      <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-primary"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Icon name="auto_videocam" className="text-3xl text-primary" />
+                      </div>
                     </div>
-                    <p className="text-xs text-on-surface-variant/60 mt-2">Your video will appear here</p>
+                    <p className="text-sm font-semibold text-white">Generating your video...</p>
+                    <p className="mt-1.5 text-xs text-on-surface-variant/60">
+                      {videoCount > 1 ? `Video ${Math.min(videoUrls.length + 1, videoCount)} of ${videoCount} · ` : ""}
+                      {elapsedSeconds > 0 ? `${elapsedSeconds}s elapsed` : "This can take a few minutes"}
+                    </p>
+                    {generationProgress != null ? (
+                      <div className="mt-4 w-52 max-w-full">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${generationProgress}%` }}></div>
+                        </div>
+                        <p className="mt-1.5 text-[10px] text-on-surface-variant/60">{Math.round(generationProgress)}%</p>
+                      </div>
+                    ) : (
+                      <div className="mt-4 h-1.5 w-52 max-w-full overflow-hidden rounded-full bg-white/10">
+                        <div className="h-full w-2/3 animate-pulse rounded-full bg-primary/70"></div>
+                      </div>
+                    )}
+                    <p className="mt-4 text-[10px] text-on-surface-variant/50">Credits are only deducted when your video is ready.</p>
+                    {videoError && (
+                      <div className="mt-4 max-w-xs rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs leading-relaxed text-red-200/90">
+                        {videoError}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative z-10 flex flex-col items-center px-6 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 animate-pulse">
+                      <Icon name="circle_play" className="text-3xl text-primary" />
+                    </div>
+                    <p className="mt-2 text-xs text-on-surface-variant/60">Your video will appear here</p>
+                    {videoError && (
+                      <div className="mt-4 max-w-xs rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs leading-relaxed text-red-200/90">
+                        {videoError}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
+            {videoError && videoUrls.length > 0 && (
+              <div className="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs leading-relaxed text-red-200/90">
+                {videoError}
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <button onClick={handleDownload} disabled={videoUrls.length === 0} className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface-container-low border border-surface-border/60 rounded-xl text-sm font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed" style={{ fontFamily: 'Geist, sans-serif' }}>
                 <Icon name="download" className="text-base" /> Download

@@ -29,6 +29,20 @@ export default function useLiveCredits() {
     return () => controller.abort();
   }, [userId]);
 
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleCreditsUpdated = (event) => {
+      const balance = event?.detail?.balance;
+      if (typeof balance === "number" && Number.isFinite(balance)) {
+        setSnapshot({ userId, balance });
+      }
+    };
+
+    window.addEventListener("viralstudio:credits-updated", handleCreditsUpdated);
+    return () => window.removeEventListener("viralstudio:credits-updated", handleCreditsUpdated);
+  }, [userId]);
+
   const fetched = snapshot.userId === userId ? snapshot.balance : null;
   return fetched ?? user?.credits ?? 0;
 }
