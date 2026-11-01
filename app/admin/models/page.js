@@ -12,7 +12,7 @@ import EmptyState from "../components/EmptyState";
 import Icon from "../../components/Icon";
 
 const providerColors = {
-  "FAL.ai": { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  "Renderful": { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
   "OpenRouter": { bg: "bg-secondary/10", text: "text-secondary", border: "border-secondary/20" },
   "ElevenLabs": { bg: "bg-accent-pink/10", text: "text-accent-pink", border: "border-accent-pink/20" },
   "Runway": { bg: "bg-accent-orange/10", text: "text-accent-orange", border: "border-accent-orange/20" },
@@ -29,7 +29,7 @@ const providerOptions = Object.keys(providerColors);
 const statusOptions = ["active", "inactive"];
 
 const emptyModel = {
-  id: "", name: "", provider: "FAL.ai", api_model_id: "", tool_category: "AI Video",
+  id: "", name: "", provider: "Renderful", api_model_id: "", tool_category: "AI Video",
   version: "", credit_cost: 1, real_api_cost: 0, profit_margin: 20, status: "active",
   duration_options: [], resolution_options: [], aspect_ratio_options: [], quantity_limits: [],
   allowed_plans: ["Free", "Creator", "Pro", "Agency"], featured: false,
@@ -126,7 +126,7 @@ export default function AdminModelsPage() {
   };
 
   const providerBadge = (provider) => {
-    const pc = providerColors[provider] || providerColors["FAL.ai"];
+    const pc = providerColors[provider] || providerColors["Renderful"];
     return (
       <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-md ${pc.bg} ${pc.text} ${pc.border} border`}>
         {provider}

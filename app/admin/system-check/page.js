@@ -15,7 +15,7 @@ export default function SystemCheckPage() {
 
     // 1. Key status
     try {
-      const kr = await fetch("/api/admin/settings/fal-key/status").then((r) => r.json());
+      const kr = await fetch("/api/admin/settings/renderful-key/status").then((r) => r.json());
       out.key = kr;
     } catch (e) {
       out.key = { hasKey: false, error: e.message };
@@ -25,7 +25,7 @@ export default function SystemCheckPage() {
     if (out.key?.hasKey) {
       // 2. Search models
       try {
-        const sr = await fetch("/api/admin/settings/fal-key/status").then((r) => r.json());
+        const sr = await fetch("/api/admin/settings/renderful-key/status").then((r) => r.json());
         out.search = { working: true };
       } catch (e) {
         out.search = { working: false, error: e.message };
@@ -34,10 +34,10 @@ export default function SystemCheckPage() {
 
       // 3. Pricing
       try {
-        const pr = await fetch("/api/model-pricing?endpoint_ids=" + encodeURIComponent("fal-ai/veo3.1/fast"))
+        const pr = await fetch("/api/model-pricing?endpoint_ids=" + encodeURIComponent("kling-v3"))
           .then((r) => r.json());
         if (pr.prices) {
-          const v = pr.prices["fal-ai/veo3.1/fast"];
+          const v = pr.prices["kling-v3"];
           out.pricing = { working: true, unitPrice: v?.unitPrice, hasPrice: v?.unitPrice != null };
         } else {
           out.pricing = { working: false, error: "No pricing data" };
@@ -58,7 +58,7 @@ export default function SystemCheckPage() {
       <div className="max-w-lg mx-auto space-y-8">
         <div>
           <h1 className="text-2xl font-bold">System Check</h1>
-          <p className="text-sm text-on-surface-variant mt-1">Verify your fal.ai integration is working</p>
+          <p className="text-sm text-on-surface-variant mt-1">Verify your Renderful.ai integration is working</p>
         </div>
 
         <button
@@ -66,13 +66,13 @@ export default function SystemCheckPage() {
           disabled={running}
           className="w-full px-4 py-3 primary-gradient text-white rounded-xl text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-50"
         >
-          {running ? "Running Check..." : "Run fal.ai Check"}
+          {running ? "Running Check..." : "Run Renderful Check"}
         </button>
 
         {results && (
           <div className="space-y-3">
             <div className="bg-surface-container-low border border-surface-border rounded-xl p-4 space-y-2">
-              <h2 className="text-sm font-semibold">FAL Key</h2>
+              <h2 className="text-sm font-semibold">Renderful Key</h2>
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${results.key?.hasKey ? "bg-green-400" : "bg-red-400"}`} />
                 <span className="text-sm">{results.key?.hasKey ? "Present" : "Missing"}</span>

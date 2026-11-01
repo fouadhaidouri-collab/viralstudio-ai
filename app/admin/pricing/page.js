@@ -73,7 +73,7 @@ export default function AdminPricingPage() {
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
           <h1 className="text-2xl font-bold">Pricing Settings</h1>
-          <p className="text-sm text-on-surface-variant mt-1">Manage credit pricing and sync fal.ai model prices</p>
+          <p className="text-sm text-on-surface-variant mt-1">Manage credit pricing and sync Renderful model prices</p>
         </div>
 
         {settings && (
@@ -142,8 +142,8 @@ export default function AdminPricingPage() {
         )}
 
         <div className="bg-surface-container-low border border-surface-border rounded-xl p-4 space-y-4">
-          <h2 className="text-sm font-semibold">Sync fal.ai Prices</h2>
-          <p className="text-xs text-on-surface-variant">Fetch latest pricing from fal.ai for all models and recalculate credit costs.</p>
+          <h2 className="text-sm font-semibold">Sync Renderful Prices</h2>
+          <p className="text-xs text-on-surface-variant">Fetch latest pricing from Renderful for all models and recalculate credit costs.</p>
 
           <button
             onClick={handleSync}

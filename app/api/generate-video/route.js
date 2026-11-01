@@ -1,148 +1,181 @@
-import { getFalKey } from "@/lib/fal-key";
-
-const FAL_BASE = "https://queue.fal.run";
+import { videoModels } from "@/app/lib/capabilities";
+import { getGeneration, normalizeStatus, outputUrl, submitGeneration } from "@/lib/renderful";
+import { saveImageDataUrl } from "@/lib/uploads";
 
 const PROVIDER_UNAVAILABLE =
   "AI generation service is temporarily unavailable. Please try again later.";
 
-const MODEL_PAYLOADS = {
-  "fal-ai/veo3.1/fast": ({ prompt, aspectRatio }) => ({
+const MODEL_BY_ID = Object.fromEntries(videoModels.map((m) => [m.model_id, m]));
+
+function secondsFromDuration(duration) {
+  const value = parseInt(String(duration || ""), 10);
+  return Number.isFinite(value) ? value : 5;
+}
+
+function normalizeAspectRatio(value) {
+  if (!value) return null;
+  if (typeof value === "object" && value.label) return normalizeAspectRatio(value.label);
+  const text = String(value);
+  const match = text.match(/(\d+)\s*:\s*(\d+)/);
+  return match ? `${match[1]}:${match[2]}` : null;
+}
+
+function buildVideoPayload({ model, prompt, imageUrl, aspectRatio, resolution, duration }) {
+  const seconds = secondsFromDuration(duration);
+  const base = {
+    type: "image-to-video",
+    model: model.model_id,
     prompt,
-    aspect_ratio: aspectRatio,
-    image_url: null,
-  }),
-  "xai/grok-imagine-video/text-to-video": ({ prompt, aspectRatio }) => ({
-    prompt,
-    aspect_ratio: aspectRatio,
-  }),
-  "bytedance/seedance/v1.5/pro/text-to-video": ({ prompt, aspectRatio }) => ({
-    prompt,
-    aspect_ratio: aspectRatio,
-    duration: 5,
-  }),
-  "bytedance/seedance-2.0/text-to-video": ({ prompt, aspectRatio }) => ({
-    prompt,
-    aspect_ratio: aspectRatio,
-    duration: 5,
-  }),
-  "kling-video/v3/pro/text-to-video": ({ prompt, aspectRatio }) => ({
-    prompt,
-    aspect_ratio: aspectRatio,
-    duration: 5,
-  }),
-  "fal-ai/runway-gen-3": ({ prompt }) => ({
-    prompt,
-    image_url: null,
-  }),
-  "fal-ai/luma-dream-machine": ({ prompt, aspectRatio }) => ({
-    prompt,
-    aspect_ratio: aspectRatio,
-    image_url: null,
-  }),
-  "fal-ai/pika": ({ prompt, aspectRatio }) => ({
-    prompt,
-    aspect_ratio: aspectRatio,
-    image_url: null,
-  }),
-  "alibaba/happy-horse/text-to-video": ({ prompt, aspectRatio }) => ({
-    prompt,
-    aspect_ratio: aspectRatio,
-    duration: 5,
-  }),
-};
+    image_url: imageUrl,
+  };
+
+  if (model.payload === "kling-v3") {
+    const mode = resolution === "4k" ? "4k" : resolution === "1080p" ? "pro" : "std";
+    return {
+      type: "image-to-video",
+      model: model.model_id,
+      prompt,
+      image: imageUrl,
+      mode,
+      duration: seconds,
+      sound: true,
+    };
+  }
+
+  if (model.payload === "wan-3.0") {
+    return {
+      ...base,
+      resolution: String(resolution || "720p").toLowerCase(),
+      duration: seconds,
+      enable_audio: true,
+    };
+  }
+
+  if (model.payload === "seedance-2.0" || model.payload === "seedance-2.0-mini") {
+    return {
+      ...base,
+      aspect_ratio: normalizeAspectRatio(aspectRatio) || "16:9",
+      resolution: String(resolution || "720p").toLowerCase(),
+      duration: seconds,
+      generate_audio: true,
+    };
+  }
+
+  if (model.payload === "hailuo-03") {
+    return {
+      ...base,
+      resolution: resolution === "2K" ? "2K" : "768p",
+      duration: seconds,
+    };
+  }
+
+  return base;
+}
+
+async function resolveImageUrl(image, origin) {
+  if (!image) return null;
+  if (/^https?:\/\//i.test(image)) return image;
+  if (String(image).startsWith("data:image/")) {
+    return saveImageDataUrl(image, origin);
+  }
+  return null;
+}
 
 export async function POST(request) {
-  const keyResult = await getFalKey();
-  if (!keyResult.hasKey) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid request." }, { status: 400 });
+  }
+
+  const { prompt, modelId, aspectRatio, resolution, duration, image, imageUrl } = body || {};
+  const model = MODEL_BY_ID[modelId];
+
+  if (!model) {
+    return Response.json({ error: "Unsupported model." }, { status: 400 });
+  }
+  if (!prompt || !String(prompt).trim()) {
+    return Response.json({ error: "Write a prompt first." }, { status: 400 });
+  }
+
+  let resolvedImageUrl;
+  try {
+    resolvedImageUrl = await resolveImageUrl(image || imageUrl, new URL(request.url).origin);
+  } catch (err) {
+    return Response.json({ error: err.message || "Could not upload the image." }, { status: 400 });
+  }
+
+  if (model.requiresImage && !resolvedImageUrl) {
+    return Response.json({ error: "Upload a photo first." }, { status: 400 });
+  }
+
+  const payload = buildVideoPayload({
+    model,
+    prompt: String(prompt).trim(),
+    imageUrl: resolvedImageUrl,
+    aspectRatio,
+    resolution,
+    duration,
+  });
+
+  let data;
+  try {
+    data = await submitGeneration(payload);
+  } catch (err) {
+    if (err.code === "NO_KEY") {
+      return Response.json(
+        { error: "Generation service is not configured yet.", setupRequired: true },
+        { status: 503 }
+      );
+    }
+    console.error("generate-video Renderful submit error:", err.message);
     return Response.json(
-      { error: "Generation service is not configured yet.", setupRequired: true },
-      { status: 503 }
+      { error: err.status && err.status < 500 ? err.message : PROVIDER_UNAVAILABLE },
+      { status: err.status && err.status < 500 ? 400 : 503 }
     );
   }
 
-  const { prompt, modelId, aspectRatio } = await request.json();
-
-  const ratioMap = {
-    "Cinematic 16:9": "16:9",
-    "Instagram 9:16": "9:16",
-    "Square 1:1": "1:1",
-    "Portrait 4:5": "4:5",
-  };
-
-  const buildPayload = MODEL_PAYLOADS[modelId];
-  if (!buildPayload) {
-    return Response.json({ error: `Unsupported model: ${modelId}` }, { status: 400 });
-  }
-
-  const payload = buildPayload({ prompt, aspectRatio: ratioMap[aspectRatio] || "16:9" });
-
-  let res;
-  try {
-    res = await fetch(`${FAL_BASE}/${modelId}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Key ${keyResult.key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.error("generate-video submit network error:", err.message);
-    return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
-  }
-
-  if (!res.ok) {
-    const text = (await res.text()).slice(0, 400);
-    console.error(`generate-video fal error ${res.status}: ${text}`);
-    return Response.json({ error: PROVIDER_UNAVAILABLE, provider_status: res.status }, { status: 503 });
-  }
-
-  const data = await res.json();
-  return Response.json({ requestId: data.request_id, modelId });
+  return Response.json({ requestId: data.id, modelId: model.model_id });
 }
 
 export async function GET(request) {
-  const keyResult = await getFalKey();
-  if (!keyResult.hasKey) {
-    return Response.json(
-      { error: "Generation service is not configured yet.", setupRequired: true },
-      { status: 503 }
-    );
-  }
-
   const { searchParams } = new URL(request.url);
   const requestId = searchParams.get("requestId");
-  const modelId = searchParams.get("modelId");
 
-  if (!requestId || !modelId) {
-    return Response.json({ error: "Missing requestId or modelId" }, { status: 400 });
+  if (!requestId) {
+    return Response.json({ error: "Missing requestId." }, { status: 400 });
   }
 
-  let statusRes;
+  let data;
   try {
-    statusRes = await fetch(`${FAL_BASE}/${modelId}/requests/${requestId}/status`, {
-      headers: { Authorization: `Key ${keyResult.key}` },
-    });
+    data = await getGeneration(requestId);
   } catch (err) {
-    console.error("generate-video status network error:", err.message);
+    if (err.code === "NO_KEY") {
+      return Response.json(
+        { error: "Generation service is not configured yet.", setupRequired: true },
+        { status: 503 }
+      );
+    }
+    console.error("generate-video Renderful status error:", err.message);
     return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
   }
 
-  if (!statusRes.ok) {
-    const text = (await statusRes.text()).slice(0, 400);
-    console.error(`generate-video status error ${statusRes.status}: ${text}`);
-    return Response.json({ error: PROVIDER_UNAVAILABLE, provider_status: statusRes.status }, { status: 503 });
-  }
-
-  const statusData = await statusRes.json();
-
-  if (statusData.status === "COMPLETED") {
-    const resultRes = await fetch(`${FAL_BASE}/${modelId}/requests/${requestId}`, {
-      headers: { Authorization: `Key ${keyResult.key}` },
+  const status = normalizeStatus(data.status);
+  if (status === "COMPLETED") {
+    return Response.json({
+      status,
+      videoUrl: outputUrl(data),
+      outputs: data.outputs || [],
     });
-    const result = await resultRes.json();
-    return Response.json({ status: "COMPLETED", videoUrl: result.video?.url || result.video_url, ...result });
   }
 
-  return Response.json({ status: statusData.status });
+  if (status === "FAILED" || status === "CANCELLED") {
+    return Response.json({
+      status,
+      error: data.error || data.message || "The AI generation failed on the provider.",
+    });
+  }
+
+  return Response.json({ status, progress: data.progress ?? null });
 }

@@ -34,35 +34,28 @@ import {
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
 
-const resMap = { "4k": 2160, "1080p": 1080, "720p": 720 };
-const CREDIT_USD_VALUE = 0.01;
-
-function calcImageCredits(model, aspectRatio, resolution, quantity) {
-  if (model.unit === "megapixels") {
-    const resNum = resMap[resolution] || 720;
-    const [aw, ah] = aspectRatio.split(":").map(Number);
-    const isLandscape = aw > ah;
-    const w = isLandscape ? Math.round(resNum * (aw / ah)) : resNum;
-    const h = isLandscape ? resNum : Math.round(resNum * (ah / aw));
-    const mp = (w * h) / 1000000;
-    const cost = mp * model.unitPrice;
-    const sell = cost * (1 + model.markup);
-    return Math.max(1, Math.ceil(sell / CREDIT_USD_VALUE)) * quantity;
-  }
-  return (model.credits || 1) * quantity;
+function calcImageCredits(model, aspectRatio, resolution, quantity, settings) {
+  const base = model.unitPrice ?? 0.05;
+  const resMultiplier = resolution === "4k" ? 2.5 : resolution === "2k" ? 1.5 : 1;
+  const markup = model.markup ?? settings?.default_markup_multiplier ?? 1;
+  const usdValue = settings?.credit_usd_value || 0.01;
+  const minCredits = settings?.minimum_generation_credits || 1;
+  const credits = Math.ceil((base * resMultiplier * markup) / usdValue);
+  return Math.max(minCredits, credits) * quantity;
 }
 
 const imageProviderMeta = {
   OpenAI: { icon: "psychology", color: "#10b981" },
-  "Nano Banana": { icon: "auto_awesome", color: "#f59e0b" },
   Google: { icon: "videocam", color: "#4285F4" },
-  Grok: { icon: "psychology", color: "#06b6d4" },
+  ByteDance: { icon: "auto_awesome", color: "#ec4899" },
+  "Black Forest Labs": { icon: "auto_awesome", color: "#22d3ee" },
+  xAI: { icon: "psychology", color: "#06b6d4" },
 };
 
-function buildImageProviders(models, pricingMap, creditSettings) {
+function buildImageProviders(models, creditSettings) {
   const cheapest = models.slice().sort((a, b) => {
-    const pa = pricingMap?.[a.label]?.unitPrice ?? 0.05;
-    const pb = pricingMap?.[b.label]?.unitPrice ?? 0.05;
+    const pa = a.unitPrice ?? 0.05;
+    const pb = b.unitPrice ?? 0.05;
     return pa - pb;
   })[0];
   const groups = {};
@@ -133,15 +126,14 @@ function Dropdown({ label, value, options, onChange, compact }) {
 export default function AIImagePage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [selectedModel, setSelectedModel] = useState(imageModels[3]);
+  const [selectedModel, setSelectedModel] = useState(imageModels[0]);
   const [prompt, setPrompt] = useState("");
   const [modelConfigs, setModelConfigs] = useState({});
-  const currentConfig = modelConfigs[selectedModel.label] || { aspectRatio: imageAspectRatios[0], resolution: "720p" };
+  const currentConfig = modelConfigs[selectedModel.label] || { aspectRatio: imageAspectRatios[0], resolution: "1k" };
   const updateConfig = (key, value) => {
     setModelConfigs(prev => ({ ...prev, [selectedModel.label]: { ...(prev[selectedModel.label] || {}), [key]: value } }));
   };
   const [imageCount, setImageCount] = useState(1);
-  const [images, setImages] = useState([]);
   const [generating, setGenerating] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
   const [imageError, setImageError] = useState(null);
@@ -149,30 +141,11 @@ export default function AIImagePage() {
   const credits = useLiveCredits();
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
-  const [pricing, setPricing] = useState({});
   const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.01, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
-  const fileInputRef = useRef();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
   const scrollActivated = useScrollActivated();
 
   useEffect(() => {
-    const ids = imageModels.map(m => m.fal_model).join(",");
-    fetch(`/api/model-pricing?endpoint_ids=${encodeURIComponent(ids)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.prices) {
-          const m = {};
-          for (const mod of imageModels) {
-            if (data.prices[mod.fal_model]) {
-              m[mod.label] = data.prices[mod.fal_model];
-            } else {
-              m[mod.label] = { unitPrice: null, pricingUnavailable: true };
-            }
-          }
-          setPricing(m);
-        }
-      })
-      .catch(() => {});
     fetch("/api/pricing/settings")
       .then((r) => r.json())
       .then((data) => {
@@ -190,7 +163,7 @@ export default function AIImagePage() {
     if (!c) return;
     const existing = modelConfigs[selectedModel.label];
     if (!existing) {
-      const defaults = { aspectRatio: imageAspectRatios[0], resolution: "720p" };
+      const defaults = { aspectRatio: imageAspectRatios[0], resolution: "1k" };
       if (c.aspectRatios.length > 0) {
         const found = imageAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
         if (found) defaults.aspectRatio = found;
@@ -220,21 +193,10 @@ export default function AIImagePage() {
     return () => clearInterval(interval);
   }, [scrollActivated]);
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (ev) => setImages((prev) => [...prev, ev.target.result]);
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (i) => setImages((prev) => prev.filter((_, idx) => idx !== i));
-
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     if (!isAuthenticated) { router.push("/login"); return; }
-    const needed = calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, imageCount);
+    const needed = calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, imageCount, creditSettings);
     if (needed != null && credits < needed) { setNeededCredits(needed); setShowCreditModal(true); return; }
     setGenerating(true);
     setImageUrls([]);
@@ -243,13 +205,13 @@ export default function AIImagePage() {
     try {
       const results = [];
       for (let i = 0; i < imageCount; i++) {
-        const modelId = selectedModel.fal_model;
+        const modelId = selectedModel.model_id;
         if (!modelId) throw new Error(`Unknown model: ${selectedModel.label}`);
 
         const subRes = await fetch("/api/generate-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, modelId, aspectRatio: currentConfig.aspectRatio.label, resolution: currentConfig.resolution }),
+          body: JSON.stringify({ prompt, modelId, aspectRatio: currentConfig.aspectRatio.label, resolution: currentConfig.resolution, quantity: 1 }),
         });
 
         if (!subRes.ok) {
@@ -278,7 +240,7 @@ export default function AIImagePage() {
             fetch("/api/generations", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ type: "Image Lab", provider: selectedModel.provider, model: selectedModel.fal_model, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: selectedModel.credits || 1 }),
+              body: JSON.stringify({ type: "Image Lab", provider: selectedModel.provider, model: selectedModel.model_id, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: selectedModel.credits || 1 }),
             }).catch(() => {});
           } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
             throw new Error("The AI generation failed on the provider. No credits were charged.");
@@ -349,28 +311,8 @@ export default function AIImagePage() {
                 placeholder="Describe the image you want to create. Be as detailed as possible for best results."
               ></textarea>
 
-              <div className="flex flex-wrap gap-2 mt-4 shrink-0">
-                <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-low border border-surface-border/60 rounded-xl text-xs font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-95" style={{ fontFamily: 'Geist, sans-serif' }}>
-                  <Icon name="image" className="text-base" /> Add image(s)
-                </button>
-                <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
-              </div>
-
-              {images.length > 0 && (
-                <div className="flex flex-wrap gap-3 mt-4 shrink-0">
-                  {images.map((img, i) => (
-                    <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-surface-border group">
-                      <img src={img} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
-                      <button onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Icon name="close" className="text-xs text-white" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelSelector label="Model" providers={buildImageProviders(imageModels, pricing, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => { return calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1); }} compact />
+                <ModelSelector label="Model" providers={buildImageProviders(imageModels, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} compact />
 
                 <div className="grid grid-cols-3 gap-2">
                   <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
@@ -388,7 +330,7 @@ export default function AIImagePage() {
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
                     <><Icon name="auto_awesome" className="text-sm" /> Generate Image {(() => {
-                      const c = calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, imageCount);
+                      const c = calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, imageCount, creditSettings);
                       return <span className="text-yellow-300/90">({c} credit{c !== 1 ? "s" : ""})</span>;
                     })()}</>
                   )}

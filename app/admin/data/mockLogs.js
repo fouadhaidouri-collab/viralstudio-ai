@@ -3,7 +3,7 @@ export const mockLogs = [
   { id: 'log_002', action: 'user_generation', type: 'user', user_id: 'usr_002', admin_id: null, severity: 'info', details: 'Sarah Johnson generated AI Video (3 credits)', created_at: '2026-06-20T10:00:00Z' },
   { id: 'log_003', action: 'credit_purchase', type: 'credit', user_id: 'usr_003', admin_id: null, severity: 'info', details: 'Michael Chen purchased 5000 credits', created_at: '2026-06-19T00:00:00Z' },
   { id: 'log_004', action: 'payment_received', type: 'payment', user_id: 'usr_008', admin_id: null, severity: 'info', details: 'Anna Martinez paid $79 for Pro plan', created_at: '2026-06-12T07:00:00Z' },
-  { id: 'log_005', action: 'api_failure', type: 'api', user_id: null, admin_id: null, severity: 'error', details: 'FAL API timeout on veo3.1/fast - request req_abc123', created_at: '2026-06-20T10:05:00Z' },
+  { id: 'log_005', action: 'api_failure', type: 'api', user_id: null, admin_id: null, severity: 'error', details: 'Renderful API timeout on kling-v3 - request req_abc123', created_at: '2026-06-20T10:05:00Z' },
   { id: 'log_006', action: 'model_error', type: 'model', user_id: 'usr_003', admin_id: null, severity: 'error', details: 'Kling 1.5 model unavailable - returned 503', created_at: '2026-06-19T14:00:00Z' },
   { id: 'log_007', action: 'user_suspended', type: 'admin', user_id: 'usr_005', admin_id: 'usr_001', severity: 'warning', details: 'James Rodriguez suspended by Alex Virale - TOS violation', created_at: '2026-06-15T09:00:00Z' },
   { id: 'log_008', action: 'credit_refund', type: 'credit', user_id: 'usr_005', admin_id: 'usr_015', severity: 'info', details: 'Refunded 3 credits to James Rodriguez - failed generation', created_at: '2026-06-17T00:00:00Z' },

@@ -107,7 +107,7 @@ export default function AdminModulesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">AI Modules</h1>
-            <p className="text-sm text-on-surface-variant mt-1">Manage fal.ai modules, sync schema and pricing</p>
+            <p className="text-sm text-on-surface-variant mt-1">Manage Renderful modules, sync schema and pricing</p>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setShowAdd(true)} className="px-4 py-2 primary-gradient text-white rounded-lg text-sm font-semibold hover:brightness-110 transition-all">
@@ -242,7 +242,7 @@ export default function AdminModulesPage() {
                   </div>
                   <div className="bg-surface-container-low rounded-lg p-3">
                     <span className="text-on-surface-variant">Provider</span>
-                    <div className="mt-1">{selectedModule.provider || "fal.ai"}</div>
+                    <div className="mt-1">{selectedModule.provider || "Renderful"}</div>
                   </div>
                   <div className="bg-surface-container-low rounded-lg p-3">
                     <span className="text-on-surface-variant">Category</span>

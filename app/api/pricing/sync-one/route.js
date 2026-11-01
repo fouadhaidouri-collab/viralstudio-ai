@@ -1,4 +1,4 @@
-import { fetchFalModelPricing, saveProviderPrice, recalculateModuleCreditPrice, saveModuleCreditPrice, getCreditSettings } from "@/lib/pricing";
+import { fetchRenderfulModelPricing, saveProviderPrice, recalculateModuleCreditPrice, saveModuleCreditPrice, getCreditSettings } from "@/lib/pricing";
 
 export async function POST(request) {
   const { endpoint_id, module_id } = await request.json();
@@ -7,7 +7,7 @@ export async function POST(request) {
     return Response.json({ error: "Missing endpoint_id" }, { status: 400 });
   }
 
-  const providerResult = await fetchFalModelPricing(endpoint_id);
+  const providerResult = await fetchRenderfulModelPricing(endpoint_id);
 
   if (!providerResult.success) {
     return Response.json({ error: providerResult.error || "Sync failed" }, { status: 500 });

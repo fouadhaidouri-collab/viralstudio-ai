@@ -21,7 +21,7 @@ export const mockModels = [
   {
     id: 'mdl_nanobanana',
     name: 'NanoBanana',
-    provider: 'FAL.ai',
+    provider: 'Renderful',
     api_model_id: 'fal-ai/nanobanana',
     tool_category: 'Image Lab',
     version: '2.0',

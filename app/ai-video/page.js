@@ -38,7 +38,8 @@ const secFromDuration = (d) => {
   return isNaN(n) ? BASE_DURATION_SEC : n;
 };
 const durationMultiplier = (d) => secFromDuration(d) / BASE_DURATION_SEC;
-const resolutionMultiplier = (r) => r === "1080p" ? 1.5 : r === "4k" ? 2.5 : 1;
+const resolutionMultiplier = (r) =>
+  r === "4k" ? 2.5 : r === "2K" ? 2.0 : r === "1080p" ? 1.5 : 1;
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
 
@@ -52,34 +53,48 @@ const calcModelCredits = (unitPrice, quantity, settings, modelMarkup) => {
   return Math.max(credits, minCredits);
 };
 
+function compressImage(file, maxSide = 1024, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read that image."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Unsupported image format."));
+      img.onload = () => {
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const width = Math.max(1, Math.round(img.width * scale));
+        const height = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 const familyProviders = {
-  Veo: "OpenAI",
-  Grok: "xAI",
-  Seedance: "ByteDance",
   Kling: "Kling",
-  Runway: "Runway",
-  Luma: "Luma",
-  Pika: "Pika",
+  Seedance: "ByteDance",
   Hailuo: "Hailuo",
-  "Happy Horse": "Alibaba",
+  Alibaba: "Alibaba",
 };
 
 const familyMeta = {
-  Veo: { icon: "videocam", color: "#4285F4" },
-  Grok: { icon: "psychology", color: "#06b6d4" },
   Seedance: { icon: "directions_run", color: "#f59e0b" },
   Kling: { icon: "smart_display", color: "#ef4444" },
-  Runway: { icon: "run_circle", color: "#10b981" },
-  Luma: { icon: "flare", color: "#8b5cf6" },
-  Pika: { icon: "pets", color: "#ec4899" },
   Hailuo: { icon: "waves", color: "#3b82f6" },
-  "Happy Horse": { icon: "emoji_nature", color: "#14b8a6" },
+  Alibaba: { icon: "emoji_nature", color: "#14b8a6" },
 };
 
-function buildVideoFamilies(models, pricingMap, duration, resolution, creditSettings) {
+function buildVideoFamilies(models, duration, resolution, creditSettings) {
   const cheapest = models.slice().sort((a, b) => {
-    const pa = pricingMap?.[a.label]?.unitPrice ?? 0.05;
-    const pb = pricingMap?.[b.label]?.unitPrice ?? 0.05;
+    const pa = a.unitPrice ?? 0.05;
+    const pb = b.unitPrice ?? 0.05;
     return pa - pb;
   })[0];
   const fastest = models.slice().sort((a, b) => {
@@ -174,62 +189,31 @@ export default function AIVideoPage() {
   const [generating, setGenerating] = useState(false);
   const [videoUrls, setVideoUrls] = useState([]);
   const [videoError, setVideoError] = useState(null);
-  const [pricing, setPricing] = useState({});
   const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.01, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
   const credits = useLiveCredits();
   const [showCreditModal, setShowCreditModal] = useState(false);
   const [neededCredits, setNeededCredits] = useState(0);
-  const [modelCapabilities, setModelCapabilities] = useState({});
   const fileInputRef = useRef();
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
   const scrollActivated = useScrollActivated();
 
-  const caps = videoModelCapabilities[model.label] || videoModelCapabilities["Veo 3.1 Fast"];
+  const caps = videoModelCapabilities[model.label] || videoModelCapabilities[videoModels[0].label];
   const defaultDurations = caps.durations.length > 0 ? caps.durations : ["5 seconds"];
-  const realCaps = modelCapabilities[model.fal_model] || null;
-  const availableAspectRatios = useMemo(() => {
-    const mc = modelCapabilities[model.fal_model];
-    const realOpts = mc?.schema?.options?.aspect_ratio;
-    if (realOpts && Array.isArray(realOpts)) {
-      const normalized = realOpts.map(o => o.replace(/\s+/g, ""));
-      return videoAspectRatios.filter(ar => normalized.includes(ar.label.replace(/\s+/g, "")));
-    }
-    return videoAspectRatios.filter(ar => caps.aspectRatios.includes(ar.label));
-  }, [modelCapabilities, model.fal_model, caps]);
-  const availableResolutions = useMemo(() => {
-    const mc = modelCapabilities[model.fal_model];
-    const realOpts = mc?.schema?.options?.["resolution"] || mc?.schema?.options?.["video_resolution"] || mc?.schema?.options?.["output_resolution"];
-    if (realOpts && Array.isArray(realOpts)) return videoResolutions.filter(r => realOpts.includes(r));
-    return videoResolutions.filter(r => caps.resolutions.includes(r));
-  }, [modelCapabilities, model.fal_model, caps]);
-  const availableDurations = useMemo(() => {
-    const mc = modelCapabilities[model.fal_model];
-    const realOpts = mc?.schema?.options?.["duration"] || mc?.schema?.options?.["num_seconds"] || mc?.schema?.options?.["duration_s"] || mc?.schema?.options?.["duration_seconds"];
-    if (realOpts && Array.isArray(realOpts)) {
-      const mapped = realOpts.map(v => {
-        // fal.ai returns "Xs" format (e.g. "8s"), convert to "X seconds"
-        const secMatch = String(v).match(/^(\d+)s?$/);
-        return secMatch ? `${secMatch[1]} seconds` : `${v} seconds`;
-      });
-      return mapped;
-    }
-    if (realOpts && typeof realOpts === "object" && realOpts.type === "number") return defaultDurations;
-    return caps.durations;
-  }, [modelCapabilities, model.fal_model, caps]);
+  const availableAspectRatios = videoAspectRatios.filter(ar => caps.aspectRatios.includes(ar.label));
+  const availableResolutions = videoResolutions.filter(r => caps.resolutions.includes(r));
+  const availableDurations = caps.durations;
   const currentConfig = modelConfigs[model.label] || { aspectRatio: videoAspectRatios[0], resolution: videoResolutions[0], duration: defaultDurations[0] };
   const updateConfig = (key, value) => {
     setModelConfigs(prev => ({ ...prev, [model.label]: { ...(prev[model.label] || {}), [key]: value } }));
   };
-  const providers = useMemo(() => buildVideoFamilies(videoModels, pricing, currentConfig.duration, currentConfig.resolution, creditSettings), [pricing, currentConfig.duration, currentConfig.resolution, creditSettings]);
+  const providers = useMemo(() => buildVideoFamilies(videoModels, currentConfig.duration, currentConfig.resolution, creditSettings), [currentConfig.duration, currentConfig.resolution, creditSettings]);
   const calcCredits = (m) => {
-    const p = pricing?.[m.label];
-    return calcModelCredits(p?.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings, m.markup);
+    return calcModelCredits(m.unitPrice ?? 0.05, durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution), creditSettings, m.markup);
   };
   const calcStartingCredits = (m) => {
-    const p = pricing?.[m.label];
     const startDur = m.options?.duration?.[0] || "5 seconds";
     const q = durationMultiplier(startDur) * resolutionMultiplier("720p");
-    return calcModelCredits(p?.unitPrice ?? 0.05, q, creditSettings, m.markup);
+    return calcModelCredits(m.unitPrice ?? 0.05, q, creditSettings, m.markup);
   };
 
   useEffect(() => {
@@ -247,23 +231,6 @@ export default function AIVideoPage() {
   }, []);
 
   useEffect(() => {
-    const ids = videoModels.map(m => m.fal_model).join(",");
-    fetch(`/api/model-pricing?endpoint_ids=${encodeURIComponent(ids)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.prices) {
-          const m = {};
-          for (const mod of videoModels) {
-            if (data.prices[mod.fal_model]) {
-              m[mod.label] = data.prices[mod.fal_model];
-            } else {
-              m[mod.label] = { unitPrice: null, pricingUnavailable: true };
-            }
-          }
-          setPricing(m);
-        }
-      })
-      .catch(() => {});
     fetch("/api/pricing/settings")
       .then((r) => r.json())
       .then((data) => {
@@ -271,19 +238,6 @@ export default function AIVideoPage() {
       })
       .catch(() => {});
   }, []);
-
-  // Fetch real fal.ai schema + pricing when model changes
-  useEffect(() => {
-    if (!model.fal_model) return;
-    const key = model.fal_model;
-    if (modelCapabilities[key]?.fetched) return;
-    fetch(`/api/fal/model-capabilities?endpoint_id=${encodeURIComponent(key)}`)
-      .then(r => r.json())
-      .then(data => {
-        setModelCapabilities(prev => ({ ...prev, [key]: { ...data, fetched: true } }));
-      })
-      .catch(() => {});
-  }, [model.fal_model]);
 
   useEffect(() => {
     const c = videoModelCapabilities[model.label];
@@ -316,15 +270,21 @@ export default function AIVideoPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.label]);
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setImages((prev) => [...prev, ev.target.result]);
-      };
-      reader.readAsDataURL(file);
-    });
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setVideoError("Upload a JPG, PNG, or WebP image.");
+      return;
+    }
+    try {
+      const dataUrl = await compressImage(file);
+      setImages([dataUrl]);
+      setVideoError(null);
+    } catch (err) {
+      setVideoError(err.message || "Could not prepare that image.");
+    }
   };
 
   const removeImage = (idx) => {
@@ -332,7 +292,7 @@ export default function AIVideoPage() {
   };
 
   const generateOne = async () => {
-    const modelId = model.fal_model;
+    const modelId = model.model_id;
     if (!modelId) throw new Error(`Unknown model: ${model.label}`);
 
     const subRes = await fetch("/api/generate-video", {
@@ -341,10 +301,10 @@ export default function AIVideoPage() {
       body: JSON.stringify({
         prompt,
         modelId,
-        aspectRatio: currentConfig.aspectRatio?.label || "16:9",
+        aspectRatio: currentConfig.aspectRatio?.label || null,
         resolution: currentConfig.resolution,
         duration: currentConfig.duration,
-
+        image: images[0] || null,
       }),
     });
 
@@ -377,11 +337,14 @@ export default function AIVideoPage() {
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
+    if (model.requiresImage && images.length === 0) {
+      setVideoError("Upload a photo first. These models animate a still image.");
+      return;
+    }
     if (!isAuthenticated) { router.push("/login"); return; }
 
-    const p = pricing?.[model.label];
     const quantity = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
-    const needed = calcModelCredits(p?.unitPrice ?? 0.05, quantity, creditSettings);
+    const needed = calcModelCredits(model.unitPrice ?? 0.05, quantity, creditSettings, model.markup);
     if (needed != null && credits < needed) {
       setNeededCredits(needed);
       setShowCreditModal(true);
@@ -402,7 +365,7 @@ export default function AIVideoPage() {
         fetch("/api/generations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "AI Video", provider: prov, model: model.fal_model, prompt, output_url: url, thumbnail_url: url, credits_used: 0 }),
+          body: JSON.stringify({ type: "AI Video", provider: prov, model: model.model_id, prompt, output_url: url, thumbnail_url: url, credits_used: 0 }),
         }).catch(() => {});
       }
     } catch (err) {
@@ -492,18 +455,19 @@ export default function AIVideoPage() {
                 placeholder="Describe the video you want to create. Be as detailed as possible for best results."
               ></textarea>
 
-              <div className="flex flex-wrap gap-2 mt-4 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 mt-4 shrink-0">
                 <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-low border border-surface-border/60 rounded-xl text-xs font-medium hover:bg-surface-container-high hover:border-primary/30 transition-all duration-200 active:scale-95" style={{ fontFamily: 'Geist, sans-serif' }}>
-                  <Icon name="image" className="text-base" /> Add image(s)
+                  <Icon name="image" className="text-base" /> {images.length > 0 ? "Replace photo" : "Upload photo"}
                 </button>
-                <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                <span className="text-[11px] text-on-surface-variant/70">Required · JPG, PNG or WebP</span>
               </div>
 
               {images.length > 0 && (
                 <div className="flex flex-wrap gap-3 mt-4 shrink-0">
                   {images.map((img, i) => (
                     <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-surface-border group">
-                      <img src={img} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
+                      <img src={img} alt="Uploaded reference" className="w-full h-full object-cover" />
                       <button onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Icon name="close" className="text-xs text-white" />
                       </button>
@@ -524,7 +488,7 @@ export default function AIVideoPage() {
                 </div>
                 <button
                   onClick={handleGenerate}
-                  disabled={generating || !prompt.trim()}
+                  disabled={generating || !prompt.trim() || (model.requiresImage && images.length === 0)}
                   className="w-full primary-gradient text-white font-semibold py-3 rounded-xl shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.97] hover:translate-y-[-1px] disabled:opacity-60 disabled:cursor-not-allowed text-sm"
                   style={{ fontFamily: 'Geist, sans-serif' }}
                 >
@@ -532,9 +496,8 @@ export default function AIVideoPage() {
                     <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Generating...</>
                   ) : (
                     <><Icon name="auto_videocam" className="text-sm" /> Generate Video {(() => {
-                      const unitPrice = realCaps?.pricing?.unitPrice ?? pricing?.[model.label]?.unitPrice ?? 0.05;
                       const qty = videoCount * durationMultiplier(currentConfig.duration) * resolutionMultiplier(currentConfig.resolution);
-                      const c = calcModelCredits(unitPrice, qty, creditSettings, model.markup);
+                      const c = calcModelCredits(model.unitPrice ?? 0.05, qty, creditSettings, model.markup);
                       return <span className="text-yellow-300/90 font-semibold">({c} credits)</span>;
                     })()}</>
                   )}
@@ -558,7 +521,7 @@ export default function AIVideoPage() {
                     loop
                     playsInline
                     className="relative z-10 max-w-full max-h-full object-contain rounded-xl"
-                    style={{ aspectRatio: (currentConfig.aspectRatio?.label || "16:9").replace(":", "/") }}
+                    style={{ aspectRatio: (currentConfig.aspectRatio?.label || "9:16").replace(":", "/") }}
                   />
                 ) : (
                   <div className="relative z-10 flex flex-col items-center">
@@ -592,7 +555,7 @@ export default function AIVideoPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {videoUrls.map((url, i) => (
                   <div key={i} className="glass-card rounded-lg overflow-hidden border-surface-border">
-                    <video src={url} controls className="w-full object-contain bg-black" style={{ aspectRatio: (currentConfig.aspectRatio?.label || "16:9").replace(":", "/") }} />
+                    <video src={url} controls className="w-full object-contain bg-black" style={{ aspectRatio: (currentConfig.aspectRatio?.label || "9:16").replace(":", "/") }} />
                     <div className="p-2 flex items-center justify-between">
                       <span className="text-[10px] font-medium text-on-surface-variant">Video {i + 1}</span>
                       <a href={url} download className="text-primary text-[10px] flex items-center gap-1 hover:underline"><Icon name="download" className="text-xs" /> DL</a>

@@ -1,4 +1,4 @@
-import { getFalKey } from "@/lib/fal-key";
+import { getRenderfulKey, RENDERFUL_BASE } from "@/lib/renderful";
 import fs from "fs";
 import path from "path";
 
@@ -21,6 +21,15 @@ function writeCacheEntry(eid, entry) {
   } catch {}
 }
 
+function priceForModel(model) {
+  const min = Number(model?.cost?.min);
+  if (!Number.isFinite(min)) return null;
+  if (model.type === "image-to-video" || model.type === "text-to-video") {
+    return { unitPrice: min / 5, unit: "second" };
+  }
+  return { unitPrice: min, unit: "image" };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const endpointIds = searchParams.get("endpoint_ids");
@@ -29,39 +38,60 @@ export async function GET(request) {
     return Response.json({ error: "Missing endpoint_ids" }, { status: 400 });
   }
 
-  const keyResult = await getFalKey();
+  const keyResult = await getRenderfulKey();
   if (!keyResult.hasKey) {
     return Response.json({ success: false, setupRequired: true, error: keyResult.error }, { status: 200 });
   }
 
-  const cache = readCache();
   const ids = endpointIds.split(",").filter(Boolean);
+  const cache = readCache();
   const pricingMap = {};
 
-  for (const eid of ids) {
-    // Try live fetch first
-    try {
-      const url = `https://api.fal.ai/v1/models/pricing?endpoint_id=${encodeURIComponent(eid)}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Key ${keyResult.key}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.prices && data.prices.length > 0) {
-          const p = data.prices[0];
-          if (p.unit_price != null) {
-            const entry = { unitPrice: p.unit_price, unit: p.unit, currency: p.currency };
-            pricingMap[eid] = entry;
-            writeCacheEntry(eid, { unit_price: p.unit_price, unit: p.unit, currency: p.currency, pricing_unavailable: false });
-            continue;
-          }
-        }
-      }
-    } catch {}
+  let catalog = null;
+  try {
+    const res = await fetch(`${RENDERFUL_BASE}/models`, {
+      headers: { Authorization: `Bearer ${keyResult.key}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      catalog = Array.isArray(data.models) ? data.models : [];
+    }
+  } catch {}
 
-    // Fallback to cache
-    if (cache[eid] && cache[eid].unit_price != null) {
-      pricingMap[eid] = { unitPrice: cache[eid].unit_price, unit: cache[eid].unit, currency: cache[eid].currency || "USD" };
+  const byId = new Map();
+  if (catalog) {
+    for (const model of catalog) {
+      if (!byId.has(model.id)) byId.set(model.id, model);
+    }
+  }
+
+  for (const eid of ids) {
+    const model = byId.get(eid);
+    const live = model ? priceForModel(model) : null;
+
+    if (live) {
+      const entry = {
+        endpoint_id: eid,
+        unit_price: live.unitPrice,
+        unit: live.unit,
+        currency: "USD",
+        pricing_unavailable: false,
+        provider: "renderful",
+      };
+      writeCacheEntry(eid, entry);
+      pricingMap[eid] = {
+        unitPrice: live.unitPrice,
+        unit: live.unit,
+        pricingUnavailable: false,
+        lastSyncedAt: entry.last_synced_at,
+      };
+    } else if (cache[eid]) {
+      pricingMap[eid] = {
+        unitPrice: cache[eid].unit_price ?? null,
+        unit: cache[eid].unit || null,
+        pricingUnavailable: cache[eid].unit_price == null,
+        lastSyncedAt: cache[eid].last_synced_at || null,
+      };
     } else {
       pricingMap[eid] = { unitPrice: null, pricingUnavailable: true };
     }

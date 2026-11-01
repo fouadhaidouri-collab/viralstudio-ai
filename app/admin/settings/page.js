@@ -8,7 +8,7 @@ import SettingsSplash from "../components/SettingsSplash";
 const defaultSettings = {
   general: { app_name: "", logo: null, default_language: "en", default_currency: "USD", maintenance_mode: false, signup_enabled: true },
   credits: { default_credits: 0, minimum_purchase: 10, credit_value: 0.05, auto_refund_failed: true },
-  api: { fal_ai: "", openrouter: "", elevenlabs: "", stripe: "", paypal: "" },
+  api: { renderful: "", openrouter: "", elevenlabs: "", stripe: "", paypal: "" },
   storage: { provider: "Supabase", max_upload_size: 500, allowed_file_types: "mp4,mov,avi,jpg,png,gif,mp3,wav", auto_delete_old: false },
   branding: { primary_color: "#a855f7", accent_color: "#22d3ee", button_style: "gradient", dark_mode_default: true, arabic_rtl_enabled: true },
 };
@@ -228,7 +228,7 @@ export default function AdminSettingsPage() {
         <SettingCard title="API Settings" description="Configure third-party API integrations" icon="key">
           <div className="space-y-3">
             {[
-              { key: "fal_ai", label: "FAL.ai" },
+              { key: "renderful", label: "Renderful.ai" },
               { key: "openrouter", label: "OpenRouter" },
               { key: "elevenlabs", label: "ElevenLabs" },
               { key: "stripe", label: "Stripe" },

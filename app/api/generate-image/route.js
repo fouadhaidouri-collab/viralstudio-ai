@@ -1,109 +1,119 @@
-import { getFalKey } from "@/lib/fal-key";
-
-const FAL_BASE = "https://queue.fal.run";
+import { imageAspectRatios, imageModels } from "@/app/lib/capabilities";
+import { getGeneration, normalizeStatus, outputUrl, submitGeneration } from "@/lib/renderful";
 
 const PROVIDER_UNAVAILABLE =
   "AI generation service is temporarily unavailable. Please try again later.";
 
+const MODEL_BY_ID = Object.fromEntries(imageModels.map((m) => [m.model_id, m]));
+const ASPECT_BY_LABEL = Object.fromEntries(
+  imageAspectRatios.map((ar) => [ar.label, ar.api || ar.label])
+);
+
+function normalizeAspectRatio(value) {
+  if (!value) return null;
+  if (ASPECT_BY_LABEL[value]) return ASPECT_BY_LABEL[value];
+  const text = String(value);
+  const match = text.match(/(\d+)\s*:\s*(\d+)/);
+  return match ? `${match[1]}:${match[2]}` : null;
+}
+
+function buildImagePayload({ model, prompt, aspectRatio, resolution }) {
+  const payload = {
+    type: "text-to-image",
+    model: model.model_id,
+    prompt,
+  };
+
+  const ratio = normalizeAspectRatio(aspectRatio);
+  if (ratio) payload.aspect_ratio = ratio;
+
+  if (resolution) payload.resolution = String(resolution).toLowerCase();
+
+  return payload;
+}
+
 export async function POST(request) {
-  const keyResult = await getFalKey();
-  if (!keyResult.hasKey) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid request." }, { status: 400 });
+  }
+
+  const { prompt, modelId, aspectRatio, resolution } = body || {};
+  const model = MODEL_BY_ID[modelId];
+
+  if (!model) {
+    return Response.json({ error: "Unsupported model." }, { status: 400 });
+  }
+  if (!prompt || !String(prompt).trim()) {
+    return Response.json({ error: "Write a prompt first." }, { status: 400 });
+  }
+
+  const payload = buildImagePayload({
+    model,
+    prompt: String(prompt).trim(),
+    aspectRatio,
+    resolution,
+  });
+
+  let data;
+  try {
+    data = await submitGeneration(payload);
+  } catch (err) {
+    if (err.code === "NO_KEY") {
+      return Response.json(
+        { error: "Generation service is not configured yet.", setupRequired: true },
+        { status: 503 }
+      );
+    }
+    console.error("generate-image Renderful submit error:", err.message);
     return Response.json(
-      { error: "Generation service is not configured yet.", setupRequired: true },
-      { status: 503 }
+      { error: err.status && err.status < 500 ? err.message : PROVIDER_UNAVAILABLE },
+      { status: err.status && err.status < 500 ? 400 : 503 }
     );
   }
 
-  const { prompt, modelId, aspectRatio, resolution } = await request.json();
-
-  const aspectMap = {
-    "Square 1:1": "1:1",
-    "Portrait 4:5": "4:5",
-    "Landscape 16:9": "16:9",
-    "Portrait 9:16": "9:16",
-  };
-
-  const resMap = { "4k": 2160, "1080p": 1080, "1080": 1080, "720p": 720, "720": 720 };
-  const resNum = resMap[resolution] || 720;
-  const ar = aspectMap[aspectRatio] || "1:1";
-  const [aw, ah] = ar.split(":").map(Number);
-  const isLandscape = aw > ah;
-  const w = isLandscape ? Math.round(resNum * (aw / ah)) : resNum;
-  const h = isLandscape ? resNum : Math.round(resNum * (ah / aw));
-
-  const payload = {
-    prompt,
-    aspect_ratio: ar,
-    image_size: { width: w, height: h },
-  };
-
-  let res;
-  try {
-    res = await fetch(`${FAL_BASE}/${modelId}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Key ${keyResult.key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.error("generate-image submit network error:", err.message);
-    return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
-  }
-
-  if (!res.ok) {
-    const text = (await res.text()).slice(0, 400);
-    console.error(`generate-image fal error ${res.status}: ${text}`);
-    return Response.json({ error: PROVIDER_UNAVAILABLE, provider_status: res.status }, { status: 503 });
-  }
-
-  const data = await res.json();
-  return Response.json({ requestId: data.request_id, modelId });
+  return Response.json({ requestId: data.id, modelId: model.model_id });
 }
 
 export async function GET(request) {
-  const keyResult = await getFalKey();
-  if (!keyResult.hasKey) {
-    return Response.json(
-      { error: "Generation service is not configured yet.", setupRequired: true },
-      { status: 503 }
-    );
-  }
-
   const { searchParams } = new URL(request.url);
   const requestId = searchParams.get("requestId");
-  const modelId = searchParams.get("modelId");
 
-  if (!requestId || !modelId) {
-    return Response.json({ error: "Missing requestId or modelId" }, { status: 400 });
+  if (!requestId) {
+    return Response.json({ error: "Missing requestId." }, { status: 400 });
   }
 
-  let statusRes;
+  let data;
   try {
-    statusRes = await fetch(`${FAL_BASE}/${modelId}/requests/${requestId}/status`, {
-      headers: { Authorization: `Key ${keyResult.key}` },
-    });
+    data = await getGeneration(requestId);
   } catch (err) {
-    console.error("generate-image status network error:", err.message);
+    if (err.code === "NO_KEY") {
+      return Response.json(
+        { error: "Generation service is not configured yet.", setupRequired: true },
+        { status: 503 }
+      );
+    }
+    console.error("generate-image Renderful status error:", err.message);
     return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
   }
 
-  if (!statusRes.ok) {
-    const text = (await statusRes.text()).slice(0, 400);
-    console.error(`generate-image status error ${statusRes.status}: ${text}`);
-    return Response.json({ error: PROVIDER_UNAVAILABLE, provider_status: statusRes.status }, { status: 503 });
-  }
-
-  const statusData = await statusRes.json();
-
-  if (statusData.status === "COMPLETED") {
-    const resultRes = await fetch(`${FAL_BASE}/${modelId}/requests/${requestId}`, {
-      headers: { Authorization: `Key ${keyResult.key}` },
+  const status = normalizeStatus(data.status);
+  if (status === "COMPLETED") {
+    return Response.json({
+      status,
+      imageUrl: outputUrl(data),
+      outputs: data.outputs || [],
     });
-    const result = await resultRes.json();
-    return Response.json({ status: "COMPLETED", imageUrl: result.image?.url || result.image_url || result.images?.[0]?.url, ...result });
   }
 
-  return Response.json({ status: statusData.status });
+  if (status === "FAILED" || status === "CANCELLED") {
+    return Response.json({
+      status,
+      error: data.error || data.message || "The AI generation failed on the provider.",
+    });
+  }
+
+  return Response.json({ status, progress: data.progress ?? null });
 }
