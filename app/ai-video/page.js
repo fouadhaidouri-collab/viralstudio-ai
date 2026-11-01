@@ -330,7 +330,7 @@ export default function AIVideoPage() {
       if (statusData.status === "COMPLETED") {
         return statusData.videoUrl;
       } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
-        throw new Error("The AI generation failed on the provider. No credits were charged.");
+        throw new Error(statusData.error || "The AI generation failed on the provider. No credits were charged.");
       }
     }
   };
@@ -485,6 +485,11 @@ export default function AIVideoPage() {
                   <Dropdown label="Duration" value={currentConfig.duration} options={availableDurations} onChange={(v) => updateConfig("duration", v)} />
                   <Dropdown label="Quantity" value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} />
                 </div>
+                {availableAspectRatios.length === 0 && (
+                  <p className="text-[10px] text-on-surface-variant/60 leading-relaxed">
+                    Aspect ratio follows the uploaded photo for this model.
+                  </p>
+                )}
                 <button
                   onClick={handleGenerate}
                   disabled={generating || !prompt.trim() || (model.requiresImage && images.length === 0)}
