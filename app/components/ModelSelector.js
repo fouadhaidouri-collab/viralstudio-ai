@@ -15,6 +15,7 @@ const logoMap = {
   Grok: "grok.png",
   Seedance: "seedance.jpg",
   Kling: "kling.png",
+  Alibaba: "alibaba.svg",
   Runway: "runway.jpg",
   Luma: "luma.jpg",
   Pika: "pika.png",
