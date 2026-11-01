@@ -460,7 +460,6 @@ export default function AIVideoPage() {
                   <Icon name="image" className="text-base" /> {images.length > 0 ? "Replace photo" : "Upload photo"}
                 </button>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                <span className="text-[11px] text-on-surface-variant/70">Required · JPG, PNG or WebP</span>
               </div>
 
               {images.length > 0 && (
