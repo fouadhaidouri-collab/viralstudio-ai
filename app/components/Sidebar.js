@@ -95,9 +95,13 @@ function SidebarContent() {
 
           if (item.children) {
             return (
-              <div key={item.href}>
+              <div
+                key={item.href}
+                onMouseEnter={() => setOpenMegaMenu(item.href)}
+                onMouseLeave={() => setOpenMegaMenu(null)}
+              >
                 <button
-                  onClick={() => setOpenMegaMenu(openMegaMenu === item.href ? null : item.href)}
+                  onClick={() => setOpenMegaMenu(item.href)}
                   aria-expanded={openMegaMenu === item.href}
                   className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-200 active:scale-[0.97] ${
                     isActive || openMegaMenu === item.href
@@ -110,7 +114,7 @@ function SidebarContent() {
                   <Icon name={openMegaMenu === item.href ? "chevron-left" : "chevron-right"} size={16} />
                 </button>
                 {openMegaMenu === item.href && (
-                  <div className="fixed left-[272px] top-12 z-[60] w-[min(520px,calc(100vw-288px))] rounded-2xl border border-white/10 bg-[#171619]/95 p-5 shadow-2xl backdrop-blur-xl">
+                  <div className="fixed left-64 top-12 z-[60] w-[min(520px,calc(100vw-288px))] rounded-2xl border border-white/10 bg-[#171619]/95 p-5 shadow-2xl backdrop-blur-xl">
                     <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">AI Tools</p>
