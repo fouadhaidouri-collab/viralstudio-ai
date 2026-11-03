@@ -926,7 +926,7 @@ export const VIDEO_CATALOG = [
         audioMode: AUDIO_SILENT,
         audioMultiplier: 1,
         audioField: null,
-        imageField: "image",
+        imageField: "image_url",
         requiresImage: true,
         requiresPrompt: false,
         supportsLastFrame: false,
