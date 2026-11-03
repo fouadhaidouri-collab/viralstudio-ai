@@ -1,4 +1,7 @@
-import { getVideoModel } from "@/app/lib/videoCatalog";
+import { getVideoModel, estimateCredits } from "@/app/lib/videoCatalog";
+import { auth } from "@/app/lib/auth";
+import { get, run, batch } from "@/lib/db";
+import { getCreditSettings, getUserCredits } from "@/lib/pricing";
 import {
   getGeneration,
   normalizeStatus,
@@ -112,6 +115,9 @@ export async function POST(request) {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
 
+  const session = await auth();
+  if (!session?.user?.id) return Response.json({ error: "Please sign in to generate a video." }, { status: 401 });
+
   const {
     mode,
     prompt,
@@ -167,6 +173,18 @@ export async function POST(request) {
     );
   }
 
+  const settings = await getCreditSettings();
+  const chargeAmount = estimateCredits(model, settings, { duration, resolution, audio: audio !== false });
+  const userId = session.user.id;
+  const currentCredits = await getUserCredits(userId);
+  if ((currentCredits.balance_credits || 0) < chargeAmount) {
+    return Response.json({ error: "You do not have enough credits for this video. Please add credits and try again.", balance: currentCredits.balance_credits || 0, required: chargeAmount }, { status: 402 });
+  }
+  await run(`CREATE TABLE IF NOT EXISTS video_generation_billing (
+    request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending', model_id TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
   const payload = buildVideoPayload({
     model,
     prompt,
@@ -195,6 +213,13 @@ export async function POST(request) {
     );
   }
 
+  if (!data?.id) return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
+  try {
+    await run("INSERT INTO video_generation_billing (request_id, user_id, amount, status, model_id) VALUES (?, ?, ?, 'pending', ?)", [String(data.id), userId, chargeAmount, model.model_id]);
+  } catch (err) {
+    console.error("Video billing record could not be saved:", err.message);
+    return Response.json({ error: "We could not safely track this generation. Please contact support before retrying." }, { status: 503 });
+  }
   return Response.json({ requestId: data.id, modelId: model.model_id });
 }
 
@@ -202,10 +227,16 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const requestId = searchParams.get("requestId");
 
-  if (!requestId) {
-    return Response.json({ error: "Missing requestId." }, { status: 400 });
-  }
-
+  if (!requestId) return Response.json({ error: "Missing requestId." }, { status: 400 });
+  const session = await auth();
+  if (!session?.user?.id) return Response.json({ error: "Please sign in to continue." }, { status: 401 });
+  await run(`CREATE TABLE IF NOT EXISTS video_generation_billing (
+    request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending', model_id TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  const billing = await get("SELECT * FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
+  if (!billing) return Response.json({ error: "This generation could not be found." }, { status: 404 });
   let data;
   try {
     data = await getGeneration(requestId);
@@ -222,21 +253,29 @@ export async function GET(request) {
 
   const status = normalizeStatus(data.status);
   if (status === "COMPLETED") {
-    return Response.json({
-      status,
-      videoUrl: outputUrl(data),
-      outputs: data.outputs || [],
-    });
+    const videoUrl = outputUrl(data);
+    if (!videoUrl) return Response.json({ status: "PROCESSING", progress: data.progress ?? null });
+    if (billing.status === "pending") {
+      try {
+        await batch([
+          { sql: "UPDATE video_generation_billing SET status = 'charging' WHERE request_id = ? AND user_id = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM credits WHERE user_id = ? AND current_balance >= ?)", params: [String(requestId), session.user.id, session.user.id, billing.amount] },
+          { sql: "UPDATE credits SET current_balance = current_balance - ?, total_used = total_used + ?, updated_at = datetime('now') WHERE user_id = ? AND EXISTS (SELECT 1 FROM video_generation_billing WHERE request_id = ? AND user_id = ? AND status = 'charging')", params: [billing.amount, billing.amount, session.user.id, String(requestId), session.user.id] },
+          { sql: "INSERT INTO credit_ledger (id, user_id, transaction_id, credits_added, reason) SELECT ?, ?, ?, ?, 'AI Video generation' WHERE EXISTS (SELECT 1 FROM video_generation_billing WHERE request_id = ? AND user_id = ? AND status = 'charging') AND NOT EXISTS (SELECT 1 FROM credit_ledger WHERE transaction_id = ?)", params: [`video_${requestId}`, session.user.id, String(requestId), -billing.amount, String(requestId), session.user.id, String(requestId)] },
+          { sql: "UPDATE video_generation_billing SET status = 'charged' WHERE request_id = ? AND user_id = ? AND status = 'charging'", params: [String(requestId), session.user.id] }
+        ]);
+      } catch (err) {
+        console.error("AI Video credit settlement failed:", err.message);
+        return Response.json({ status, videoUrl, outputs: data.outputs || [], billingError: "Your video is ready, but we could not finalize the credit payment. Please contact support." });
+      }
+    }
+    const finalBilling = await get("SELECT status FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
+    const balance = await getUserCredits(session.user.id);
+    return Response.json({ status, videoUrl, outputs: data.outputs || [], balance: balance.balance_credits || 0,
+      billingError: finalBilling?.status === "pending" ? "Your video is ready, but your balance changed while it was generating. Please add credits and contact support." : null });
   }
 
   if (status === "FAILED" || status === "CANCELLED") {
-    return Response.json({
-      status,
-      error:
-        data.error ||
-        data.message ||
-        "The AI generation failed on the provider.",
-    });
+    return Response.json({ status, error: "The video could not be generated. No credits were charged. Please try again." });
   }
 
   return Response.json({ status, progress: data.progress ?? null });
