@@ -36,7 +36,6 @@ function SidebarContent() {
   const { setMobileOpen } = useSidebar();
   const credits = useLiveCredits();
   const [showAdmin, setShowAdmin] = useState(false);
-  const [openMenus, setOpenMenus] = useState({});
 
   useEffect(() => {
     const host = window.location.hostname;
@@ -51,12 +50,6 @@ function SidebarContent() {
     ];
     routes.forEach((href) => router.prefetch(href));
   }, [router, showAdmin]);
-
-  useEffect(() => {
-    if (pathname.startsWith("/ai-video")) {
-      setOpenMenus((prev) => ({ ...prev, "/ai-video": true }));
-    }
-  }, [pathname]);
 
   const handleNav = () => setMobileOpen(false);
 
@@ -100,16 +93,11 @@ function SidebarContent() {
             (item.children && pathname.startsWith(`${item.href}/`));
 
           if (item.children) {
-            const isOpen = openMenus[item.href] ?? isActive;
+            const isOpen = true;
             return (
               <div key={item.href}>
                 <button
-                  onClick={() =>
-                    setOpenMenus((prev) => ({
-                      ...prev,
-                      [item.href]: !isOpen,
-                    }))
-                  }
+                  onClick={() => router.push(item.href)}
                   className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-200 active:scale-[0.97] ${
                     isActive
                       ? "bg-white/[0.06] text-white"
@@ -120,13 +108,6 @@ function SidebarContent() {
                   <span className="sidebar-link-text flex-1 text-left">
                     {item.label}
                   </span>
-                  <Icon
-                    name="expand_more"
-                    className={`shrink-0 text-on-surface-variant transition-transform duration-200 ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
-                    size={18}
-                  />
                 </button>
                 {isOpen && (
                   <div className="mt-1 ml-4 space-y-1 border-l border-white/10 pl-3">
