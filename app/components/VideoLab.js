@@ -384,7 +384,10 @@ export default function VideoLab({ mode = "image" }) {
   const [generating, setGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [generatedInCurrentRun, setGeneratedInCurrentRun] = useState(0);
   const [videoUrls, setVideoUrls] = useState([]);
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const videoHistoryRef = useRef(null);
   const [videoError, setVideoError] = useState(null);
   const [creditSettings, setCreditSettings] = useState({
     credit_usd_value: 0.01,
@@ -463,11 +466,6 @@ export default function VideoLab({ mode = "image" }) {
     selectedAspectRatio && selectedAspectRatio.includes(":")
       ? selectedAspectRatio
       : null;
-  const previewAspectStyle =
-    aspectLabel && aspectLabel.includes(":")
-      ? { aspectRatio: aspectLabel.replace(":", "/") }
-      : undefined;
-
   const updateConfig = (key, value) => {
     setModelConfigs((prev) => ({
       ...prev,
@@ -498,7 +496,7 @@ export default function VideoLab({ mode = "image" }) {
   useEffect(() => {
     setModel(models[0]);
     setLastFrame(null);
-    setVideoUrls([]);
+    setSelectedVideoIndex(0);
     setVideoError(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
@@ -529,6 +527,28 @@ export default function VideoLab({ mode = "image" }) {
     const p = params.get("prompt");
     if (p) setPrompt(p);
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    fetch("/api/generations")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("History unavailable"))))
+      .then((data) => {
+        if (cancelled) return;
+        const savedVideos = (Array.isArray(data.data) ? data.data : [])
+          .filter((item) => item.type === "AI Video" && item.output_url)
+          .map((item) => item.output_url);
+        const uniqueVideos = [...new Set(savedVideos)];
+        setVideoUrls((current) => {
+          const currentSet = new Set(current);
+          return [...uniqueVideos.filter((url) => !currentSet.has(url)), ...current];
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
 
   useEffect(() => {
     fetch("/api/pricing/settings")
@@ -709,16 +729,16 @@ export default function VideoLab({ mode = "image" }) {
     }
 
     setGenerating(true);
+    setGeneratedInCurrentRun(0);
     setGenerationProgress(null);
-    setVideoUrls([]);
     setVideoError(null);
 
     try {
-      const results = [];
       for (let i = 0; i < videoCount; i++) {
         const url = await generateOne();
-        results.push(url);
-        setVideoUrls([...results]);
+        setGeneratedInCurrentRun((count) => count + 1);
+        setVideoUrls((current) => [url, ...current.filter((item) => item !== url)]);
+        setSelectedVideoIndex(0);
 
         let creditsUsed = 0;
         if (perVideoCredits > 0) {
@@ -754,10 +774,12 @@ export default function VideoLab({ mode = "image" }) {
     }
   };
 
+  const selectedVideoUrl = videoUrls[selectedVideoIndex] || videoUrls[0] || null;
+
   const handleDownload = () => {
-    if (videoUrls.length === 0 || !videoUrls[0]) return;
+    if (!selectedVideoUrl) return;
     const a = document.createElement("a");
-    a.href = videoUrls[0];
+    a.href = selectedVideoUrl;
     a.download = `viralstudio-${Date.now()}.mp4`;
     document.body.appendChild(a);
     a.click();
@@ -765,9 +787,9 @@ export default function VideoLab({ mode = "image" }) {
   };
 
   const handleShare = async () => {
-    if (videoUrls.length === 0 || !videoUrls[0]) return;
+    if (!selectedVideoUrl) return;
     try {
-      await navigator.clipboard.writeText(videoUrls[0]);
+      await navigator.clipboard.writeText(selectedVideoUrl);
     } catch {}
   };
 
@@ -1065,9 +1087,9 @@ export default function VideoLab({ mode = "image" }) {
                   background:
                     "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)",
                 }}
-                className="glass-card card-glow relative flex flex-1 flex-col rounded-2xl border border-white/5 bg-black"
+                className="glass-card card-glow relative flex min-h-[420px] flex-1 flex-col overflow-hidden rounded-2xl border border-white/5 bg-black xl:min-h-[calc(100vh-7.5rem)]"
               >
-                <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
+                <div className="relative flex min-h-[420px] flex-1 flex-col items-center justify-center overflow-hidden bg-black">
                   <div
                     style={{
                       background:
@@ -1078,14 +1100,13 @@ export default function VideoLab({ mode = "image" }) {
                   {videoUrls.length > 0 ? (
                     <>
                       <video
-                        key={videoUrls[0]}
-                        src={videoUrls[0]}
+                        key={selectedVideoUrl}
+                        src={selectedVideoUrl}
                         controls
                         autoPlay
                         loop
                         playsInline
-                        className="relative z-10 max-h-full max-w-full rounded-xl object-contain"
-                        style={previewAspectStyle}
+                        className="absolute inset-0 z-10 h-full w-full bg-black object-contain"
                       />
                       {generating && (
                         <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur">
@@ -1110,7 +1131,7 @@ export default function VideoLab({ mode = "image" }) {
                           </svg>
                           {videoCount > 1
                             ? `Generating ${Math.min(
-                                videoUrls.length + 1,
+                                generatedInCurrentRun + 1,
                                 videoCount
                               )} of ${videoCount}...`
                             : "Generating..."}
@@ -1230,40 +1251,63 @@ export default function VideoLab({ mode = "image" }) {
                     "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)",
                 }}
               >
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-3 flex items-center justify-between gap-3">
                   <h3 className="flex items-center gap-2 text-sm font-semibold">
-                    <Icon
-                      name="checklist"
-                      className="text-base text-primary"
-                    />{" "}
-                    Generated Videos ({videoUrls.length})
+                    <Icon name="checklist" className="text-base text-primary" />
+                    Generated Videos <span className="text-xs text-white/40">({videoUrls.length})</span>
                   </h3>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => videoHistoryRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+                      aria-label="Scroll videos left"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/70 transition hover:border-primary/40 hover:text-white"
+                    >
+                      <Icon name="chevron-left" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => videoHistoryRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+                      aria-label="Scroll videos right"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/70 transition hover:border-primary/40 hover:text-white"
+                    >
+                      <Icon name="chevron-right" />
+                    </button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                <div
+                  ref={videoHistoryRef}
+                  className="flex gap-3 overflow-x-auto pb-2 [scrollbar-color:rgba(168,85,247,0.55)_rgba(255,255,255,0.06)] [scrollbar-width:thin]"
+                >
                   {videoUrls.map((url, i) => (
-                    <div
-                      key={i}
-                      className="glass-card overflow-hidden rounded-lg border-surface-border"
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => setSelectedVideoIndex(i)}
+                      aria-label={`Play generated video ${i + 1}`}
+                      aria-pressed={selectedVideoUrl === url}
+                      className={`group relative w-40 shrink-0 overflow-hidden rounded-xl border text-left transition-all sm:w-48 ${
+                        selectedVideoUrl === url
+                          ? "border-primary ring-2 ring-primary/30"
+                          : "border-white/10 hover:border-primary/50"
+                      }`}
                     >
                       <video
                         src={url}
-                        controls
-                        className="w-full bg-black object-contain"
-                        style={previewAspectStyle}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="aspect-video w-full bg-black object-cover"
                       />
-                      <div className="flex items-center justify-between p-2">
-                        <span className="text-[10px] font-medium text-on-surface-variant">
-                          Video {i + 1}
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition group-hover:bg-black/25">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur">
+                          <Icon name="play" className="text-sm" />
                         </span>
-                        <a
-                          href={url}
-                          download
-                          className="flex items-center gap-1 text-[10px] text-primary hover:underline"
-                        >
-                          <Icon name="download" className="text-xs" /> DL
-                        </a>
-                      </div>
-                    </div>
+                      </span>
+                      <span className="block truncate bg-black/50 px-2 py-1.5 text-left text-[10px] font-medium text-white/75">
+                        Video {i + 1}
+                      </span>
+                    </button>
                   ))}
                 </div>
               </div>
