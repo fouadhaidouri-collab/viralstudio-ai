@@ -664,7 +664,11 @@ export default function VideoLab({ mode = "image" }) {
       if (statusData.status === "COMPLETED") {
         if (typeof statusData.balance === "number") window.dispatchEvent(new CustomEvent("viralstudio:credits-updated", { detail: { balance: statusData.balance } }));
         if (statusData.billingError) setVideoError(statusData.billingError);
-        return statusData.videoUrl;
+        return {
+          videoUrl: statusData.videoUrl,
+          creditsCharged: !statusData.billingError,
+          billingError: statusData.billingError || null,
+        };
       } else if (
         statusData.status === "FAILED" ||
         statusData.status === "CANCELLED"
@@ -712,12 +716,14 @@ export default function VideoLab({ mode = "image" }) {
 
     try {
       for (let i = 0; i < videoCount; i++) {
-        const url = await generateOne();
+        const generation = await generateOne();
+        const url = generation.videoUrl;
         setGeneratedInCurrentRun((count) => count + 1);
         setVideoUrls((current) => [url, ...current.filter((item) => item !== url)]);
         setSelectedVideoIndex(0);
 
-        const creditsUsed = perVideoCredits;
+        const creditsUsed = generation.creditsCharged ? perVideoCredits : 0;
+        if (generation.billingError) setVideoError(generation.billingError);
 
         fetch("/api/generations", {
           method: "POST",
