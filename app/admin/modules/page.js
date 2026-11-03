@@ -10,6 +10,8 @@ export default function AdminModulesPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState(null);
   const [adding, setAdding] = useState(false);
+  const [markupOverride, setMarkupOverride] = useState("");
+  const [savingPricing, setSavingPricing] = useState(false);
 
   const loadModules = () => {
     fetch("/api/admin/modules")
@@ -93,11 +95,31 @@ export default function AdminModulesPage() {
     } catch {}
   };
 
+  const saveModulePricing = async () => {
+    if (!selectedModule) return;
+    setSavingPricing(true);
+    try {
+      const res = await fetch(`/api/admin/modules/${selectedModule.module_id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markup_override: markupOverride === "" ? null : Number(markupOverride) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save pricing");
+      setSelectedModule(data.module);
+      setMarkupOverride(data.module.credit_pricing?.markup_override ?? "");
+      setSyncMsg("Module pricing updated");
+      loadModules();
+    } catch (error) { setSyncMsg(error.message); }
+    finally { setSavingPricing(false); }
+  };
+
   const viewModule = async (mod) => {
     try {
       const res = await fetch(`/api/admin/modules/${mod.module_id}`);
       const data = await res.json();
-      setSelectedModule(data.module || data);
+      const moduleData = data.module || data;
+      setSelectedModule(moduleData);
+      setMarkupOverride(moduleData.credit_pricing?.markup_override ?? "");
     } catch {}
   };
 
@@ -322,6 +344,23 @@ export default function AdminModulesPage() {
                     <pre className="mt-1 overflow-x-auto">{JSON.stringify(selectedModule.business_config, null, 2)}</pre>
                   </div>
                 )}
+
+                <div className="bg-surface-container-low rounded-lg p-3 space-y-3">
+                  <div>
+                    <span className="text-xs font-semibold">Module Markup Override</span>
+                    <p className="text-xs text-on-surface-variant mt-1">Leave empty to use the automatic API-cost tiers. Enter a multiplier such as 2.5 to override tiers for this module only.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="number" min="0.01" step="0.1" value={markupOverride}
+                      onChange={(e) => setMarkupOverride(e.target.value)} placeholder="Automatic pricing"
+                      className="flex-1 bg-surface-container-lowest border border-surface-border rounded-lg px-3 py-2 text-sm" />
+                    <button onClick={saveModulePricing} disabled={savingPricing}
+                      className="px-4 py-2 primary-gradient rounded-lg text-sm font-semibold disabled:opacity-50">
+                      {savingPricing ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                  <p className="text-xs text-on-surface-variant">Current multiplier: {selectedModule.credit_pricing?.markup_multiplier ?? "Automatic"}</p>
+                </div>
 
                 {selectedModule.fal_pricing && (
                   <div className="text-xs text-on-surface-variant bg-surface-container-low rounded-lg p-3">
