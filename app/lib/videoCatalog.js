@@ -20,6 +20,17 @@ const maxResolution = (resolutions) => {
 
 const normalizeResolution = (value) => String(value || "").trim().toLowerCase();
 
+const DEFAULT_PRICING_TIERS = [
+  { maxCost: 0.02, markup: 4.0 }, { maxCost: 0.10, markup: 3.0 },
+  { maxCost: 0.50, markup: 2.2 }, { maxCost: 1.00, markup: 1.8 },
+  { maxCost: 3.00, markup: 1.5 }, { maxCost: null, markup: 1.3 },
+];
+function resolveMarkup(cost, settings = {}) {
+  const tiers = settings?.pricing_tiers || DEFAULT_PRICING_TIERS;
+  const tier = tiers.find((item) => item.maxCost == null || cost <= Number(item.maxCost));
+  return Number(tier?.markup) > 0 ? Number(tier.markup) : 1;
+}
+
 export const VIDEO_FAMILIES = [
   {
     name: "Kling",
@@ -1741,10 +1752,10 @@ export function estimateProviderCost(model, { duration, resolution, audio } = {}
 }
 
 export function estimateCredits(model, settings, options = {}) {
-  const markup = settings?.default_markup_multiplier ?? 2;
   const usdValue = settings?.credit_usd_value || 0.01;
   const minCredits = settings?.minimum_generation_credits || 1;
   const cost = estimateProviderCost(model, options);
+  const markup = resolveMarkup(cost, settings);
   const rawCredits = (cost * markup) / usdValue;
   const roundedCredits = Math.round(rawCredits * 1e6) / 1e6;
   return Math.max(Math.ceil(roundedCredits), minCredits);
