@@ -44,7 +44,7 @@ export async function POST(request, { params }) {
   }
 
   // 5. Estimate credits
-  const estimate = estimateModuleCredits(module_id, userInput);
+  const estimate = await estimateModuleCredits(module_id, userInput);
   if (estimate.pricing_unavailable || estimate.credits_required == null) {
     return Response.json({ error: "Pricing unavailable for this module. Cannot generate." }, { status: 402 });
   }
