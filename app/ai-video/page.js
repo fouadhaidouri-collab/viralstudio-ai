@@ -42,7 +42,6 @@ const resolutionMultiplier = (r) =>
   r === "4k" ? 2.5 : r === "2K" ? 2.0 : r === "1080p" ? 1.5 : 1;
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
-const AUTO_ASPECT_RATIO = { label: "Auto (follow photo)", icon: "image" };
 
 const calcModelCredits = (unitPrice, quantity, settings, modelMarkup) => {
   if (unitPrice == null) return null;
@@ -254,7 +253,7 @@ export default function AIVideoPage() {
   const supportsNativeAspectRatio = caps.aspectRatios.length > 0;
   const availableAspectRatios = supportsNativeAspectRatio
     ? videoAspectRatios.filter((ar) => caps.aspectRatios.includes(ar.label))
-    : [AUTO_ASPECT_RATIO, ...videoAspectRatios];
+    : videoAspectRatios;
   const availableResolutions = videoResolutions.filter(r => caps.resolutions.includes(r));
   const availableDurations = caps.durations;
   const currentConfig = modelConfigs[model.label] || { aspectRatio: availableAspectRatios[0], resolution: videoResolutions[0], duration: defaultDurations[0] };
@@ -324,7 +323,7 @@ export default function AIVideoPage() {
     if (!existing) {
       const defaultAspect = c.aspectRatios.length > 0
         ? (videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]) || videoAspectRatios[0])
-        : AUTO_ASPECT_RATIO;
+        : videoAspectRatios[0];
       const defaults = { aspectRatio: defaultAspect, resolution: defaultRes, duration: defaultDur };
       setModelConfigs(prev => ({ ...prev, [model.label]: defaults }));
       return;
@@ -335,8 +334,8 @@ export default function AIVideoPage() {
       const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
       if (found) { updated.aspectRatio = found; changed = true; }
     }
-    if (c.aspectRatios.length === 0 && !existing.aspectRatio) {
-      updated.aspectRatio = AUTO_ASPECT_RATIO; changed = true;
+    if (c.aspectRatios.length === 0 && !videoAspectRatios.some(ar => ar.label === existing.aspectRatio?.label)) {
+      updated.aspectRatio = videoAspectRatios[0]; changed = true;
     }
     if (c.resolutions.length > 0 && !c.resolutions.includes(existing.resolution)) {
       updated.resolution = defaultRes; changed = true;
@@ -607,9 +606,7 @@ export default function AIVideoPage() {
                 </div>
                 {!supportsNativeAspectRatio && (
                   <p className="text-[10px] text-on-surface-variant/60 leading-relaxed">
-                    {selectedAspectRatio
-                      ? "This model follows your photo. We crop it to the selected aspect ratio before generating."
-                      : "Auto keeps your uploaded photo's original framing."}
+                    This model follows your photo. We crop it to the selected aspect ratio before generating.
                   </p>
                 )}
                 <button
