@@ -42,6 +42,7 @@ const resolutionMultiplier = (r) =>
   r === "4k" ? 2.5 : r === "2K" ? 2.0 : r === "1080p" ? 1.5 : 1;
 
 const TEMPLATE_VIDEOS = Array.from({ length: 11 }, (_, i) => `/templates/template${i + 1}.mp4`);
+const AUTO_ASPECT_RATIO = { label: "Auto (follow photo)", icon: "image" };
 
 const calcModelCredits = (unitPrice, quantity, settings, modelMarkup) => {
   if (unitPrice == null) return null;
@@ -87,6 +88,42 @@ function compressImage(file, maxSide = 1024, quality = 0.82) {
       img.src = reader.result;
     };
     reader.readAsDataURL(file);
+  });
+}
+
+function cropImageToAspect(dataUrl, aspectLabel, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const ratio = String(aspectLabel || "").split(":").map(Number);
+    if (ratio.length !== 2 || !ratio[0] || !ratio[1]) {
+      resolve(dataUrl);
+      return;
+    }
+    const targetRatio = ratio[0] / ratio[1];
+    const img = new Image();
+    img.onerror = () => reject(new Error("Could not prepare the uploaded photo."));
+    img.onload = () => {
+      const sourceRatio = img.width / img.height;
+      let sx = 0;
+      let sy = 0;
+      let sw = img.width;
+      let sh = img.height;
+
+      if (sourceRatio > targetRatio) {
+        sw = Math.round(img.height * targetRatio);
+        sx = Math.round((img.width - sw) / 2);
+      } else if (sourceRatio < targetRatio) {
+        sh = Math.round(img.width / targetRatio);
+        sy = Math.round((img.height - sh) / 2);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, sw);
+      canvas.height = Math.max(1, sh);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.src = dataUrl;
   });
 }
 
@@ -214,10 +251,15 @@ export default function AIVideoPage() {
 
   const caps = videoModelCapabilities[model.label] || videoModelCapabilities[videoModels[0].label];
   const defaultDurations = caps.durations.length > 0 ? caps.durations : ["5 seconds"];
-  const availableAspectRatios = videoAspectRatios.filter(ar => caps.aspectRatios.includes(ar.label));
+  const supportsNativeAspectRatio = caps.aspectRatios.length > 0;
+  const availableAspectRatios = supportsNativeAspectRatio
+    ? videoAspectRatios.filter((ar) => caps.aspectRatios.includes(ar.label))
+    : [AUTO_ASPECT_RATIO, ...videoAspectRatios];
   const availableResolutions = videoResolutions.filter(r => caps.resolutions.includes(r));
   const availableDurations = caps.durations;
-  const currentConfig = modelConfigs[model.label] || { aspectRatio: videoAspectRatios[0], resolution: videoResolutions[0], duration: defaultDurations[0] };
+  const currentConfig = modelConfigs[model.label] || { aspectRatio: availableAspectRatios[0], resolution: videoResolutions[0], duration: defaultDurations[0] };
+  const selectedAspectRatio = currentConfig.aspectRatio?.label?.includes(":") ? currentConfig.aspectRatio.label : null;
+  const previewAspectStyle = selectedAspectRatio ? { aspectRatio: selectedAspectRatio.replace(":", "/") } : undefined;
   const updateConfig = (key, value) => {
     setModelConfigs(prev => ({ ...prev, [model.label]: { ...(prev[model.label] || {}), [key]: value } }));
   };
@@ -280,11 +322,10 @@ export default function AIVideoPage() {
     const defaultRes = c.resolutions.length > 0 ? c.resolutions[0] : videoResolutions[0];
     const defaultDur = c.durations.length > 0 ? c.durations[0] : defaultDurations[0];
     if (!existing) {
-      const defaults = { aspectRatio: videoAspectRatios[0], resolution: defaultRes, duration: defaultDur };
-      if (c.aspectRatios.length > 0) {
-        const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
-        if (found) defaults.aspectRatio = found;
-      }
+      const defaultAspect = c.aspectRatios.length > 0
+        ? (videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]) || videoAspectRatios[0])
+        : AUTO_ASPECT_RATIO;
+      const defaults = { aspectRatio: defaultAspect, resolution: defaultRes, duration: defaultDur };
       setModelConfigs(prev => ({ ...prev, [model.label]: defaults }));
       return;
     }
@@ -293,6 +334,9 @@ export default function AIVideoPage() {
     if (c.aspectRatios.length > 0 && !c.aspectRatios.includes(existing.aspectRatio?.label)) {
       const found = videoAspectRatios.find(ar => ar.label === c.aspectRatios[0]);
       if (found) { updated.aspectRatio = found; changed = true; }
+    }
+    if (c.aspectRatios.length === 0 && !existing.aspectRatio) {
+      updated.aspectRatio = AUTO_ASPECT_RATIO; changed = true;
     }
     if (c.resolutions.length > 0 && !c.resolutions.includes(existing.resolution)) {
       updated.resolution = defaultRes; changed = true;
@@ -352,16 +396,21 @@ export default function AIVideoPage() {
     const modelId = model.model_id;
     if (!modelId) throw new Error(`Unknown model: ${model.label}`);
 
+    let imagePayload = images[0] || null;
+    if (imagePayload && !supportsNativeAspectRatio && selectedAspectRatio) {
+      imagePayload = await cropImageToAspect(imagePayload, selectedAspectRatio);
+    }
+
     const subRes = await fetch("/api/generate-video", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         prompt,
         modelId,
-        aspectRatio: currentConfig.aspectRatio?.label || null,
+        aspectRatio: selectedAspectRatio,
         resolution: currentConfig.resolution,
         duration: currentConfig.duration,
-        image: images[0] || null,
+        image: imagePayload,
       }),
     });
 
@@ -551,16 +600,16 @@ export default function AIVideoPage() {
               <div className="mt-auto pt-3 shrink-0 space-y-2">
                 <ModelSelector label="AI Model" providers={providers} selectedModel={model} onSelect={setModel} calcCredits={calcCredits} calcStartingCredits={calcStartingCredits} compact />
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {availableAspectRatios.length > 0 && (
-                    <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
-                  )}
+                  <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio?.label || availableAspectRatios[0].label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
                   <Dropdown label="Resolution" value={currentConfig.resolution} options={availableResolutions} onChange={(v) => updateConfig("resolution", v)} />
                   <Dropdown label="Duration" value={currentConfig.duration} options={availableDurations} onChange={(v) => updateConfig("duration", v)} />
                   <Dropdown label="Quantity" value={String(videoCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setVideoCount(Number(v))} />
                 </div>
-                {availableAspectRatios.length === 0 && (
+                {!supportsNativeAspectRatio && (
                   <p className="text-[10px] text-on-surface-variant/60 leading-relaxed">
-                    Aspect ratio follows the uploaded photo for this model.
+                    {selectedAspectRatio
+                      ? "This model follows your photo. We crop it to the selected aspect ratio before generating."
+                      : "Auto keeps your uploaded photo's original framing."}
                   </p>
                 )}
                 <button
@@ -595,7 +644,7 @@ export default function AIVideoPage() {
                       loop
                       playsInline
                       className="relative z-10 max-w-full max-h-full object-contain rounded-xl"
-                      style={{ aspectRatio: (currentConfig.aspectRatio?.label || "9:16").replace(":", "/") }}
+                      style={previewAspectStyle}
                     />
                     {generating && (
                       <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur">
@@ -682,7 +731,7 @@ export default function AIVideoPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {videoUrls.map((url, i) => (
                   <div key={i} className="glass-card rounded-lg overflow-hidden border-surface-border">
-                    <video src={url} controls className="w-full object-contain bg-black" style={{ aspectRatio: (currentConfig.aspectRatio?.label || "9:16").replace(":", "/") }} />
+                    <video src={url} controls className="w-full object-contain bg-black" style={previewAspectStyle} />
                     <div className="p-2 flex items-center justify-between">
                       <span className="text-[10px] font-medium text-on-surface-variant">Video {i + 1}</span>
                       <a href={url} download className="text-primary text-[10px] flex items-center gap-1 hover:underline"><Icon name="download" className="text-xs" /> DL</a>
