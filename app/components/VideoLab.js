@@ -1089,7 +1089,7 @@ export default function VideoLab({ mode = "image" }) {
                 }}
                 className="glass-card card-glow relative flex min-h-[420px] flex-1 flex-col overflow-hidden rounded-2xl border border-white/5 bg-black xl:min-h-[calc(100vh-7.5rem)]"
               >
-                <div className="relative flex min-h-[420px] flex-1 flex-col items-center justify-center overflow-hidden bg-black">
+                <div className="relative flex min-h-[420px] flex-1 flex-col items-center justify-center overflow-hidden">
                   <div
                     style={{
                       background:
