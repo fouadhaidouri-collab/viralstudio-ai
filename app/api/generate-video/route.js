@@ -176,14 +176,33 @@ export async function POST(request) {
   const settings = await getCreditSettings();
   const chargeAmount = estimateCredits(model, settings, { duration, resolution, audio: audio !== false });
   const userId = session.user.id;
-  const currentCredits = await getUserCredits(userId);
-  if ((currentCredits.balance_credits || 0) < chargeAmount) {
-    return Response.json({ error: "You do not have enough credits for this video. Please add credits and try again.", balance: currentCredits.balance_credits || 0, required: chargeAmount }, { status: 402 });
+  const requestId = crypto.randomUUID();
+  // Reserve credits atomically before calling the provider. Active holds count
+  // against available balance, but do not reduce the customer's displayed balance.
+  const available = await getUserCredits(userId);
+  const reserve = await run(`INSERT INTO video_credit_holds (request_id, user_id, amount, status)
+    SELECT ?, ?, ?, 'held'
+    WHERE EXISTS (
+      SELECT 1 FROM credits c WHERE c.user_id = ?
+      AND c.current_balance - COALESCE((
+        SELECT SUM(h.amount) FROM video_credit_holds h
+        WHERE h.user_id = c.user_id AND h.status IN ('held','charging')
+      ), 0) >= ?
+    )`, [requestId, userId, chargeAmount, userId, chargeAmount]);
+  const hold = await get("SELECT request_id FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'held'", [requestId, userId]);
+  if (!hold) {
+    return Response.json({ error: "You do not have enough available credits for this video. Please add credits and try again.", balance: available.balance_credits || 0, required: chargeAmount }, { status: 402 });
   }
+  await run("INSERT INTO video_generation_billing (request_id, user_id, amount, status, model_id) VALUES (?, ?, ?, 'pending', ?)", [requestId, userId, chargeAmount, model.model_id]);
   await run(`CREATE TABLE IF NOT EXISTS video_generation_billing (
     request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending', model_id TEXT,
+    status TEXT NOT NULL DEFAULT 'pending', model_id TEXT, provider_id TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  try { await run("ALTER TABLE video_generation_billing ADD COLUMN provider_id TEXT"); } catch {}
+  await run(`CREATE TABLE IF NOT EXISTS video_credit_holds (
+    request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'held', created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
   const payload = buildVideoPayload({
     model,
@@ -200,27 +219,31 @@ export async function POST(request) {
   try {
     data = await submitGeneration(payload);
   } catch (err) {
+    await batch([
+      { sql: "UPDATE video_credit_holds SET status = 'released' WHERE request_id = ? AND user_id = ? AND status = 'held'", params: [requestId, userId] },
+      { sql: "UPDATE video_generation_billing SET status = 'failed' WHERE request_id = ? AND user_id = ? AND status = 'pending'", params: [requestId, userId] }
+    ]).catch((releaseError) => console.error("Video credit hold release failed:", releaseError.message));
     if (err.code === "NO_KEY") {
-      return Response.json(
-        { error: "Generation service is not configured yet.", setupRequired: true },
-        { status: 503 }
-      );
+      return Response.json({ error: "Generation service is not configured yet. No credits were charged.", setupRequired: true }, { status: 503 });
     }
     console.error("generate-video Renderful submit error:", err.message);
-    return Response.json(
-      { error: err.status && err.status < 500 ? err.message : PROVIDER_UNAVAILABLE },
-      { status: err.status && err.status < 500 ? 400 : 503 }
-    );
+    return Response.json({ error: err.status && err.status < 500 ? err.message : PROVIDER_UNAVAILABLE, noCreditsCharged: true }, { status: err.status && err.status < 500 ? 400 : 503 });
   }
 
-  if (!data?.id) return Response.json({ error: PROVIDER_UNAVAILABLE }, { status: 503 });
-  try {
-    await run("INSERT INTO video_generation_billing (request_id, user_id, amount, status, model_id) VALUES (?, ?, ?, 'pending', ?)", [String(data.id), userId, chargeAmount, model.model_id]);
-  } catch (err) {
-    console.error("Video billing record could not be saved:", err.message);
-    return Response.json({ error: "We could not safely track this generation. Please contact support before retrying." }, { status: 503 });
+  if (!data?.id) {
+    await batch([
+      { sql: "UPDATE video_credit_holds SET status = 'released' WHERE request_id = ? AND user_id = ? AND status = 'held'", params: [requestId, userId] },
+      { sql: "UPDATE video_generation_billing SET status = 'failed' WHERE request_id = ? AND user_id = ? AND status = 'pending'", params: [requestId, userId] }
+    ]);
+    return Response.json({ error: PROVIDER_UNAVAILABLE, noCreditsCharged: true }, { status: 503 });
   }
-  return Response.json({ requestId: data.id, modelId: model.model_id });
+  try {
+    await run("UPDATE video_generation_billing SET provider_id = ? WHERE request_id = ? AND user_id = ?", [String(data.id), requestId, userId]);
+  } catch (err) {
+    console.error("Video provider reference could not be saved:", err.message);
+    return Response.json({ error: "Your request was accepted but could not be tracked safely. Please contact support and do not submit it again.", requestId, noCreditsCharged: true }, { status: 503 });
+  }
+  return Response.json({ requestId, modelId: model.model_id });
 }
 
 export async function GET(request) {
@@ -232,14 +255,20 @@ export async function GET(request) {
   if (!session?.user?.id) return Response.json({ error: "Please sign in to continue." }, { status: 401 });
   await run(`CREATE TABLE IF NOT EXISTS video_generation_billing (
     request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending', model_id TEXT,
+    status TEXT NOT NULL DEFAULT 'pending', model_id TEXT, provider_id TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  try { await run("ALTER TABLE video_generation_billing ADD COLUMN provider_id TEXT"); } catch {}
+  await run(`CREATE TABLE IF NOT EXISTS video_credit_holds (
+    request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'held', created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
   const billing = await get("SELECT * FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
   if (!billing) return Response.json({ error: "This generation could not be found." }, { status: 404 });
+  if (!billing.provider_id) return Response.json({ status: "PROCESSING", progress: null });
   let data;
   try {
-    data = await getGeneration(requestId);
+    data = await getGeneration(billing.provider_id);
   } catch (err) {
     if (err.code === "NO_KEY") {
       return Response.json(
@@ -257,11 +286,14 @@ export async function GET(request) {
     if (!videoUrl) return Response.json({ status: "PROCESSING", progress: data.progress ?? null });
     if (billing.status === "pending") {
       try {
+        // D1 batch is transactional. Only the request that changes its hold
+        // from held to charging can debit the account; concurrent polls are no-ops.
         await batch([
-          { sql: "UPDATE video_generation_billing SET status = 'charging' WHERE request_id = ? AND user_id = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM credits WHERE user_id = ? AND current_balance >= ?)", params: [String(requestId), session.user.id, session.user.id, billing.amount] },
-          { sql: "UPDATE credits SET current_balance = current_balance - ?, total_used = total_used + ?, updated_at = datetime('now') WHERE user_id = ? AND EXISTS (SELECT 1 FROM video_generation_billing WHERE request_id = ? AND user_id = ? AND status = 'charging')", params: [billing.amount, billing.amount, session.user.id, String(requestId), session.user.id] },
-          { sql: "INSERT INTO credit_ledger (id, user_id, transaction_id, credits_added, reason) SELECT ?, ?, ?, ?, 'AI Video generation' WHERE EXISTS (SELECT 1 FROM video_generation_billing WHERE request_id = ? AND user_id = ? AND status = 'charging') AND NOT EXISTS (SELECT 1 FROM credit_ledger WHERE transaction_id = ?)", params: [`video_${requestId}`, session.user.id, String(requestId), -billing.amount, String(requestId), session.user.id, String(requestId)] },
-          { sql: "UPDATE video_generation_billing SET status = 'charged' WHERE request_id = ? AND user_id = ? AND status = 'charging'", params: [String(requestId), session.user.id] }
+          { sql: "UPDATE video_credit_holds SET status = 'charging' WHERE request_id = ? AND user_id = ? AND status = 'held'", params: [String(requestId), session.user.id] },
+          { sql: "UPDATE credits SET current_balance = current_balance - ?, total_used = total_used + ?, updated_at = datetime('now') WHERE user_id = ? AND EXISTS (SELECT 1 FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'charging')", params: [billing.amount, billing.amount, session.user.id, String(requestId), session.user.id] },
+          { sql: "INSERT INTO credit_ledger (id, user_id, transaction_id, credits_added, reason) SELECT ?, ?, ?, ?, 'AI Video generation' WHERE EXISTS (SELECT 1 FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'charging') AND NOT EXISTS (SELECT 1 FROM credit_ledger WHERE transaction_id = ?)", params: [`video_${requestId}`, session.user.id, String(requestId), -billing.amount, String(requestId), session.user.id, String(requestId)] },
+          { sql: "UPDATE video_generation_billing SET status = 'charged' WHERE request_id = ? AND user_id = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'charging')", params: [String(requestId), session.user.id, String(requestId), session.user.id] },
+          { sql: "UPDATE video_credit_holds SET status = 'charged' WHERE request_id = ? AND user_id = ? AND status = 'charging'", params: [String(requestId), session.user.id] }
         ]);
       } catch (err) {
         console.error("AI Video credit settlement failed:", err.message);
@@ -275,7 +307,16 @@ export async function GET(request) {
   }
 
   if (status === "FAILED" || status === "CANCELLED") {
-    return Response.json({ status, error: "The video could not be generated. No credits were charged. Please try again." });
+    try {
+      await batch([
+        { sql: "UPDATE video_credit_holds SET status = 'released' WHERE request_id = ? AND user_id = ? AND status IN ('held','charging')", params: [String(requestId), session.user.id] },
+        { sql: "UPDATE video_generation_billing SET status = 'failed' WHERE request_id = ? AND user_id = ? AND status = 'pending'", params: [String(requestId), session.user.id] }
+      ]);
+    } catch (err) {
+      console.error("Failed to release AI Video credit hold:", err.message);
+      return Response.json({ status: "PROCESSING", error: "We are safely checking the generation status. No new request is needed." });
+    }
+    return Response.json({ status, error: "The video could not be generated. Your reserved credits have been released. No credits were charged. Please try again." });
   }
 
   return Response.json({ status, progress: data.progress ?? null });
