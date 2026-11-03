@@ -1070,7 +1070,7 @@ export default function VideoLab({ mode = "image" }) {
                     }}
                     className="absolute inset-0"
                   ></div>
-                  {videoUrls.length > 0 ? (
+                  {!generating && videoUrls.length > 0 ? (
                     <>
                       <video
                         key={selectedVideoUrl}
