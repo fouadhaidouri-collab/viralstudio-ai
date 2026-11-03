@@ -10,7 +10,9 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   const { module_id } = await params;
   const body = await request.json();
-  const updated = updateModuleBusinessConfig(module_id, body);
+  let updated;
+  try { updated = await updateModuleBusinessConfig(module_id, body); }
+  catch (error) { return Response.json({ error: error.message || "Invalid module settings" }, { status: 400 }); }
   if (!updated) return Response.json({ error: "Module not found" }, { status: 404 });
   return Response.json({ success: true, module: updated });
 }
