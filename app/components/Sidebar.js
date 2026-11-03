@@ -9,7 +9,23 @@ import Icon from "./Icon";
 
 const homeItem = { href: "/", label: "Home", icon: "dashboard" };
 const toolItems = [
-  { href: "/ai-video", label: "AI Video", icon: "movie" },
+  {
+    href: "/ai-video",
+    label: "AI Video",
+    icon: "movie",
+    children: [
+      {
+        href: "/ai-video/text-to-video",
+        label: "Text to Video",
+        icon: "description",
+      },
+      {
+        href: "/ai-video/image-to-video",
+        label: "Image to Video",
+        icon: "image",
+      },
+    ],
+  },
   { href: "/ai-image", label: "Image Lab", icon: "image" },
   { href: "/library", label: "Library", icon: "folder" },
 ];
@@ -20,6 +36,7 @@ function SidebarContent() {
   const { setMobileOpen } = useSidebar();
   const credits = useLiveCredits();
   const [showAdmin, setShowAdmin] = useState(false);
+  const [openMenus, setOpenMenus] = useState({});
 
   useEffect(() => {
     const host = window.location.hostname;
@@ -29,11 +46,17 @@ function SidebarContent() {
   useEffect(() => {
     const routes = [
       homeItem.href,
-      ...toolItems.map((i) => i.href),
+      ...toolItems.flatMap((i) => [i.href, ...(i.children || []).map((c) => c.href)]),
       ...(showAdmin ? ["/admin"] : []),
     ];
     routes.forEach((href) => router.prefetch(href));
   }, [router, showAdmin]);
+
+  useEffect(() => {
+    if (pathname.startsWith("/ai-video")) {
+      setOpenMenus((prev) => ({ ...prev, "/ai-video": true }));
+    }
+  }, [pathname]);
 
   const handleNav = () => setMobileOpen(false);
 
@@ -72,7 +95,70 @@ function SidebarContent() {
           <span className="sidebar-heading-text">AI Tools</span>
         </div>
         {[...toolItems, ...(showAdmin ? [{ href: "/admin", label: "Admin Panel", icon: "shield" }] : [])].map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.children && pathname.startsWith(`${item.href}/`));
+
+          if (item.children) {
+            const isOpen = openMenus[item.href] ?? isActive;
+            return (
+              <div key={item.href}>
+                <button
+                  onClick={() =>
+                    setOpenMenus((prev) => ({
+                      ...prev,
+                      [item.href]: !isOpen,
+                    }))
+                  }
+                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-200 active:scale-[0.97] ${
+                    isActive
+                      ? "bg-white/[0.06] text-white"
+                      : "text-on-surface-variant hover:bg-[rgba(255,255,255,0.04)] hover:text-white hover:translate-x-0.5"
+                  }`}
+                >
+                  <Icon name={item.icon} className="shrink-0" size={20} />
+                  <span className="sidebar-link-text flex-1 text-left">
+                    {item.label}
+                  </span>
+                  <Icon
+                    name="expand_more"
+                    className={`shrink-0 text-on-surface-variant transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                    size={18}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="mt-1 ml-4 space-y-1 border-l border-white/10 pl-3">
+                    {item.children.map((child) => {
+                      const childActive = pathname === child.href;
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={handleNav}
+                          className={`flex items-center gap-2.5 rounded-lg px-3 py-2 transition-all duration-200 active:scale-[0.97] ${
+                            childActive
+                              ? "primary-gradient text-white shadow-lg shadow-primary/25"
+                              : "text-on-surface-variant hover:bg-[rgba(255,255,255,0.04)] hover:text-white hover:translate-x-0.5"
+                          }`}
+                        >
+                          <Icon name={child.icon} className="shrink-0" size={16} />
+                          <span
+                            className="flex-1 truncate text-left text-[13px] font-semibold"
+                            style={{ fontFamily: "Geist, sans-serif" }}
+                          >
+                            {child.label}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           return (
             <Link
               key={item.href}

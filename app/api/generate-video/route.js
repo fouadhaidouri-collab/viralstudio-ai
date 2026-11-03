@@ -1,11 +1,14 @@
-import { videoModels } from "@/app/lib/capabilities";
-import { getGeneration, normalizeStatus, outputUrl, submitGeneration } from "@/lib/renderful";
+import { getVideoModel } from "@/app/lib/videoCatalog";
+import {
+  getGeneration,
+  normalizeStatus,
+  outputUrl,
+  submitGeneration,
+} from "@/lib/renderful";
 import { saveImageDataUrl } from "@/lib/uploads";
 
 const PROVIDER_UNAVAILABLE =
   "AI generation service is temporarily unavailable. Please try again later.";
-
-const MODEL_BY_ID = Object.fromEntries(videoModels.map((m) => [m.model_id, m]));
 
 function secondsFromDuration(duration) {
   const value = parseInt(String(duration || ""), 10);
@@ -14,62 +17,82 @@ function secondsFromDuration(duration) {
 
 function normalizeAspectRatio(value) {
   if (!value) return null;
-  if (typeof value === "object" && value.label) return normalizeAspectRatio(value.label);
-  const text = String(value);
+  const text = String(value?.label ?? value).trim();
+  if (text.toLowerCase() === "adaptive") return "adaptive";
   const match = text.match(/(\d+)\s*:\s*(\d+)/);
   return match ? `${match[1]}:${match[2]}` : null;
 }
 
-function buildVideoPayload({ model, prompt, imageUrl, aspectRatio, resolution, duration }) {
+function pickMappedValue(map, value) {
+  if (!map || !value) return null;
+  const exact = map[value];
+  if (exact !== undefined) return exact;
+  const lower = String(value).toLowerCase();
+  if (map[lower] !== undefined) return map[lower];
+  const key = Object.keys(map).find((k) => k.toLowerCase() === lower);
+  return key ? map[key] : null;
+}
+
+function buildVideoPayload({
+  model,
+  prompt,
+  imageUrl,
+  lastFrameUrl,
+  aspectRatio,
+  resolution,
+  duration,
+  audio,
+}) {
+  const config = model.modeConfig || {};
   const seconds = secondsFromDuration(duration);
-  const base = {
-    type: "image-to-video",
+  const payload = {
+    type: config.type || (model.mode === "text" ? "text-to-video" : "image-to-video"),
     model: model.model_id,
-    prompt,
-    image_url: imageUrl,
   };
 
-  if (model.payload === "kling-v3") {
-    const mode = resolution === "4k" ? "4k" : resolution === "1080p" ? "pro" : "std";
-    return {
-      type: "image-to-video",
-      model: model.model_id,
-      prompt,
-      image: imageUrl,
-      mode,
-      duration: seconds,
-      sound: true,
-    };
+  const cleanPrompt = String(prompt || "").trim();
+  if (cleanPrompt) payload.prompt = cleanPrompt;
+
+  if (model.mode === "image" && imageUrl) {
+    payload[model.imageField || "image_url"] = imageUrl;
   }
 
-  if (model.payload === "wan-3.0") {
-    return {
-      ...base,
-      resolution: String(resolution || "720p").toLowerCase(),
-      duration: seconds,
-      enable_audio: true,
-    };
+  if (
+    model.mode === "image" &&
+    lastFrameUrl &&
+    model.lastFrameField
+  ) {
+    payload[model.lastFrameField] = lastFrameUrl;
   }
 
-  if (model.payload === "seedance-2.0" || model.payload === "seedance-2.0-mini") {
-    return {
-      ...base,
-      aspect_ratio: normalizeAspectRatio(aspectRatio) || "16:9",
-      resolution: String(resolution || "720p").toLowerCase(),
-      duration: seconds,
-      generate_audio: true,
-    };
+  if (model.nativeAspectRatio) {
+    const normalized = normalizeAspectRatio(aspectRatio);
+    if (normalized) payload.aspect_ratio = normalized;
   }
 
-  if (model.payload === "hailuo-03") {
-    return {
-      ...base,
-      resolution: resolution === "2K" ? "2K" : "768p",
-      duration: seconds,
-    };
+  if (model.sizeMap) {
+    const key = String(aspectRatio?.label ?? aspectRatio ?? "");
+    payload.size =
+      pickMappedValue(model.sizeMap, key) ||
+      model.sizeMap.default ||
+      "1280*720";
   }
 
-  return base;
+  if (model.resolutionKey && resolution) {
+    const mapped = model.resolutionMap
+      ? pickMappedValue(model.resolutionMap, resolution)
+      : null;
+    payload[model.resolutionKey] =
+      mapped || String(resolution).toLowerCase();
+  }
+
+  if (seconds) payload.duration = seconds;
+
+  if (model.audioField && model.audioMode !== "silent") {
+    payload[model.audioField] = audio !== false;
+  }
+
+  return payload;
 }
 
 async function resolveImageUrl(image, origin) {
@@ -89,34 +112,70 @@ export async function POST(request) {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const { prompt, modelId, aspectRatio, resolution, duration, image, imageUrl } = body || {};
-  const model = MODEL_BY_ID[modelId];
+  const {
+    mode,
+    prompt,
+    modelId,
+    aspectRatio,
+    resolution,
+    duration,
+    image,
+    imageUrl,
+    lastFrame,
+    lastFrameUrl,
+    audio,
+  } = body || {};
+
+  const resolvedMode = mode === "text" ? "text" : "image";
+  const model =
+    getVideoModel(resolvedMode, modelId) ||
+    getVideoModel(resolvedMode === "text" ? "image" : "text", modelId);
 
   if (!model) {
     return Response.json({ error: "Unsupported model." }, { status: 400 });
   }
-  if (!prompt || !String(prompt).trim()) {
+
+  if (model.requiresPrompt && !String(prompt || "").trim()) {
     return Response.json({ error: "Write a prompt first." }, { status: 400 });
   }
 
-  let resolvedImageUrl;
+  const origin = new URL(request.url).origin;
+  let resolvedImageUrl = null;
+  let resolvedLastFrameUrl = null;
+
   try {
-    resolvedImageUrl = await resolveImageUrl(image || imageUrl, new URL(request.url).origin);
+    resolvedImageUrl = await resolveImageUrl(image || imageUrl, origin);
+    resolvedLastFrameUrl = await resolveImageUrl(
+      lastFrame || lastFrameUrl,
+      origin
+    );
   } catch (err) {
-    return Response.json({ error: err.message || "Could not upload the image." }, { status: 400 });
+    return Response.json(
+      { error: err.message || "Could not upload the image." },
+      { status: 400 }
+    );
   }
 
   if (model.requiresImage && !resolvedImageUrl) {
     return Response.json({ error: "Upload a photo first." }, { status: 400 });
   }
 
+  if (model.requiresLastFrame && !resolvedLastFrameUrl) {
+    return Response.json(
+      { error: "Upload an end frame first." },
+      { status: 400 }
+    );
+  }
+
   const payload = buildVideoPayload({
     model,
-    prompt: String(prompt).trim(),
+    prompt,
     imageUrl: resolvedImageUrl,
+    lastFrameUrl: resolvedLastFrameUrl,
     aspectRatio,
     resolution,
     duration,
+    audio,
   });
 
   let data;
@@ -173,7 +232,10 @@ export async function GET(request) {
   if (status === "FAILED" || status === "CANCELLED") {
     return Response.json({
       status,
-      error: data.error || data.message || "The AI generation failed on the provider.",
+      error:
+        data.error ||
+        data.message ||
+        "The AI generation failed on the provider.",
     });
   }
 
