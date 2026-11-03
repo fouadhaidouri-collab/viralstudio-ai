@@ -604,31 +604,6 @@ export default function VideoLab({ mode = "image" }) {
     setImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const deductCredits = async (amount) => {
-    const res = await fetch("/api/credits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "deduct",
-        amount,
-        module_id: model.model_id,
-        endpoint_id: model.model_id,
-      }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      throw new Error(data.error || "Could not deduct credits.");
-    }
-    if (typeof window !== "undefined" && typeof data.balance === "number") {
-      window.dispatchEvent(
-        new CustomEvent("viralstudio:credits-updated", {
-          detail: { balance: data.balance },
-        })
-      );
-    }
-    return data;
-  };
-
   const generateOne = async () => {
     const modelId = model.model_id;
     if (!modelId) throw new Error(`Unknown model: ${model.name}`);
@@ -687,7 +662,13 @@ export default function VideoLab({ mode = "image" }) {
       if (progress != null) setGenerationProgress(progress);
 
       if (statusData.status === "COMPLETED") {
-        return statusData.videoUrl;
+        if (typeof statusData.balance === "number") window.dispatchEvent(new CustomEvent("viralstudio:credits-updated", { detail: { balance: statusData.balance } }));
+        if (statusData.billingError) setVideoError(statusData.billingError);
+        return {
+          videoUrl: statusData.videoUrl,
+          creditsCharged: !statusData.billingError,
+          billingError: statusData.billingError || null,
+        };
       } else if (
         statusData.status === "FAILED" ||
         statusData.status === "CANCELLED"
@@ -735,22 +716,14 @@ export default function VideoLab({ mode = "image" }) {
 
     try {
       for (let i = 0; i < videoCount; i++) {
-        const url = await generateOne();
+        const generation = await generateOne();
+        const url = generation.videoUrl;
         setGeneratedInCurrentRun((count) => count + 1);
         setVideoUrls((current) => [url, ...current.filter((item) => item !== url)]);
         setSelectedVideoIndex(0);
 
-        let creditsUsed = 0;
-        if (perVideoCredits > 0) {
-          try {
-            await deductCredits(perVideoCredits);
-            creditsUsed = perVideoCredits;
-          } catch (err) {
-            setVideoError(
-              `Video ready, but credits could not be deducted: ${err.message}`
-            );
-          }
-        }
+        const creditsUsed = generation.creditsCharged ? perVideoCredits : 0;
+        if (generation.billingError) setVideoError(generation.billingError);
 
         fetch("/api/generations", {
           method: "POST",
