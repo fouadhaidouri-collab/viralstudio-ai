@@ -21,6 +21,11 @@ export default function AdminPricingPage() {
           credit_pack_credits: data.credit_pack_credits,
           default_markup_multiplier: data.default_markup_multiplier,
           minimum_generation_credits: data.minimum_generation_credits,
+          pricing_tiers: data.pricing_tiers || [
+            { maxCost: 0.02, markup: 4 }, { maxCost: 0.10, markup: 3 },
+            { maxCost: 0.50, markup: 2.2 }, { maxCost: 1, markup: 1.8 },
+            { maxCost: 3, markup: 1.5 }, { maxCost: null, markup: 1.3 },
+          ],
         });
       })
       .catch(() => {});
@@ -119,6 +124,25 @@ export default function AdminPricingPage() {
                   className="w-full bg-surface-container-lowest border border-surface-border rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
               </div>
+            </div>
+
+            <div className="space-y-3 border-t border-surface-border pt-4">
+              <div>
+                <h3 className="text-sm font-semibold">Automatic API Markup Tiers</h3>
+                <p className="text-xs text-on-surface-variant mt-1">Markup is selected from the total estimated API cost of each generation. Higher-cost operations use a lower multiplier.</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs text-on-surface-variant">
+                <span>Maximum API cost</span><span>Markup multiplier</span><span>Gross markup</span>
+              </div>
+              {(form.pricing_tiers || []).map((tier, index) => (
+                <div key={index} className="grid grid-cols-3 gap-2 items-center">
+                  <span className="text-xs">{index === 5 ? "Above $3.00" : `Up to $${Number(tier.maxCost).toFixed(2)}`}</span>
+                  <input type="number" min="0.01" step="0.1" value={tier.markup}
+                    onChange={(e) => setForm({ ...form, pricing_tiers: form.pricing_tiers.map((item, i) => i === index ? { ...item, markup: parseFloat(e.target.value) || 1 } : item) })}
+                    className="w-full bg-surface-container-lowest border border-surface-border rounded-lg px-3 py-2 text-sm" />
+                  <span className="text-xs">{Math.round((Number(tier.markup) - 1) * 100)}%</span>
+                </div>
+              ))}
             </div>
 
             <div className="text-xs text-on-surface-variant bg-surface-container-high rounded-lg px-3 py-2">
