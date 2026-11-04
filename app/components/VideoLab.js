@@ -60,6 +60,7 @@ const TEMPLATE_VIDEOS = Array.from(
   { length: 11 },
   (_, i) => `/templates/template${i + 1}.mp4`
 );
+const DEFAULT_PREVIEW_VIDEO = "/templates/template0.mp4";
 
 const normalizeProgress = (value) => {
   let progress = null;
@@ -538,15 +539,8 @@ export default function VideoLab({ mode = "image" }) {
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("History unavailable"))))
       .then(async (data) => {
         if (cancelled) return;
-        const savedVideos = (Array.isArray(data.data) ? data.data : [])
-          .filter((item) => String(item.type || "").toLowerCase().includes("video") && item.output_url)
-          .map((item) => item.output_url);
-        const uniqueVideos = [...new Set(savedVideos)];
-        setVideoUrls((current) => {
-          const currentSet = new Set(current);
-          return [...uniqueVideos.filter((url) => !currentSet.has(url)), ...current];
-        });
-
+        // Completed historical videos stay in Library. Only current-session
+        // results are shown in this page's Generated Videos strip.
         const activeJobs = Array.isArray(data.activeJobs) ? data.activeJobs : [];
         if (!activeJobs.length) return;
         setGenerationBatch(activeJobs.map((job) => ({
@@ -815,7 +809,8 @@ export default function VideoLab({ mode = "image" }) {
     }
   };
 
-  const selectedVideoUrl = videoUrls[selectedVideoIndex] || videoUrls[0] || null;
+  const selectedVideoUrl =
+    videoUrls[selectedVideoIndex] || videoUrls[0] || DEFAULT_PREVIEW_VIDEO;
 
   const generateDisabled =
     generating ||
@@ -1116,7 +1111,7 @@ export default function VideoLab({ mode = "image" }) {
                     }}
                     className="absolute inset-0"
                   ></div>
-                  {videoUrls.length > 0 && !generating ? (
+                  {!generating ? (
                     <>
                       <video
                         key={selectedVideoUrl}
@@ -1124,8 +1119,13 @@ export default function VideoLab({ mode = "image" }) {
                         controls
                         autoPlay
                         loop
+                        muted={selectedVideoUrl === DEFAULT_PREVIEW_VIDEO}
                         playsInline
-                        className="absolute inset-0 z-10 h-full w-full bg-black object-contain"
+                        className={`absolute inset-0 z-10 h-full w-full bg-black ${
+                          selectedVideoUrl === DEFAULT_PREVIEW_VIDEO
+                            ? "object-cover"
+                            : "object-contain"
+                        }`}
                       />
                       {generating && (
                         <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur">
