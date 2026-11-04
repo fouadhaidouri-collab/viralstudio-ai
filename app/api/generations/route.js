@@ -14,8 +14,22 @@ export async function GET() {
 
   let activeJobs = [];
   try {
+    await run(`CREATE TABLE IF NOT EXISTS video_credit_holds (
+      request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'held', created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`);
+    // Jobs left pending for more than 12 hours are stale, not active UI work.
+    // Release only their still-held credits; never charge them during cleanup.
+    await run(
+      "UPDATE video_generation_billing SET status = 'expired' WHERE user_id = ? AND status = 'pending' AND created_at < datetime('now', '-12 hours')",
+      [userId]
+    );
+    await run(
+      "UPDATE video_credit_holds SET status = 'released' WHERE user_id = ? AND status IN ('held','charging') AND request_id IN (SELECT request_id FROM video_generation_billing WHERE user_id = ? AND status = 'expired')",
+      [userId, userId]
+    );
     activeJobs = await query(
-      "SELECT request_id, model_id, created_at FROM video_generation_billing WHERE user_id = ? AND status = 'pending' AND provider_id IS NOT NULL ORDER BY created_at ASC",
+      "SELECT request_id, model_id, created_at FROM video_generation_billing WHERE user_id = ? AND status = 'pending' AND provider_id IS NOT NULL AND created_at >= datetime('now', '-12 hours') ORDER BY created_at ASC",
       [userId]
     );
   } catch {

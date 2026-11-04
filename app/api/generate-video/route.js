@@ -295,9 +295,20 @@ export async function GET(request) {
     const videoUrl = outputUrl(data);
     if (!videoUrl) return Response.json({ status: "PROCESSING", progress: data.progress ?? null });
     if (billing.status === "pending") {
-      try {
-        // D1 batch is transactional. Only the request that changes its hold
-        // from held to charging can debit the account; concurrent polls are no-ops.
+      const creditHold = await get(
+        "SELECT status FROM video_credit_holds WHERE request_id = ? AND user_id = ?",
+        [String(requestId), session.user.id]
+      );
+
+      // A pending billing row without a live credit hold cannot be charged.
+      // Mark it completed-unpaid rather than showing a false payment error forever.
+      if (!creditHold || !["held", "charging"].includes(creditHold.status)) {
+        await run(
+          "UPDATE video_generation_billing SET status = 'completed_unpaid' WHERE request_id = ? AND user_id = ? AND status = 'pending'",
+          [String(requestId), session.user.id]
+        );
+      } else try {
+        // D1 batch is transactional. Only a live hold can be settled; concurrent polls are no-ops.
         await batch([
           { sql: "UPDATE video_credit_holds SET status = 'charging' WHERE request_id = ? AND user_id = ? AND status = 'held'", params: [String(requestId), session.user.id] },
           { sql: "UPDATE credits SET current_balance = current_balance - ?, total_used = total_used + ?, updated_at = datetime('now') WHERE user_id = ? AND EXISTS (SELECT 1 FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'charging')", params: [billing.amount, billing.amount, session.user.id, String(requestId), session.user.id] },
@@ -311,15 +322,15 @@ export async function GET(request) {
       }
     }
     const finalBilling = await get("SELECT status, amount, model_id, prompt, provider FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
-    if (finalBilling?.status === "charged") {
+    if (["charged", "completed_unpaid"].includes(finalBilling?.status)) {
       await run(
         "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, output_url, thumbnail_url, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'completed', ?, ?, ?, datetime('now'))",
-        [`video_${requestId}`, session.user.id, finalBilling.provider || "Renderful", finalBilling.model_id, finalBilling.prompt || "", finalBilling.amount || 0, videoUrl, videoUrl]
+        [`video_${requestId}`, session.user.id, finalBilling.provider || "Renderful", finalBilling.model_id, finalBilling.prompt || "", finalBilling.status === "charged" ? (finalBilling.amount || 0) : 0, videoUrl, videoUrl]
       );
     }
     const balance = await getUserCredits(session.user.id);
     return Response.json({ status, videoUrl, outputs: data.outputs || [], balance: balance.balance_credits || 0,
-      billingError: finalBilling?.status === "pending" ? "Your video is ready, but your balance changed while it was generating. Please add credits and contact support." : null });
+      billingError: finalBilling?.status === "pending" ? "Your video is ready, but its credit settlement needs support. The video is saved; do not generate it again." : null });
   }
 
   if (status === "FAILED" || status === "CANCELLED") {
