@@ -1013,15 +1013,16 @@ export default function VideoLab({ mode = "image" }) {
                     type="button"
                     onClick={() => setSettingsOpen(true)}
                     disabled={generating}
-                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.02] px-4 py-3 text-left shadow-sm transition-all duration-200 hover:border-primary/40 hover:from-primary/[0.08] hover:to-primary/[0.02] disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label={`Video Settings: ${currentConfig.aspectRatio?.label || "Aspect ratio"}, ${currentConfig.resolution || "Auto"}, ${currentConfig.duration}, ${videoCount} ${videoCount === 1 ? "video" : "videos"}`}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.025] px-4 py-3.5 text-left shadow-sm transition-all duration-200 hover:border-primary/40 hover:from-primary/[0.1] hover:to-primary/[0.03] active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <span className="min-w-0">
-                      <span className="block text-[10px] font-semibold uppercase tracking-wider text-white/40">Video Settings</span>
-                      <span className="mt-1 block truncate text-xs font-medium text-white/85">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-xs font-semibold tracking-wide text-white/75">Video Settings</span>
+                      <span className="mt-1.5 block whitespace-normal break-words text-xs font-semibold leading-relaxed text-white">
                         {currentConfig.aspectRatio?.label || "Aspect ratio"} · {currentConfig.resolution || "Auto"} · {currentConfig.duration} · {videoCount} {videoCount === 1 ? "video" : "videos"}
                       </span>
                     </span>
-                    <Icon name="tune" className="shrink-0 text-lg text-primary" />
+                    <Icon name="tune" className="shrink-0 text-xl text-primary" />
                   </button>
 
                   {!isTextMode && !supportsNativeAspectRatio && (
