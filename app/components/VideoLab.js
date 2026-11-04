@@ -1109,10 +1109,8 @@ export default function VideoLab({ mode = "image" }) {
                         loop
                         muted={selectedVideoUrl === DEFAULT_PREVIEW_VIDEO}
                         playsInline
-                        className={`absolute inset-0 z-10 h-full w-full bg-black ${
-                          selectedVideoUrl === DEFAULT_PREVIEW_VIDEO
-                            ? "object-cover"
-                            : "object-contain"
+                        className={`absolute inset-0 z-10 h-full w-full bg-black object-contain sm:${
+                          selectedVideoUrl === DEFAULT_PREVIEW_VIDEO ? "object-cover" : "object-contain"
                         }`}
                       />
                       {generating && (
