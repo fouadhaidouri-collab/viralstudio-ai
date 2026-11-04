@@ -382,6 +382,7 @@ export default function VideoLab({ mode = "image" }) {
   const [images, setImages] = useState([]);
   const [lastFrame, setLastFrame] = useState(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -1008,34 +1009,20 @@ export default function VideoLab({ mode = "image" }) {
                     onClick={() => setCatalogOpen(true)}
                   />
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <Dropdown
-                      label="Aspect Ratio"
-                      value={currentConfig.aspectRatio?.label}
-                      options={availableAspectRatios}
-                      onChange={(v) => updateConfig("aspectRatio", v)}
-                    />
-                    {availableResolutions.length > 0 && (
-                      <Dropdown
-                        label="Resolution"
-                        value={currentConfig.resolution}
-                        options={availableResolutions}
-                        onChange={(v) => updateConfig("resolution", v)}
-                      />
-                    )}
-                    <Dropdown
-                      label="Duration"
-                      value={currentConfig.duration}
-                      options={availableDurations}
-                      onChange={(v) => updateConfig("duration", v)}
-                    />
-                    <Dropdown
-                      label="Quantity"
-                      value={String(videoCount)}
-                      options={["1", "2", "3", "4", "5"]}
-                      onChange={(v) => setVideoCount(Number(v))}
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSettingsOpen(true)}
+                    disabled={generating}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.02] px-4 py-3 text-left shadow-sm transition-all duration-200 hover:border-primary/40 hover:from-primary/[0.08] hover:to-primary/[0.02] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-[10px] font-semibold uppercase tracking-wider text-white/40">Video Settings</span>
+                      <span className="mt-1 block truncate text-xs font-medium text-white/85">
+                        {currentConfig.aspectRatio?.label || "Aspect ratio"} · {currentConfig.resolution || "Auto"} · {currentConfig.duration} · {videoCount} {videoCount === 1 ? "video" : "videos"}
+                      </span>
+                    </span>
+                    <Icon name="tune" className="shrink-0 text-lg text-primary" />
+                  </button>
 
                   {!isTextMode && !supportsNativeAspectRatio && (
                     <p className="text-[10px] leading-relaxed text-on-surface-variant/60">
@@ -1328,6 +1315,87 @@ export default function VideoLab({ mode = "image" }) {
             )}
           </div>
         </main>
+        {settingsOpen && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setSettingsOpen(false);
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="video-settings-title"
+              className="w-full max-w-md rounded-2xl border border-white/10 bg-[#15131d] p-5 shadow-2xl"
+            >
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div>
+                  <h2 id="video-settings-title" className="text-base font-semibold text-white">Video Settings</h2>
+                  <p className="mt-1 text-xs text-white/45">Choose options supported by the selected AI model.</p>
+                </div>
+                <button type="button" onClick={() => setSettingsOpen(false)} aria-label="Close settings" className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/60 transition hover:bg-white/10 hover:text-white">
+                  <Icon name="close" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Dropdown
+                  label="Aspect Ratio"
+                  value={currentConfig.aspectRatio?.label}
+                  options={availableAspectRatios}
+                  onChange={(value) => updateConfig("aspectRatio", value)}
+                />
+                {availableResolutions.length > 0 && (
+                  <Dropdown
+                    label="Resolution"
+                    value={currentConfig.resolution}
+                    options={availableResolutions}
+                    onChange={(value) => updateConfig("resolution", value)}
+                  />
+                )}
+              </div>
+
+              <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="mb-3 flex items-center justify-between">
+                  <label htmlFor="video-duration-slider" className="text-[10px] font-semibold uppercase tracking-wider text-white/45">Duration</label>
+                  <span className="rounded-lg bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">{currentConfig.duration}</span>
+                </div>
+                <input
+                  id="video-duration-slider"
+                  type="range"
+                  min="0"
+                  max={Math.max(0, availableDurations.length - 1)}
+                  step="1"
+                  value={Math.max(0, availableDurations.indexOf(currentConfig.duration))}
+                  onChange={(event) => updateConfig("duration", availableDurations[Number(event.target.value)])}
+                  disabled={availableDurations.length <= 1}
+                  className="h-2 w-full cursor-pointer accent-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+                />
+                <div className="mt-2 flex justify-between text-[10px] text-white/35">
+                  <span>{availableDurations[0]}</span>
+                  <span>{availableDurations[availableDurations.length - 1]}</span>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Dropdown
+                  label="Quantity"
+                  value={String(videoCount)}
+                  options={["1", "2", "3", "4", "5"]}
+                  onChange={(value) => setVideoCount(Number(value))}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                className="primary-gradient mt-5 flex w-full items-center justify-center rounded-xl py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:translate-y-[-1px]"
+              >
+                Apply Settings
+              </button>
+            </div>
+          </div>
+        )}
         <VideoModelCatalog
           open={catalogOpen}
           onClose={() => setCatalogOpen(false)}
