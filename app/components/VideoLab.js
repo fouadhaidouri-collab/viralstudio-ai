@@ -532,9 +532,11 @@ export default function VideoLab({ mode = "image" }) {
   useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
     fetch("/api/generations")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("History unavailable"))))
-      .then((data) => {
+      .then(async (data) => {
         if (cancelled) return;
         const savedVideos = (Array.isArray(data.data) ? data.data : [])
           .filter((item) => String(item.type || "").toLowerCase().includes("video") && item.output_url)
@@ -544,6 +546,51 @@ export default function VideoLab({ mode = "image" }) {
           const currentSet = new Set(current);
           return [...uniqueVideos.filter((url) => !currentSet.has(url)), ...current];
         });
+
+        const activeJobs = Array.isArray(data.activeJobs) ? data.activeJobs : [];
+        if (!activeJobs.length) return;
+        setGenerationBatch(activeJobs.map((job) => ({
+          id: job.request_id,
+          requestId: job.request_id,
+          modelId: job.model_id,
+          status: "generating",
+          videoUrl: null,
+        })));
+        setGenerating(true);
+
+        await Promise.all(activeJobs.map(async (job) => {
+          while (!cancelled) {
+            try {
+              const response = await fetch(
+                `/api/generate-video?requestId=${encodeURIComponent(job.request_id)}&modelId=${encodeURIComponent(job.model_id || "")}`
+              );
+              const statusData = await response.json();
+              if (response.ok && statusData.status === "COMPLETED" && statusData.videoUrl) {
+                setVideoUrls((current) => [statusData.videoUrl, ...current.filter((url) => url !== statusData.videoUrl)]);
+                setSelectedVideoIndex(0);
+                setGenerationBatch((items) => items.map((item) =>
+                  item.id === job.request_id ? { ...item, status: "completed", videoUrl: statusData.videoUrl } : item
+                ));
+                if (typeof statusData.balance === "number") {
+                  window.dispatchEvent(new CustomEvent("viralstudio:credits-updated", { detail: { balance: statusData.balance } }));
+                }
+                if (statusData.billingError) setVideoError(statusData.billingError);
+                return;
+              }
+              if (response.ok && (statusData.status === "FAILED" || statusData.status === "CANCELLED")) {
+                setGenerationBatch((items) => items.map((item) =>
+                  item.id === job.request_id ? { ...item, status: "failed" } : item
+                ));
+                return;
+              }
+            } catch {
+              // Retry transient network/provider errors without losing the saved job.
+            }
+            await wait(3000);
+          }
+        }));
+
+        if (!cancelled) setGenerating(false);
       })
       .catch(() => {});
     return () => {
@@ -740,19 +787,8 @@ export default function VideoLab({ mode = "image" }) {
             const creditsUsed = generation.creditsCharged ? perVideoCredits : 0;
             if (generation.billingError) setVideoError(generation.billingError);
 
-            fetch("/api/generations", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                type: "AI Video",
-                provider: model.provider || "Unknown",
-                model: model.model_id,
-                prompt,
-                output_url: url,
-                thumbnail_url: url,
-                credits_used: creditsUsed,
-              }),
-            }).catch(() => {});
+            // The generation API persists the completed video server-side,
+            // including when the user leaves this page before it finishes.
 
             return { success: true };
           } catch (err) {
