@@ -27,7 +27,6 @@ export const videoAspectRatios = [
   { label: "4:3", icon: "crop_7_5" },
   { label: "3:4", icon: "crop_7_5" },
   { label: "21:9", icon: "crop_16_9" },
-  { label: "Adaptive", icon: "aspect_ratio" },
 ];
 
 export const videoResolutions = [
