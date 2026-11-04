@@ -1329,69 +1329,140 @@ export default function VideoLab({ mode = "image" }) {
               aria-labelledby="video-settings-title"
               className="w-full max-w-md rounded-2xl border border-white/10 bg-[#15131d] p-5 shadow-2xl"
             >
-              <div className="mb-5 flex items-center justify-between gap-3">
+              <div className="mb-6 flex items-center justify-between gap-3">
                 <div>
-                  <h2 id="video-settings-title" className="text-base font-semibold text-white">Video Settings</h2>
-                  <p className="mt-1 text-xs text-white/45">Choose options supported by the selected AI model.</p>
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-400/10 text-violet-300">
+                      <Icon name="tune" className="text-base" />
+                    </span>
+                    <h2 id="video-settings-title" className="text-lg font-semibold tracking-tight text-white">Video Settings</h2>
+                  </div>
+                  <p className="text-xs text-white/45">Customize your video before generating.</p>
                 </div>
-                <button type="button" onClick={() => setSettingsOpen(false)} aria-label="Close settings" className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/60 transition hover:bg-white/10 hover:text-white">
+                <button type="button" onClick={() => setSettingsOpen(false)} aria-label="Close settings" className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-white/60 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white">
                   <Icon name="close" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Dropdown
-                  label="Aspect Ratio"
-                  value={currentConfig.aspectRatio?.label}
-                  options={availableAspectRatios}
-                  onChange={(value) => updateConfig("aspectRatio", value)}
-                />
+              <div className="space-y-5">
+                <section>
+                  <div className="mb-2.5 flex items-center justify-between">
+                    <h3 className="text-xs font-semibold text-white/80">Aspect Ratio</h3>
+                    <span className="text-[10px] text-white/35">Choose your format</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {availableAspectRatios.map((ratio) => {
+                      const selected = currentConfig.aspectRatio?.label === ratio.label;
+                      return (
+                        <button
+                          key={ratio.label}
+                          type="button"
+                          onClick={() => updateConfig("aspectRatio", ratio)}
+                          aria-pressed={selected}
+                          className={`flex min-h-[66px] flex-col items-center justify-center gap-2 rounded-xl border px-2 py-2.5 transition-all duration-150 active:scale-[0.98] ${
+                            selected
+                              ? "border-violet-400/60 bg-violet-500/15 text-white shadow-[0_0_0_1px_rgba(167,139,250,0.12)]"
+                              : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
+                          }`}
+                        >
+                          <AspectIcon label={ratio.label} size="text-base" />
+                          <span className="text-[11px] font-semibold">{ratio.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
                 {availableResolutions.length > 0 && (
-                  <Dropdown
-                    label="Resolution"
-                    value={currentConfig.resolution}
-                    options={availableResolutions}
-                    onChange={(value) => updateConfig("resolution", value)}
-                  />
+                  <section>
+                    <div className="mb-2.5 flex items-center justify-between">
+                      <h3 className="text-xs font-semibold text-white/80">Resolution</h3>
+                      <span className="text-[10px] text-white/35">Output quality</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {availableResolutions.map((resolution) => {
+                        const selected = currentConfig.resolution === resolution;
+                        return (
+                          <button
+                            key={resolution}
+                            type="button"
+                            onClick={() => updateConfig("resolution", resolution)}
+                            aria-pressed={selected}
+                            className={`rounded-xl border px-3 py-3 text-xs font-semibold transition-all duration-150 active:scale-[0.98] ${
+                              selected
+                                ? "border-violet-400/60 bg-violet-500/15 text-white"
+                                : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
+                            }`}
+                          >
+                            {prettyResolution(resolution)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
                 )}
-              </div>
 
-              <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="mb-3 flex items-center justify-between">
-                  <label htmlFor="video-duration-slider" className="text-[10px] font-semibold uppercase tracking-wider text-white/45">Duration</label>
-                  <span className="rounded-lg bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">{currentConfig.duration}</span>
-                </div>
-                <input
-                  id="video-duration-slider"
-                  type="range"
-                  min="0"
-                  max={Math.max(0, availableDurations.length - 1)}
-                  step="1"
-                  value={Math.max(0, availableDurations.indexOf(currentConfig.duration))}
-                  onChange={(event) => updateConfig("duration", availableDurations[Number(event.target.value)])}
-                  disabled={availableDurations.length <= 1}
-                  className="h-2 w-full cursor-pointer accent-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40"
-                />
-                <div className="mt-2 flex justify-between text-[10px] text-white/35">
-                  <span>{availableDurations[0]}</span>
-                  <span>{availableDurations[availableDurations.length - 1]}</span>
-                </div>
-              </div>
+                <section>
+                  <div className="mb-2.5 flex items-center justify-between">
+                    <h3 className="text-xs font-semibold text-white/80">Duration</h3>
+                    <span className="rounded-lg border border-violet-400/25 bg-violet-400/10 px-2.5 py-1 text-[11px] font-semibold text-violet-200">{currentConfig.duration}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {availableDurations.map((duration) => {
+                      const selected = currentConfig.duration === duration;
+                      return (
+                        <button
+                          key={duration}
+                          type="button"
+                          onClick={() => updateConfig("duration", duration)}
+                          aria-pressed={selected}
+                          className={`rounded-xl border px-2 py-3 text-xs font-semibold transition-all duration-150 active:scale-[0.98] ${
+                            selected
+                              ? "border-violet-400/60 bg-violet-500/15 text-white"
+                              : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
+                          }`}
+                        >
+                          {duration}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
 
-              <div className="mt-4">
-                <Dropdown
-                  label="Quantity"
-                  value={String(videoCount)}
-                  options={["1", "2", "3", "4", "5"]}
-                  onChange={(value) => setVideoCount(Number(value))}
-                />
+                <section>
+                  <div className="mb-2.5 flex items-center justify-between">
+                    <h3 className="text-xs font-semibold text-white/80">Quantity</h3>
+                    <span className="text-[10px] text-white/35">Number of videos</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {[1, 2, 3, 4, 5].map((count) => {
+                      const selected = videoCount === count;
+                      return (
+                        <button
+                          key={count}
+                          type="button"
+                          onClick={() => setVideoCount(count)}
+                          aria-pressed={selected}
+                          className={`flex h-11 items-center justify-center rounded-xl border text-sm font-semibold transition-all duration-150 active:scale-[0.97] ${
+                            selected
+                              ? "border-violet-400/60 bg-violet-500/15 text-white"
+                              : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
+                          }`}
+                        >
+                          {count}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
               </div>
 
               <button
                 type="button"
                 onClick={() => setSettingsOpen(false)}
-                className="primary-gradient mt-5 flex w-full items-center justify-center rounded-xl py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:translate-y-[-1px]"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-violet-300/20 bg-gradient-to-r from-violet-600 to-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition-all duration-150 hover:brightness-110 active:scale-[0.99]"
               >
+                <Icon name="check" className="text-base" />
                 Apply Settings
               </button>
             </div>
