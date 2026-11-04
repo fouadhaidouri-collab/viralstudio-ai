@@ -716,53 +716,63 @@ export default function VideoLab({ mode = "image" }) {
     setVideoError(null);
     setGenerationBatch(Array.from({ length: videoCount }, (_, index) => ({
       id: `batch-${Date.now()}-${index}`,
-      status: index === 0 ? "generating" : "waiting",
+      status: "generating",
       videoUrl: null,
     })));
-    let activeBatchIndex = 0;
 
     try {
-      for (let i = 0; i < videoCount; i++) {
-        activeBatchIndex = i;
-        setGenerationBatch((items) => items.map((item, index) => ({
-          ...item,
-          status: index === i ? "generating" : item.status,
-        })));
-        const generation = await generateOne();
-        const url = generation.videoUrl;
-        setGeneratedInCurrentRun((count) => count + 1);
-        setVideoUrls((current) => [url, ...current.filter((item) => item !== url)]);
-        setSelectedVideoIndex(0);
-        setGenerationBatch((items) => items.map((item, index) => index === i
-          ? { ...item, status: "completed", videoUrl: url }
-          : item));
+      // Submit and monitor every requested video concurrently. Each request
+      // has its own provider job ID and its own server-side credit hold.
+      const results = await Promise.all(
+        Array.from({ length: videoCount }, async (_, index) => {
+          try {
+            const generation = await generateOne();
+            const url = generation.videoUrl;
+            setGeneratedInCurrentRun((count) => count + 1);
+            setVideoUrls((current) => [url, ...current.filter((item) => item !== url)]);
+            setSelectedVideoIndex(0);
+            setGenerationBatch((items) => items.map((item, itemIndex) =>
+              itemIndex === index
+                ? { ...item, status: "completed", videoUrl: url }
+                : item
+            ));
 
-        const creditsUsed = generation.creditsCharged ? perVideoCredits : 0;
-        if (generation.billingError) setVideoError(generation.billingError);
+            const creditsUsed = generation.creditsCharged ? perVideoCredits : 0;
+            if (generation.billingError) setVideoError(generation.billingError);
 
-        fetch("/api/generations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: "AI Video",
-            provider: model.provider || "Unknown",
-            model: model.model_id,
-            prompt,
-            output_url: url,
-            thumbnail_url: url,
-            credits_used: creditsUsed,
-          }),
-        }).catch(() => {});
+            fetch("/api/generations", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                type: "AI Video",
+                provider: model.provider || "Unknown",
+                model: model.model_id,
+                prompt,
+                output_url: url,
+                thumbnail_url: url,
+                credits_used: creditsUsed,
+              }),
+            }).catch(() => {});
+
+            return { success: true };
+          } catch (err) {
+            setGenerationBatch((items) => items.map((item, itemIndex) =>
+              itemIndex === index ? { ...item, status: "failed" } : item
+            ));
+            return {
+              success: false,
+              error: err.message || "Video generation failed.",
+            };
+          }
+        })
+      );
+
+      const failures = results.filter((result) => !result.success);
+      if (failures.length > 0) {
+        setVideoError(
+          `${failures.length} of ${videoCount} videos failed. ${failures[0].error}`
+        );
       }
-    } catch (err) {
-      setVideoError(err.message);
-      setGenerationBatch((items) => items.map((item, index) =>
-        index === activeBatchIndex && item.status === "generating"
-          ? { ...item, status: "failed" }
-          : item.status === "waiting"
-            ? { ...item, status: "not-started" }
-            : item
-      ));
     } finally {
       setGenerating(false);
       setGenerationProgress(null);
