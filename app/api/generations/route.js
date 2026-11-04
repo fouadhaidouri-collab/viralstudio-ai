@@ -15,7 +15,7 @@ export async function GET() {
   let activeJobs = [];
   try {
     activeJobs = await query(
-      "SELECT request_id, model_id, prompt, provider, created_at FROM video_generation_billing WHERE user_id = ? AND status = 'pending' AND provider_id IS NOT NULL ORDER BY created_at ASC",
+      "SELECT request_id, model_id, created_at FROM video_generation_billing WHERE user_id = ? AND status = 'pending' AND provider_id IS NOT NULL ORDER BY created_at ASC",
       [userId]
     );
   } catch {
