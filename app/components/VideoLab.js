@@ -576,6 +576,7 @@ export default function VideoLab({ mode = "image" }) {
                 setGenerationBatch((items) => items.map((item) =>
                   item.id === job.request_id ? { ...item, status: "failed" } : item
                 ));
+                if (statusData.error) setVideoError(statusData.error);
                 return;
               }
             } catch {
