@@ -536,7 +536,7 @@ export default function VideoLab({ mode = "image" }) {
       .then((data) => {
         if (cancelled) return;
         const savedVideos = (Array.isArray(data.data) ? data.data : [])
-          .filter((item) => item.type === "AI Video" && item.output_url)
+          .filter((item) => String(item.type || "").toLowerCase().includes("video") && item.output_url)
           .map((item) => item.output_url);
         const uniqueVideos = [...new Set(savedVideos)];
         setVideoUrls((current) => {
