@@ -194,7 +194,7 @@ export default function VideoModelCatalog({
                   type="button"
                   onClick={() => scrollToFamily(family.name)}
                   aria-pressed={isActive}
-                  className={`group/provider relative flex min-h-[76px] w-full items-center gap-3 overflow-hidden rounded-xl border px-3 py-3 text-left transition-all duration-200 active:scale-[0.98] ${
+                  className={`group/provider relative flex min-h-[57px] w-full items-center gap-2 overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all duration-200 active:scale-[0.98] ${
                     isActive
                       ? "border-primary/50 bg-gradient-to-br from-primary/20 via-primary/[0.09] to-white/[0.025] text-white shadow-[0_0_0_1px_rgba(168,85,247,0.12),0_10px_28px_rgba(88,28,135,0.18)]"
                       : "border-white/10 bg-white/[0.035] text-white/65 hover:border-primary/35 hover:bg-white/[0.07] hover:text-white"
@@ -206,13 +206,13 @@ export default function VideoModelCatalog({
                   <img
                     src={`/logos/${family.logo}`}
                     alt=""
-                    className={`h-9 w-9 shrink-0 rounded-lg border object-cover shadow-sm ${
+                    className={`h-7 w-7 shrink-0 rounded-lg border object-cover shadow-sm ${
                       isActive ? "border-primary/30" : "border-white/10"
                     }`}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs font-bold tracking-wide">{family.name}</span>
-                    <span className={`mt-1 block text-[10px] ${
+                    <span className="block truncate text-[11px] font-bold tracking-wide">{family.name}</span>
+                    <span className={`mt-0.5 block text-[9px] ${
                       isActive ? "text-primary/90" : "text-white/35"
                     }`}>
                       {family.models.length} {family.models.length === 1 ? "model" : "models"}
