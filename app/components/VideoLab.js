@@ -1232,7 +1232,7 @@ export default function VideoLab({ mode = "image" }) {
                     "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)",
                 }}
               >
-                <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <h3 className="flex items-center gap-2 text-sm font-semibold">
                     <Icon name="checklist" className="text-base text-primary" />
                     Generated Videos <span className="text-xs text-white/40">({videoUrls.length + generationBatch.filter((item) => item.status !== "completed" && item.status !== "not-started").length})</span>
@@ -1327,9 +1327,9 @@ export default function VideoLab({ mode = "image" }) {
               role="dialog"
               aria-modal="true"
               aria-labelledby="video-settings-title"
-              className="w-full max-w-md rounded-2xl border border-white/10 bg-[#15131d] p-5 shadow-2xl"
+              className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-[#15131d] p-4 shadow-2xl sm:p-5"
             >
-              <div className="mb-6 flex items-center justify-between gap-3">
+              <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <div className="mb-2 flex items-center gap-2">
                     <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-indigo-400/25 bg-gradient-to-br from-violet-500/15 to-indigo-500/10 text-indigo-200">
@@ -1344,7 +1344,7 @@ export default function VideoLab({ mode = "image" }) {
                 </button>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <section>
                   <div className="mb-2.5 flex items-center justify-between">
                     <h3 className="text-xs font-semibold text-white/80">Aspect Ratio</h3>
@@ -1359,7 +1359,7 @@ export default function VideoLab({ mode = "image" }) {
                           type="button"
                           onClick={() => updateConfig("aspectRatio", ratio)}
                           aria-pressed={selected}
-                          className={`flex min-h-[66px] flex-col items-center justify-center gap-2 rounded-xl border px-2 py-2.5 transition-all duration-150 active:scale-[0.98] ${
+                          className={`flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-2 transition-all duration-150 active:scale-[0.98] ${
                             selected
                               ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_0_0_1px_rgba(129,140,248,0.22),0_8px_22px_rgba(79,70,229,0.12)]"
                               : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
@@ -1388,7 +1388,7 @@ export default function VideoLab({ mode = "image" }) {
                             type="button"
                             onClick={() => updateConfig("resolution", resolution)}
                             aria-pressed={selected}
-                            className={`rounded-xl border px-3 py-3 text-xs font-semibold transition-all duration-150 active:scale-[0.98] ${
+                            className={`rounded-xl border px-3 py-2.5 text-xs font-semibold transition-all duration-150 active:scale-[0.98] ${
                               selected
                                 ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.12)]"
                                 : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
@@ -1412,7 +1412,7 @@ export default function VideoLab({ mode = "image" }) {
                       {currentConfig.duration}
                     </span>
                   </div>
-                  <div className="rounded-xl border border-white/[0.08] bg-[#1b1a26] px-4 pb-3 pt-4">
+                  <div className="rounded-xl border border-white/[0.08] bg-[#1b1a26] px-4 pb-2.5 pt-3">
                     <input
                       type="range"
                       min={0}
@@ -1448,7 +1448,7 @@ export default function VideoLab({ mode = "image" }) {
                           type="button"
                           onClick={() => setVideoCount(count)}
                           aria-pressed={selected}
-                          className={`flex h-11 items-center justify-center rounded-xl border text-sm font-semibold transition-all duration-150 active:scale-[0.97] ${
+                          className={`flex h-10 items-center justify-center rounded-xl border text-sm font-semibold transition-all duration-150 active:scale-[0.97] ${
                             selected
                               ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.12)]"
                               : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
@@ -1462,11 +1462,11 @@ export default function VideoLab({ mode = "image" }) {
                 </section>
               </div>
 
-              <div className="mt-6 border-t border-white/[0.07] pt-4">
+              <div className="mt-4 border-t border-white/[0.07] pt-3">
                 <button
                   type="button"
                   onClick={() => setSettingsOpen(false)}
-                  className="group relative flex min-h-[52px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-xl border border-violet-300/25 bg-gradient-to-r from-violet-600 via-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(91,33,182,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-200/45 hover:shadow-[0_12px_30px_rgba(91,33,182,0.3)] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#15131d]"
+                  className="group relative flex min-h-[48px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-xl border border-violet-300/25 bg-gradient-to-r from-violet-600 via-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(91,33,182,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-200/45 hover:shadow-[0_12px_30px_rgba(91,33,182,0.3)] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#15131d]"
                 >
                   <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/0 via-white/[0.09] to-white/0 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                   <span className="relative flex h-6 w-6 items-center justify-center rounded-lg border border-white/15 bg-white/10">
@@ -1475,7 +1475,7 @@ export default function VideoLab({ mode = "image" }) {
                   <span className="relative">Apply Settings</span>
                   <Icon name="arrow-right" className="relative text-sm text-white/75 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
-                <p className="mt-2.5 text-center text-[10px] text-white/35">
+                <p className="mt-2 text-center text-[10px] text-white/35">
                   Your selections will be applied to this video
                 </p>
               </div>
