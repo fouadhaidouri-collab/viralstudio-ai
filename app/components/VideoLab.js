@@ -60,7 +60,7 @@ const TEMPLATE_VIDEOS = Array.from(
   { length: 11 },
   (_, i) => `/templates/template${i + 1}.mp4`
 );
-const DEFAULT_PREVIEW_VIDEO = "/templates/template0.mp4";
+const DEFAULT_PREVIEW_VIDEO = "https://d2w6xqzevsijyc.cloudfront.net/api/JIGywbUnFHXqTrXkDEVVhKzBdET2/afbiZH2XVI8Px0z0sx7R_0.mp4";
 
 const normalizeProgress = (value) => {
   let progress = null;
