@@ -386,6 +386,7 @@ export default function VideoLab({ mode = "image" }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [generatedInCurrentRun, setGeneratedInCurrentRun] = useState(0);
   const [videoUrls, setVideoUrls] = useState([]);
+  const [generationBatch, setGenerationBatch] = useState([]);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   const videoHistoryRef = useRef(null);
   const [videoError, setVideoError] = useState(null);
@@ -713,14 +714,28 @@ export default function VideoLab({ mode = "image" }) {
     setGeneratedInCurrentRun(0);
     setGenerationProgress(null);
     setVideoError(null);
+    setGenerationBatch(Array.from({ length: videoCount }, (_, index) => ({
+      id: `batch-${Date.now()}-${index}`,
+      status: index === 0 ? "generating" : "waiting",
+      videoUrl: null,
+    })));
+    let activeBatchIndex = 0;
 
     try {
       for (let i = 0; i < videoCount; i++) {
+        activeBatchIndex = i;
+        setGenerationBatch((items) => items.map((item, index) => ({
+          ...item,
+          status: index === i ? "generating" : item.status,
+        })));
         const generation = await generateOne();
         const url = generation.videoUrl;
         setGeneratedInCurrentRun((count) => count + 1);
         setVideoUrls((current) => [url, ...current.filter((item) => item !== url)]);
         setSelectedVideoIndex(0);
+        setGenerationBatch((items) => items.map((item, index) => index === i
+          ? { ...item, status: "completed", videoUrl: url }
+          : item));
 
         const creditsUsed = generation.creditsCharged ? perVideoCredits : 0;
         if (generation.billingError) setVideoError(generation.billingError);
@@ -741,6 +756,13 @@ export default function VideoLab({ mode = "image" }) {
       }
     } catch (err) {
       setVideoError(err.message);
+      setGenerationBatch((items) => items.map((item, index) =>
+        index === activeBatchIndex && item.status === "generating"
+          ? { ...item, status: "failed" }
+          : item.status === "waiting"
+            ? { ...item, status: "not-started" }
+            : item
+      ));
     } finally {
       setGenerating(false);
       setGenerationProgress(null);
@@ -1168,7 +1190,7 @@ export default function VideoLab({ mode = "image" }) {
               )}
             </div>
 
-            {videoUrls.length > 0 && (
+            {(videoUrls.length > 0 || generationBatch.length > 0) && (
               <div
                 className="glass-card card-glow rounded-xl border border-white/5 p-4 xl:col-span-2"
                 style={{
@@ -1179,7 +1201,7 @@ export default function VideoLab({ mode = "image" }) {
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <h3 className="flex items-center gap-2 text-sm font-semibold">
                     <Icon name="checklist" className="text-base text-primary" />
-                    Generated Videos <span className="text-xs text-white/40">({videoUrls.length})</span>
+                    Generated Videos <span className="text-xs text-white/40">({videoUrls.length + generationBatch.filter((item) => item.status !== "completed" && item.status !== "not-started").length})</span>
                   </h3>
                   <div className="flex items-center gap-1">
                     <button
@@ -1204,7 +1226,28 @@ export default function VideoLab({ mode = "image" }) {
                   ref={videoHistoryRef}
                   className="flex gap-3 overflow-x-auto pb-2 [scrollbar-color:rgba(168,85,247,0.55)_rgba(255,255,255,0.06)] [scrollbar-width:thin]"
                 >
-                  {videoUrls.map((url, i) => (
+                  {generationBatch.map((item, i) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      disabled={!item.videoUrl}
+                      onClick={() => item.videoUrl && setSelectedVideoIndex(videoUrls.indexOf(item.videoUrl))}
+                      className={`group relative w-40 shrink-0 overflow-hidden rounded-xl border text-left transition-all sm:w-48 ${item.videoUrl ? "border-white/10 hover:border-primary/50" : "border-white/10 bg-black/30"}`}
+                    >
+                      {item.videoUrl ? (
+                        <video src={item.videoUrl} muted playsInline preload="metadata" className="aspect-video w-full bg-black object-cover" />
+                      ) : (
+                        <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-white/[0.03] text-white/55">
+                          {item.status === "generating" ? (
+                            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                          ) : <Icon name={item.status === "failed" ? "alert-circle" : "clock"} className="text-lg" />}
+                          <span className="text-[10px] font-medium">{item.status === "generating" ? "Generating..." : item.status === "failed" ? "Failed" : item.status === "not-started" ? "Not started" : "Waiting"}</span>
+                        </div>
+                      )}
+                      <span className="block truncate bg-black/50 px-2 py-1.5 text-left text-[10px] font-medium text-white/75">Video {i + 1}</span>
+                    </button>
+                  ))}
+                  {videoUrls.filter((url) => !generationBatch.some((item) => item.videoUrl === url)).map((url, i) => (
                     <button
                       key={url}
                       type="button"
