@@ -1332,7 +1332,7 @@ export default function VideoLab({ mode = "image" }) {
               <div className="mb-6 flex items-center justify-between gap-3">
                 <div>
                   <div className="mb-2 flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-400/10 text-violet-300">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-indigo-400/25 bg-gradient-to-br from-violet-500/15 to-indigo-500/10 text-indigo-200">
                       <Icon name="tune" className="text-base" />
                     </span>
                     <h2 id="video-settings-title" className="text-lg font-semibold tracking-tight text-white">Video Settings</h2>
@@ -1361,7 +1361,7 @@ export default function VideoLab({ mode = "image" }) {
                           aria-pressed={selected}
                           className={`flex min-h-[66px] flex-col items-center justify-center gap-2 rounded-xl border px-2 py-2.5 transition-all duration-150 active:scale-[0.98] ${
                             selected
-                              ? "border-violet-400/60 bg-violet-500/15 text-white shadow-[0_0_0_1px_rgba(167,139,250,0.12)]"
+                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_0_0_1px_rgba(129,140,248,0.22),0_8px_22px_rgba(79,70,229,0.12)]"
                               : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
                           }`}
                         >
@@ -1390,7 +1390,7 @@ export default function VideoLab({ mode = "image" }) {
                             aria-pressed={selected}
                             className={`rounded-xl border px-3 py-3 text-xs font-semibold transition-all duration-150 active:scale-[0.98] ${
                               selected
-                                ? "border-violet-400/60 bg-violet-500/15 text-white"
+                                ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.12)]"
                                 : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
                             }`}
                           >
@@ -1405,7 +1405,7 @@ export default function VideoLab({ mode = "image" }) {
                 <section>
                   <div className="mb-2.5 flex items-center justify-between">
                     <h3 className="text-xs font-semibold text-white/80">Duration</h3>
-                    <span className="rounded-lg border border-violet-400/25 bg-violet-400/10 px-2.5 py-1 text-[11px] font-semibold text-violet-200">{currentConfig.duration}</span>
+                    <span className="rounded-lg border border-indigo-400/25 bg-indigo-400/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-200">{currentConfig.duration}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {availableDurations.map((duration) => {
@@ -1416,13 +1416,14 @@ export default function VideoLab({ mode = "image" }) {
                           type="button"
                           onClick={() => updateConfig("duration", duration)}
                           aria-pressed={selected}
-                          className={`rounded-xl border px-2 py-3 text-xs font-semibold transition-all duration-150 active:scale-[0.98] ${
+                          className={`group flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2.5 transition-all duration-200 active:scale-[0.97] ${
                             selected
-                              ? "border-violet-400/60 bg-violet-500/15 text-white"
-                              : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
+                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.16)]"
+                              : "border-white/[0.08] bg-[#1b1a26] text-white/60 hover:border-indigo-400/35 hover:bg-indigo-500/[0.07] hover:text-white"
                           }`}
                         >
-                          {duration}
+                          <span className="text-lg font-bold leading-none tracking-tight">{String(duration).match(/\\d+(?:\\.\\d+)?/)?.[0] || duration}</span>
+                          <span className={`text-[9px] font-bold uppercase tracking-[0.16em] ${selected ? "text-indigo-200" : "text-white/35"}`}>Seconds</span>
                         </button>
                       );
                     })}
@@ -1445,7 +1446,7 @@ export default function VideoLab({ mode = "image" }) {
                           aria-pressed={selected}
                           className={`flex h-11 items-center justify-center rounded-xl border text-sm font-semibold transition-all duration-150 active:scale-[0.97] ${
                             selected
-                              ? "border-violet-400/60 bg-violet-500/15 text-white"
+                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.12)]"
                               : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
                           }`}
                         >
