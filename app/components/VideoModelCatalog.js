@@ -185,27 +185,45 @@ export default function VideoModelCatalog({
             </div>
           </div>
 
-          <div className="relative mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="relative mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
             {groups.map((family) => {
               const isActive = activeFamily === family.name;
               return (
                 <button
                   key={family.name}
+                  type="button"
                   onClick={() => scrollToFamily(family.name)}
-                  className={`flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-left transition-all ${
+                  aria-pressed={isActive}
+                  className={`group/provider relative flex min-h-[76px] w-full items-center gap-3 overflow-hidden rounded-xl border px-3 py-3 text-left transition-all duration-200 active:scale-[0.98] ${
                     isActive
-                      ? "border-primary/35 bg-primary/10 text-white"
-                      : "border-white/[0.07] bg-white/[0.025] text-white/50 hover:border-white/15 hover:bg-white/[0.05] hover:text-white/80"
+                      ? "border-primary/50 bg-gradient-to-br from-primary/20 via-primary/[0.09] to-white/[0.025] text-white shadow-[0_0_0_1px_rgba(168,85,247,0.12),0_10px_28px_rgba(88,28,135,0.18)]"
+                      : "border-white/10 bg-white/[0.035] text-white/65 hover:border-primary/35 hover:bg-white/[0.07] hover:text-white"
                   }`}
                 >
+                  <span className={`absolute inset-y-2 left-0 w-[3px] rounded-r-full transition-colors ${
+                    isActive ? "bg-primary" : "bg-transparent group-hover/provider:bg-primary/50"
+                  }`} />
                   <img
                     src={`/logos/${family.logo}`}
                     alt=""
-                    className="h-5 w-5 rounded-md object-cover"
+                    className={`h-9 w-9 shrink-0 rounded-lg border object-cover shadow-sm ${
+                      isActive ? "border-primary/30" : "border-white/10"
+                    }`}
                   />
-                  <span className="text-[11px] font-semibold">{family.name}</span>
-                  <span className="rounded-full bg-black/30 px-1.5 py-0.5 text-[9px] font-bold text-white/40">
-                    {family.models.length}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-bold tracking-wide">{family.name}</span>
+                    <span className={`mt-1 block text-[10px] ${
+                      isActive ? "text-primary/90" : "text-white/35"
+                    }`}>
+                      {family.models.length} {family.models.length === 1 ? "model" : "models"}
+                    </span>
+                  </span>
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all ${
+                    isActive
+                      ? "border-primary bg-primary text-white"
+                      : "border-white/10 bg-black/20 text-transparent group-hover/provider:border-primary/40"
+                  }`}>
+                    <Icon name="check" className="text-[10px]" />
                   </span>
                 </button>
               );
