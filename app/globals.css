@@ -376,3 +376,23 @@ body::before {
     height: 100dvh;
   }
 }
+
+
+/* === Video model catalog scrollbar === */
+.video-model-catalog-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #292333 transparent;
+}
+.video-model-catalog-scroll::-webkit-scrollbar {
+  width: 2px;
+}
+.video-model-catalog-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.video-model-catalog-scroll::-webkit-scrollbar-thumb {
+  background: #292333;
+  border-radius: 999px;
+}
+.video-model-catalog-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a855f7;
+}
