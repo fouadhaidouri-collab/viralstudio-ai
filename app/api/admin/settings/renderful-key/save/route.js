@@ -13,9 +13,10 @@ export async function POST(request) {
       return Response.json({ success: false, message: result.message }, { status: 400 });
     }
 
-    saveRenderfulKey(renderfulKey.trim());
+    await saveRenderfulKey(renderfulKey.trim());
     return Response.json({ success: true, masked: maskKey(renderfulKey.trim()) });
   } catch (err) {
-    return Response.json({ success: false, message: err.message }, { status: 500 });
+    console.error("Could not persist Renderful API key:", err.message);
+    return Response.json({ success: false, message: "The key was validated but could not be saved to persistent storage." }, { status: 500 });
   }
 }
