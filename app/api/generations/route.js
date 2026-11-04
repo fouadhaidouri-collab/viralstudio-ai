@@ -12,7 +12,17 @@ export async function GET() {
     [userId]
   );
 
-  return Response.json({ data: rows });
+  let activeJobs = [];
+  try {
+    activeJobs = await query(
+      "SELECT request_id, model_id, created_at FROM video_generation_billing WHERE user_id = ? AND status = 'pending' AND provider_id IS NOT NULL ORDER BY created_at ASC",
+      [userId]
+    );
+  } catch {
+    // The billing table is created when the first video generation is submitted.
+  }
+
+  return Response.json({ data: rows, activeJobs });
 }
 
 export async function POST(request) {
