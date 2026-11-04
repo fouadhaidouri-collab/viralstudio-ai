@@ -6,8 +6,9 @@ export async function GET() {
   if (!session?.user?.id) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const userId = session.user.id;
+  // Keep the user's full generation history available in Library.
   const rows = await query(
-    "SELECT * FROM ai_generations WHERE user_id = ? AND created_at >= datetime('now', '-30 days') ORDER BY created_at DESC",
+    "SELECT * FROM ai_generations WHERE user_id = ? ORDER BY created_at DESC",
     [userId]
   );
 
