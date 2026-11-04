@@ -14,6 +14,10 @@ export async function GET() {
 
   let activeJobs = [];
   try {
+    await run(`CREATE TABLE IF NOT EXISTS video_credit_holds (
+      request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'held', created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`);
     // Jobs left pending for more than 12 hours are stale, not active UI work.
     // Release only their still-held credits; never charge them during cleanup.
     await run(
