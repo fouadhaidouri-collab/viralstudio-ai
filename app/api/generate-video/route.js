@@ -343,7 +343,37 @@ export async function GET(request) {
       console.error("Failed to release AI Video credit hold:", err.message);
       return Response.json({ status: "PROCESSING", error: "We are safely checking the generation status. No new request is needed." });
     }
-    return Response.json({ status, error: "The video could not be generated. Your reserved credits have been released. No credits were charged. Please try again." });
+
+    // Renderful returns the actionable failure reason on the generation record.
+    // Keep it bounded and strip credential-like values before returning it to the owner.
+    const rawProviderError =
+      data.error?.message ||
+      data.error ||
+      data.failure_reason ||
+      data.message ||
+      data.error_message ||
+      null;
+    const providerError = rawProviderError
+      ? String(rawProviderError)
+          .replace(/Bearer\\s+\\S+/gi, "Bearer [redacted]")
+          .replace(/(api[_-]?key|token|secret)\\s*[:=]\\s*\\S+/gi, "$1=[redacted]")
+          .slice(0, 500)
+      : null;
+
+    console.error("Renderful video generation failed:", {
+      providerId: billing.provider_id,
+      modelId: billing.model_id,
+      providerError,
+    });
+
+    return Response.json({
+      status,
+      providerError,
+      error: providerError
+        ? `The provider failed: ${providerError}. Reserved credits were released; no credits were charged.`
+        : "The provider marked this generation as failed but returned no reason. Reserved credits were released; no credits were charged.",
+      noCreditsCharged: true,
+    });
   }
 
   return Response.json({ status, progress: data.progress ?? null });
