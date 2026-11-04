@@ -183,6 +183,8 @@ export async function POST(request) {
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
   try { await run("ALTER TABLE video_generation_billing ADD COLUMN provider_id TEXT"); } catch {}
+  try { await run("ALTER TABLE video_generation_billing ADD COLUMN prompt TEXT"); } catch {}
+  try { await run("ALTER TABLE video_generation_billing ADD COLUMN provider TEXT"); } catch {}
   await run(`CREATE TABLE IF NOT EXISTS video_credit_holds (
     request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'held', created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -204,7 +206,7 @@ export async function POST(request) {
     return Response.json({ error: "You do not have enough available credits for this video. Please add credits and try again.", balance: available.balance_credits || 0, required: chargeAmount }, { status: 402 });
   }
   try {
-    await run("INSERT INTO video_generation_billing (request_id, user_id, amount, status, model_id) VALUES (?, ?, ?, 'pending', ?)", [requestId, userId, chargeAmount, model.model_id]);
+    await run("INSERT INTO video_generation_billing (request_id, user_id, amount, status, model_id, prompt, provider) VALUES (?, ?, ?, 'pending', ?, ?, ?)", [requestId, userId, chargeAmount, model.model_id, String(prompt || ""), model.provider || "Renderful"]);
   } catch (err) {
     await run("UPDATE video_credit_holds SET status = 'released' WHERE request_id = ? AND user_id = ? AND status = 'held'", [requestId, userId]).catch(() => {});
     console.error("Could not create AI Video billing intent:", err.message);
@@ -265,6 +267,8 @@ export async function GET(request) {
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
   try { await run("ALTER TABLE video_generation_billing ADD COLUMN provider_id TEXT"); } catch {}
+  try { await run("ALTER TABLE video_generation_billing ADD COLUMN prompt TEXT"); } catch {}
+  try { await run("ALTER TABLE video_generation_billing ADD COLUMN provider TEXT"); } catch {}
   await run(`CREATE TABLE IF NOT EXISTS video_credit_holds (
     request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'held', created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -306,7 +310,13 @@ export async function GET(request) {
         return Response.json({ status, videoUrl, outputs: data.outputs || [], billingError: "Your video is ready, but we could not finalize the credit payment. Please contact support." });
       }
     }
-    const finalBilling = await get("SELECT status FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
+    const finalBilling = await get("SELECT status, amount, model_id, prompt, provider FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
+    if (finalBilling?.status === "charged") {
+      await run(
+        "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, output_url, thumbnail_url, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'completed', ?, ?, ?, datetime('now'))",
+        [`video_${requestId}`, session.user.id, finalBilling.provider || "Renderful", finalBilling.model_id, finalBilling.prompt || "", finalBilling.amount || 0, videoUrl, videoUrl]
+      );
+    }
     const balance = await getUserCredits(session.user.id);
     return Response.json({ status, videoUrl, outputs: data.outputs || [], balance: balance.balance_credits || 0,
       billingError: finalBilling?.status === "pending" ? "Your video is ready, but your balance changed while it was generating. Please add credits and contact support." : null });
