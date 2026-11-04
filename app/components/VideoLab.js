@@ -1462,14 +1462,23 @@ export default function VideoLab({ mode = "image" }) {
                 </section>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setSettingsOpen(false)}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-violet-300/20 bg-gradient-to-r from-violet-600 to-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition-all duration-150 hover:brightness-110 active:scale-[0.99]"
-              >
-                <Icon name="check" className="text-base" />
-                Apply Settings
-              </button>
+              <div className="mt-6 border-t border-white/[0.07] pt-4">
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen(false)}
+                  className="group relative flex min-h-[52px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-xl border border-violet-300/25 bg-gradient-to-r from-violet-600 via-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(91,33,182,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-200/45 hover:shadow-[0_12px_30px_rgba(91,33,182,0.3)] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#15131d]"
+                >
+                  <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/0 via-white/[0.09] to-white/0 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                  <span className="relative flex h-6 w-6 items-center justify-center rounded-lg border border-white/15 bg-white/10">
+                    <Icon name="check" className="text-sm" />
+                  </span>
+                  <span className="relative">Apply Settings</span>
+                  <Icon name="arrow-right" className="relative text-sm text-white/75 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+                <p className="mt-2.5 text-center text-[10px] text-white/35">
+                  Your selections will be applied to this video
+                </p>
+              </div>
             </div>
           </div>
         )}
