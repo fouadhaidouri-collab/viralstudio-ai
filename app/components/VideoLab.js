@@ -749,28 +749,6 @@ export default function VideoLab({ mode = "image" }) {
 
   const selectedVideoUrl = videoUrls[selectedVideoIndex] || videoUrls[0] || null;
 
-  const handleDownload = () => {
-    if (!selectedVideoUrl) return;
-    const a = document.createElement("a");
-    a.href = selectedVideoUrl;
-    a.download = `viralstudio-${Date.now()}.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  };
-
-  const handleShare = async () => {
-    if (!selectedVideoUrl) return;
-    try {
-      await navigator.clipboard.writeText(selectedVideoUrl);
-    } catch {}
-  };
-
-  const handleRegenerate = () => {
-    if (videoUrls.length === 0) return;
-    handleGenerate();
-  };
-
   const generateDisabled =
     generating ||
     (!isTextMode && images.length === 0) ||
@@ -1188,32 +1166,6 @@ export default function VideoLab({ mode = "image" }) {
                   {videoError}
                 </div>
               )}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleDownload}
-                  disabled={videoUrls.length === 0}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-surface-border/60 bg-surface-container-low py-3 text-sm font-medium transition-all duration-200 hover:border-primary/30 hover:bg-surface-container-high active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{ fontFamily: "Geist, sans-serif" }}
-                >
-                  <Icon name="download" className="text-base" /> Download
-                </button>
-                <button
-                  onClick={handleShare}
-                  disabled={videoUrls.length === 0}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-surface-border/60 bg-surface-container-low py-3 text-sm font-medium transition-all duration-200 hover:border-primary/30 hover:bg-surface-container-high active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{ fontFamily: "Geist, sans-serif" }}
-                >
-                  <Icon name="share" className="text-base" /> Share
-                </button>
-                <button
-                  onClick={handleRegenerate}
-                  disabled={videoUrls.length === 0}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-surface-border/60 bg-surface-container-low py-3 text-sm font-medium transition-all duration-200 hover:border-primary/30 hover:bg-surface-container-high active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{ fontFamily: "Geist, sans-serif" }}
-                >
-                  <Icon name="rotate" className="text-base" /> Regenerate
-                </button>
-              </div>
             </div>
 
             {videoUrls.length > 0 && (
