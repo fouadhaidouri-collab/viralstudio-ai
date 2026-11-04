@@ -934,10 +934,12 @@ export default function VideoLab({ mode = "image" }) {
                       onChange={handleImageUpload}
                       className="hidden"
                     />
-                    {model.supportsLastFrame && (
+                    {!isTextMode && (
                       <button
-                        onClick={() => lastFrameInputRef.current.click()}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-medium transition-all duration-200 active:scale-95 ${
+                        onClick={() => model.supportsLastFrame && lastFrameInputRef.current.click()}
+                        disabled={!model.supportsLastFrame}
+                        title={!model.supportsLastFrame ? "The selected model does not support an end frame." : "Upload an optional end frame"}
+                        className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-medium transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 ${
                           model.requiresLastFrame && !lastFrame
                             ? "border-amber-400/40 bg-amber-400/10 text-amber-200 hover:bg-amber-400/15"
                             : "border-surface-border/60 bg-surface-container-low hover:border-primary/30 hover:bg-surface-container-high"
@@ -947,9 +949,11 @@ export default function VideoLab({ mode = "image" }) {
                         <Icon name="add_photo_alternate" className="text-base" />
                         {lastFrame
                           ? "Replace end frame"
-                          : model.requiresLastFrame
-                            ? "End frame (required)"
-                            : "End frame (optional)"}
+                          : !model.supportsLastFrame
+                            ? "End frame (not supported by this model)"
+                            : model.requiresLastFrame
+                              ? "End frame (required)"
+                              : "End frame (optional)"}
                       </button>
                     )}
                     <input
