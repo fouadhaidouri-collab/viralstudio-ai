@@ -1022,7 +1022,7 @@ export default function VideoLab({ mode = "image" }) {
                         {currentConfig.aspectRatio?.label || "Aspect ratio"} · {currentConfig.resolution || "Auto"} · {currentConfig.duration} · {videoCount} {videoCount === 1 ? "video" : "videos"}
                       </span>
                     </span>
-                    <Icon name="tune" className="shrink-0 text-xl text-primary" />
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/65 transition-all duration-200 group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary ${settingsOpen ? "rotate-180" : ""}`}><Icon name="expand_more" className="text-base" /></span>
                   </button>
 
                   {!isTextMode && !supportsNativeAspectRatio && (
