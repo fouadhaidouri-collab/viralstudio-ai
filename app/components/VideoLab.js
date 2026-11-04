@@ -1403,30 +1403,34 @@ export default function VideoLab({ mode = "image" }) {
                 )}
 
                 <section>
-                  <div className="mb-2.5 flex items-center justify-between">
-                    <h3 className="text-xs font-semibold text-white/80">Duration</h3>
-                    <span className="rounded-lg border border-indigo-400/25 bg-indigo-400/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-200">{currentConfig.duration}</span>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-xs font-semibold text-white/80">Duration</h3>
+                      <p className="mt-1 text-[10px] text-white/35">Drag to choose video length</p>
+                    </div>
+                    <span className="min-w-[92px] rounded-lg border border-indigo-400/30 bg-gradient-to-r from-violet-500/15 to-indigo-500/15 px-3 py-2 text-center text-sm font-bold tabular-nums text-indigo-100 shadow-[0_4px_16px_rgba(79,70,229,0.12)]">
+                      {currentConfig.duration}
+                    </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {availableDurations.map((duration) => {
-                      const selected = currentConfig.duration === duration;
-                      return (
-                        <button
-                          key={duration}
-                          type="button"
-                          onClick={() => updateConfig("duration", duration)}
-                          aria-pressed={selected}
-                          className={`group flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2.5 transition-all duration-200 active:scale-[0.97] ${
-                            selected
-                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.16)]"
-                              : "border-white/[0.08] bg-[#1b1a26] text-white/60 hover:border-indigo-400/35 hover:bg-indigo-500/[0.07] hover:text-white"
-                          }`}
-                        >
-                          <span className="text-lg font-bold leading-none tracking-tight">{String(duration).match(/\\d+(?:\\.\\d+)?/)?.[0] || duration}</span>
-                          <span className={`text-[9px] font-bold uppercase tracking-[0.16em] ${selected ? "text-indigo-200" : "text-white/35"}`}>Seconds</span>
-                        </button>
-                      );
-                    })}
+                  <div className="rounded-xl border border-white/[0.08] bg-[#1b1a26] px-4 pb-3 pt-4">
+                    <input
+                      type="range"
+                      min={0}
+                      max={Math.max(0, availableDurations.length - 1)}
+                      step={1}
+                      value={Math.max(0, availableDurations.indexOf(currentConfig.duration))}
+                      onChange={(event) => {
+                        const nextDuration = availableDurations[Number(event.target.value)];
+                        if (nextDuration) updateConfig("duration", nextDuration);
+                      }}
+                      aria-label="Video duration"
+                      aria-valuetext={currentConfig.duration}
+                      className="h-2 w-full cursor-pointer appearance-none rounded-full bg-gradient-to-r from-violet-500/40 via-indigo-500/60 to-indigo-400 accent-indigo-400"
+                    />
+                    <div className="mt-3 flex items-center justify-between text-[10px] font-medium tabular-nums text-white/40">
+                      <span>{availableDurations[0] || "—"}</span>
+                      <span>{availableDurations[availableDurations.length - 1] || "—"}</span>
+                    </div>
                   </div>
                 </section>
 
