@@ -1,0 +1,127 @@
+import { get, run, batch } from "@/lib/db";
+import { getGeneration, normalizeStatus, outputUrl } from "@/lib/renderful";
+ 
+export async function POST(request) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid webhook payload." }, { status: 400 });
+  }
+
+  const providerId = String(payload?.data?.id || "").trim();
+  if (!providerId) {
+    return Response.json({ error: "Missing provider generation ID." }, { status: 400 });
+  }
+
+  // Match the provider task to a generation submitted by this application.
+  // Fetch the task from Renderful using our server-side key before trusting
+  // the callback payload or changing a customer's credits.
+  const billing = await get(
+    "SELECT * FROM video_generation_billing WHERE provider_id = ?",
+    [providerId]
+  );
+  if (!billing) return Response.json({ received: true, ignored: true });
+
+  let generation;
+  try {
+    generation = await getGeneration(providerId);
+  } catch (error) {
+    console.error("Renderful webhook verification failed:", error.message);
+    return Response.json({ error: "Could not verify provider generation." }, { status: 503 });
+  }
+
+  const status = normalizeStatus(generation.status);
+  if (status === "COMPLETED") {
+    const videoUrl = outputUrl(generation);
+    if (!videoUrl) {
+      return Response.json({ error: "Completed generation has no output URL." }, { status: 503 });
+    }
+
+    if (billing.status === "pending") {
+      const hold = await get(
+        "SELECT status FROM video_credit_holds WHERE request_id = ? AND user_id = ?",
+        [billing.request_id, billing.user_id]
+      );
+
+      if (!hold || !["held", "charging"].includes(hold.status)) {
+        await run(
+          "UPDATE video_generation_billing SET status = 'completed_unpaid' WHERE request_id = ? AND user_id = ? AND status = 'pending'",
+          [billing.request_id, billing.user_id]
+        );
+      } else {
+        try {
+          await batch([
+            {
+              sql: "UPDATE video_credit_holds SET status = 'charging' WHERE request_id = ? AND user_id = ? AND status = 'held'",
+              params: [billing.request_id, billing.user_id],
+            },
+            {
+              sql: "UPDATE credits SET current_balance = current_balance - ?, total_used = total_used + ?, updated_at = datetime('now') WHERE user_id = ? AND EXISTS (SELECT 1 FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'charging')",
+              params: [billing.amount, billing.amount, billing.user_id, billing.request_id, billing.user_id],
+            },
+            {
+              sql: "INSERT INTO credit_ledger (id, user_id, transaction_id, credits_added, reason) SELECT ?, ?, ?, ?, 'AI Video generation' WHERE EXISTS (SELECT 1 FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'charging') AND NOT EXISTS (SELECT 1 FROM credit_ledger WHERE transaction_id = ?)",
+              params: [`video_${billing.request_id}`, billing.user_id, billing.request_id, -billing.amount, billing.request_id, billing.user_id, billing.request_id],
+            },
+            {
+              sql: "UPDATE video_generation_billing SET status = 'charged' WHERE request_id = ? AND user_id = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM video_credit_holds WHERE request_id = ? AND user_id = ? AND status = 'charging')",
+              params: [billing.request_id, billing.user_id, billing.request_id, billing.user_id],
+            },
+            {
+              sql: "UPDATE video_credit_holds SET status = 'charged' WHERE request_id = ? AND user_id = ? AND status = 'charging'",
+              params: [billing.request_id, billing.user_id],
+            },
+          ]);
+        } catch (error) {
+          console.error("Renderful webhook credit settlement failed:", error.message);
+          return Response.json({ error: "Credit settlement failed; webhook can be retried." }, { status: 503 });
+        }
+      }
+    }
+
+    const finalBilling = await get(
+      "SELECT status, amount, model_id, prompt, provider FROM video_generation_billing WHERE request_id = ? AND user_id = ?",
+      [billing.request_id, billing.user_id]
+    );
+    if (["charged", "completed_unpaid"].includes(finalBilling?.status)) {
+      await run(
+        "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, output_url, thumbnail_url, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'completed', ?, ?, ?, datetime('now'))",
+        [
+          `video_${billing.request_id}`,
+          billing.user_id,
+          finalBilling.provider || "Renderful",
+          finalBilling.model_id,
+          finalBilling.prompt || "",
+          finalBilling.status === "charged" ? finalBilling.amount || 0 : 0,
+          videoUrl,
+          videoUrl,
+        ]
+      );
+    }
+
+    return Response.json({ received: true, status: "COMPLETED" });
+  }
+
+  if (status === "FAILED" || status === "CANCELLED") {
+    await batch([
+      {
+        sql: "UPDATE video_credit_holds SET status = 'released' WHERE request_id = ? AND user_id = ? AND status IN ('held','charging')",
+        params: [billing.request_id, billing.user_id],
+      },
+      {
+        sql: "UPDATE video_generation_billing SET status = 'failed' WHERE request_id = ? AND user_id = ? AND status = 'pending'",
+        params: [billing.request_id, billing.user_id],
+      },
+    ]);
+    console.error("Renderful video generation failed:", {
+      providerId,
+      modelId: billing.model_id,
+      providerError: generation.error?.message || generation.error || null,
+    });
+    return Response.json({ received: true, status });
+  }
+
+  // Ignore intermediate events. Renderful sends another callback at completion.
+  return Response.json({ received: true, status });
+}
