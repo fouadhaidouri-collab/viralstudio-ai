@@ -222,6 +222,9 @@ export async function POST(request) {
     duration,
     audio,
   });
+  // Renderful calls this endpoint when the provider finishes, even if the
+  // customer has already left the AI Video page.
+  payload.webhook_url = `${origin}/api/webhooks/renderful`;
 
   let data;
   try {
