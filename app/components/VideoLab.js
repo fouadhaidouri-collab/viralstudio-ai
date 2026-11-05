@@ -561,15 +561,13 @@ export default function VideoLab({ mode = "image" }) {
               );
               const statusData = await response.json();
               if (response.ok && statusData.status === "COMPLETED" && statusData.videoUrl) {
-                setVideoUrls((current) => [statusData.videoUrl, ...current.filter((url) => url !== statusData.videoUrl)]);
-                setSelectedVideoIndex(0);
-                setGenerationBatch((items) => items.map((item) =>
-                  item.id === job.request_id ? { ...item, status: "completed", videoUrl: statusData.videoUrl } : item
-                ));
+                // This job was completed while the customer was away. The API
+                // has already persisted it to ai_generations, so keep it in
+                // Library instead of re-adding it to the AI Video results strip.
+                setGenerationBatch((items) => items.filter((item) => item.id !== job.request_id));
                 if (typeof statusData.balance === "number") {
                   window.dispatchEvent(new CustomEvent("viralstudio:credits-updated", { detail: { balance: statusData.balance } }));
                 }
-                if (statusData.billingError) setVideoError(statusData.billingError);
                 return;
               }
               if (response.ok && (statusData.status === "FAILED" || statusData.status === "CANCELLED")) {
