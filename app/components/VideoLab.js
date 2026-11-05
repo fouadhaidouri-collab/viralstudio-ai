@@ -536,15 +536,47 @@ export default function VideoLab({ mode = "image" }) {
     let cancelled = false;
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+    const checkJob = async (job) => {
+      const response = await fetch(
+        `/api/generate-video?requestId=${encodeURIComponent(job.request_id)}&modelId=${encodeURIComponent(job.model_id || "")}`
+      );
+      const statusData = await response.json();
+      if (!response.ok) throw new Error(statusData.error || "Status check failed");
+      return statusData;
+    };
+
     fetch("/api/generations")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("History unavailable"))))
       .then(async (data) => {
         if (cancelled) return;
-        // Completed historical videos stay in Library. Only current-session
-        // results are shown in this page's Generated Videos strip.
         const activeJobs = Array.isArray(data.activeJobs) ? data.activeJobs : [];
         if (!activeJobs.length) return;
-        setGenerationBatch(activeJobs.map((job) => ({
+
+        // Check every saved job once before showing any Generating UI. Jobs
+        // that already completed are persisted by the status API and stay in Library.
+        const firstChecks = await Promise.all(activeJobs.map(async (job) => {
+          try {
+            const statusData = await checkJob(job);
+            if (statusData.status === "COMPLETED" && statusData.videoUrl) {
+              if (typeof statusData.balance === "number") {
+                window.dispatchEvent(new CustomEvent("viralstudio:credits-updated", { detail: { balance: statusData.balance } }));
+              }
+              return null;
+            }
+            if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
+              return null;
+            }
+            return { job, statusData };
+          } catch {
+            // A temporary status/API error should not lose the saved task.
+            return { job, statusData: null };
+          }
+        }));
+
+        const pending = firstChecks.filter(Boolean);
+        if (!pending.length || cancelled) return;
+
+        setGenerationBatch(pending.map(({ job }) => ({
           id: job.request_id,
           requestId: job.request_id,
           modelId: job.model_id,
@@ -553,38 +585,32 @@ export default function VideoLab({ mode = "image" }) {
         })));
         setGenerating(true);
 
-        await Promise.all(activeJobs.map(async (job) => {
+        await Promise.all(pending.map(async ({ job, statusData: initialStatus }) => {
+          let currentStatus = initialStatus;
           while (!cancelled) {
-            try {
-              const response = await fetch(
-                `/api/generate-video?requestId=${encodeURIComponent(job.request_id)}&modelId=${encodeURIComponent(job.model_id || "")}`
-              );
-              const statusData = await response.json();
-              if (response.ok && statusData.status === "COMPLETED" && statusData.videoUrl) {
-                // This job was completed while the customer was away. The API
-                // has already persisted it to ai_generations, so keep it in
-                // Library instead of re-adding it to the AI Video results strip.
-                setGenerationBatch((items) => items.filter((item) => item.id !== job.request_id));
-                if (typeof statusData.balance === "number") {
-                  window.dispatchEvent(new CustomEvent("viralstudio:credits-updated", { detail: { balance: statusData.balance } }));
-                }
-                return;
+            if (currentStatus?.status === "COMPLETED" && currentStatus.videoUrl) {
+              if (typeof currentStatus.balance === "number") {
+                window.dispatchEvent(new CustomEvent("viralstudio:credits-updated", { detail: { balance: currentStatus.balance } }));
               }
-              if (response.ok && (statusData.status === "FAILED" || statusData.status === "CANCELLED")) {
-                setGenerationBatch((items) => items.map((item) =>
-                  item.id === job.request_id ? { ...item, status: "failed" } : item
-                ));
-                if (statusData.error) setVideoError(statusData.error);
-                return;
-              }
-            } catch {
-              // Retry transient network/provider errors without losing the saved job.
+              return;
+            }
+            if (currentStatus?.status === "FAILED" || currentStatus?.status === "CANCELLED") {
+              setGenerationBatch((items) => items.filter((item) => item.id !== job.request_id));
+              return;
             }
             await wait(3000);
+            try {
+              currentStatus = await checkJob(job);
+            } catch {
+              currentStatus = null;
+            }
           }
         }));
 
-        if (!cancelled) setGenerating(false);
+        if (!cancelled) {
+          setGenerationBatch([]);
+          setGenerating(false);
+        }
       })
       .catch(() => {});
     return () => {
