@@ -780,8 +780,6 @@ export default function VideoLab({ mode = "image" }) {
                 : item
             ));
 
-            const creditsUsed = generation.creditsCharged ? perVideoCredits : 0;
-            if (generation.billingError) setVideoError(generation.billingError);
 
             // The generation API persists the completed video server-side,
             // including when the user leaves this page before it finishes.
