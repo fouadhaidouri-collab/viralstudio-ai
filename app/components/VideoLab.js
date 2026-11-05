@@ -1343,7 +1343,7 @@ export default function VideoLab({ mode = "image" }) {
         </main>
         {settingsOpen && (
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4"
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) setSettingsOpen(false);
             }}
@@ -1352,7 +1352,7 @@ export default function VideoLab({ mode = "image" }) {
               role="dialog"
               aria-modal="true"
               aria-labelledby="video-settings-title"
-              className="max-h-[calc(100dvh-2rem)] w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#15131d] p-3 shadow-2xl sm:p-5"
+              className="max-h-[calc(100dvh-2rem)] w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#15131d] p-3 shadow-lg sm:p-5"
             >
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
@@ -1384,9 +1384,9 @@ export default function VideoLab({ mode = "image" }) {
                           type="button"
                           onClick={() => updateConfig("aspectRatio", ratio)}
                           aria-pressed={selected}
-                          className={`flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg border px-2 py-1.5 transition-all duration-150 active:scale-[0.98] ${
+                          className={`flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg border px-2 py-1.5 transition-colors duration-100 ${
                             selected
-                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_0_0_1px_rgba(129,140,248,0.22),0_8px_22px_rgba(79,70,229,0.12)]"
+                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-sm"
                               : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
                           }`}
                         >
@@ -1413,9 +1413,9 @@ export default function VideoLab({ mode = "image" }) {
                             type="button"
                             onClick={() => updateConfig("resolution", resolution)}
                             aria-pressed={selected}
-                            className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-150 active:scale-[0.98] ${
+                            className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-colors duration-100 ${
                               selected
-                                ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.12)]"
+                                ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-sm"
                                 : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
                             }`}
                           >
@@ -1433,7 +1433,7 @@ export default function VideoLab({ mode = "image" }) {
                       <h3 className="text-xs font-semibold text-white/80">Duration</h3>
                       <p className="mt-0.5 text-[10px] text-white/35">Drag to choose video length</p>
                     </div>
-                    <span className="min-w-[84px] rounded-lg border border-indigo-400/30 bg-gradient-to-r from-violet-500/15 to-indigo-500/15 px-2.5 py-1.5 text-center text-sm font-bold tabular-nums text-indigo-100 shadow-[0_4px_16px_rgba(79,70,229,0.12)]">
+                    <span className="min-w-[84px] rounded-lg border border-indigo-400/30 bg-gradient-to-r from-violet-500/15 to-indigo-500/15 px-2.5 py-1.5 text-center text-sm font-bold tabular-nums text-indigo-100 shadow-sm">
                       {currentConfig.duration}
                     </span>
                   </div>
@@ -1473,9 +1473,9 @@ export default function VideoLab({ mode = "image" }) {
                           type="button"
                           onClick={() => setVideoCount(count)}
                           aria-pressed={selected}
-                          className={`flex h-9 items-center justify-center rounded-lg border text-sm font-semibold transition-all duration-150 active:scale-[0.97] ${
+                          className={`flex h-9 items-center justify-center rounded-lg border text-sm font-semibold transition-colors duration-100 ${
                             selected
-                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.12)]"
+                              ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-sm"
                               : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
                           }`}
                         >
