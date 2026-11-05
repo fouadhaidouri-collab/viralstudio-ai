@@ -1438,7 +1438,7 @@ export default function VideoLab({ mode = "image" }) {
                 </section>
 
                 <section>
-                  <div className="mb-2.5 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between">
                     <h3 className="text-xs font-semibold text-white/80">Quantity</h3>
                     <span className="text-[10px] text-white/35">Number of videos</span>
                   </div>
@@ -1451,7 +1451,7 @@ export default function VideoLab({ mode = "image" }) {
                           type="button"
                           onClick={() => setVideoCount(count)}
                           aria-pressed={selected}
-                          className={`flex h-10 items-center justify-center rounded-xl border text-sm font-semibold transition-all duration-150 active:scale-[0.97] ${
+                          className={`flex h-9 items-center justify-center rounded-lg border text-sm font-semibold transition-all duration-150 active:scale-[0.97] ${
                             selected
                               ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-[0_4px_16px_rgba(79,70,229,0.12)]"
                               : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"
