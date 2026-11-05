@@ -1352,7 +1352,7 @@ export default function VideoLab({ mode = "image" }) {
               role="dialog"
               aria-modal="true"
               aria-labelledby="video-settings-title"
-              className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#15131d] p-3 shadow-2xl sm:p-4"
+              className="max-h-[calc(100dvh-2rem)] w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#15131d] p-3 shadow-2xl sm:p-5"
             >
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
@@ -1369,13 +1369,13 @@ export default function VideoLab({ mode = "image" }) {
                 </button>
               </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
                 <section>
                   <div className="mb-2 flex items-center justify-between">
                     <h3 className="text-xs font-semibold text-white/80">Aspect Ratio</h3>
                     <span className="text-[10px] text-white/35">Choose your format</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-6">
                     {availableAspectRatios.map((ratio) => {
                       const selected = currentConfig.aspectRatio?.label === ratio.label;
                       return (
@@ -1487,7 +1487,7 @@ export default function VideoLab({ mode = "image" }) {
                 </section>
               </div>
 
-              <div className="mt-3 border-t border-white/[0.07] pt-2.5">
+              <div className="mt-4 border-t border-white/[0.07] pt-3">
                 <button
                   type="button"
                   onClick={() => setSettingsOpen(false)}
