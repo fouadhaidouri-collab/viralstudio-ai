@@ -318,7 +318,7 @@ export async function GET(request) {
         ]);
       } catch (err) {
         console.error("AI Video credit settlement failed:", err.message);
-        return Response.json({ status, videoUrl, outputs: data.outputs || [], billingError: "Your video is ready, but we could not finalize the credit payment. Please contact support." });
+        return Response.json({ status, videoUrl, outputs: data.outputs || [] });
       }
     }
     const finalBilling = await get("SELECT status, amount, model_id, prompt, provider FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
@@ -330,7 +330,7 @@ export async function GET(request) {
     }
     const balance = await getUserCredits(session.user.id);
     return Response.json({ status, videoUrl, outputs: data.outputs || [], balance: balance.balance_credits || 0,
-      billingError: finalBilling?.status === "pending" ? "Your video is ready, but its credit settlement needs support. The video is saved; do not generate it again." : null });
+      });
   }
 
   if (status === "FAILED" || status === "CANCELLED") {
