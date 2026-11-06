@@ -16,7 +16,7 @@ const PROVIDER_UNAVAILABLE =
 function getCustomerProviderMessage(value) {
   const message = String(value?.message ?? value?.error?.message ?? value?.error ?? value ?? "").toLowerCase();
 
-  if (/insufficient\\s+(balance|funds|credits)|low\\s+balance|balance\\s+(too\\s+low|insufficient)|not enough\\s+(balance|funds|credits)|quota\\s+exceeded/.test(message)) {
+  if (/insufficient\s+(balance|funds|credits)|low\s+balance|balance\s+(too\s+low|insufficient)|not enough\s+(balance|funds|credits)|quota\s+exceeded/.test(message)) {
     return "The video provider cannot process this request right now because its service balance or quota is unavailable. Your credits were not charged. Please try again later.";
   }
   if (/rate.?limit|too many requests|throttl/.test(message)) {
@@ -379,8 +379,8 @@ export async function GET(request) {
       null;
     const providerError = rawProviderError
       ? String(rawProviderError)
-          .replace(/Bearer\\s+\\S+/gi, "Bearer [redacted]")
-          .replace(/(api[_-]?key|token|secret)\\s*[:=]\\s*\\S+/gi, "$1=[redacted]")
+          .replace(/Bearer\s+\\S+/gi, "Bearer [redacted]")
+          .replace(/(api[_-]?key|token|secret)\s*[:=]\s*\\S+/gi, "$1=[redacted]")
           .slice(0, 500)
       : null;
 
@@ -393,7 +393,7 @@ export async function GET(request) {
     return Response.json({
       status,
       error: getCustomerProviderMessage(providerError),
-      failureCategory: /insufficient\\s+(balance|funds|credits)|low\\s+balance|quota\\s+exceeded/i.test(String(providerError || ""))
+      failureCategory: /insufficient\s+(balance|funds|credits)|low\s+balance|quota\s+exceeded/i.test(String(providerError || ""))
         ? "provider_balance"
         : "provider_error",
       noCreditsCharged: true,
