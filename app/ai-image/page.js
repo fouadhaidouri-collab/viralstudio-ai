@@ -8,7 +8,7 @@ import { SidebarProvider } from "../components/SidebarContext";
 import MenuButton from "../components/MenuButton";
 import { useAuth } from "../lib/AuthContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
-import ModelSelector from "../components/ModelSelector";
+import ImageModelCatalog from "../components/ImageModelCatalog";
 import Icon from "../components/Icon";
 import useScrollActivated from "../lib/useScrollActivated";
 import useLiveCredits from "../lib/useLiveCredits";
@@ -42,38 +42,6 @@ function calcImageCredits(model, aspectRatio, resolution, quantity, settings) {
   const minCredits = settings?.minimum_generation_credits || 1;
   const credits = Math.ceil((base * resMultiplier * markup) / usdValue);
   return Math.max(minCredits, credits) * quantity;
-}
-
-const imageProviderMeta = {
-  OpenAI: { icon: "psychology", color: "#10b981" },
-  Google: { icon: "videocam", color: "#4285F4" },
-  ByteDance: { icon: "auto_awesome", color: "#ec4899" },
-  "Black Forest Labs": { icon: "auto_awesome", color: "#22d3ee" },
-  xAI: { icon: "psychology", color: "#06b6d4" },
-};
-
-function buildImageProviders(models, creditSettings) {
-  const cheapest = models.slice().sort((a, b) => {
-    const pa = a.unitPrice ?? 0.05;
-    const pb = b.unitPrice ?? 0.05;
-    return pa - pb;
-  })[0];
-  const groups = {};
-  for (const m of models) {
-    if (!groups[m.provider]) groups[m.provider] = [];
-    let badge = null;
-    let badgeColor = null;
-    if (m.label === cheapest.label) { badge = "Cheapest"; badgeColor = "#facc15"; }
-    else if (models.indexOf(m) >= models.length - 2) { badge = "New"; badgeColor = "#8b5cf6"; }
-    else { badge = "Best Quality"; badgeColor = "#f97316"; }
-    groups[m.provider].push({ ...m, badge, badgeColor });
-  }
-  return Object.entries(groups).map(([name, mods]) => ({
-    name,
-    icon: imageProviderMeta[name]?.icon || "smart_toy",
-    color: imageProviderMeta[name]?.color || "#a855f7",
-    models: mods,
-  }));
 }
 
 function Dropdown({ label, value, options, onChange, compact }) {
@@ -316,7 +284,7 @@ export default function AIImagePage() {
               ></textarea>
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelSelector label="Image Model" providers={buildImageProviders(imageModels, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} calcStartingCredits={(m) => calcImageCredits(m, m.options?.aspect_ratio?.[0] || currentConfig.aspectRatio.label, m.options?.resolution?.[0] || currentConfig.resolution, 1, creditSettings)} compact />
+                <ImageModelCatalog models={imageModels} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} calcStartingCredits={(m) => calcImageCredits(m, m.options?.aspect_ratio?.[0] || currentConfig.aspectRatio.label, m.options?.resolution?.[0] || currentConfig.resolution, 1, creditSettings)} />
 
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-wider text-white/45">Image settings</span><span className="text-[10px] text-white/30">Model-compatible options</span></div><div className="grid grid-cols-3 gap-2">
                   <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
