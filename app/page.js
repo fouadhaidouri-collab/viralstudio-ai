@@ -160,46 +160,15 @@ function InViewVideo({ src, poster, className, active = true }) {
 }
 
 function TemplateMedia({ src, poster, mobilePoster, className, isDesktop, active }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  const mobileWebp = mobilePoster.replace(/\.jpg$/, ".webp");
-
-  useEffect(() => {
-    if (isDesktop) return;
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      const frame = requestAnimationFrame(() => setVisible(true));
-      return () => cancelAnimationFrame(frame);
-    }
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { rootMargin: "300px 0px" }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [isDesktop]);
-
-  if (isDesktop) {
-    return <InViewVideo src={src} poster={poster} className={className} active={active} />;
-  }
-
+  // On phones, keep the poster visible until the card approaches the viewport,
+  // then load and autoplay the real video. InViewVideo pauses it when scrolled away.
   return (
-    <picture ref={ref} className="block w-full h-full">
-      {visible && (
-        <source type="image/webp" media="(max-width: 767px)" srcSet={mobileWebp} />
-      )}
-      {visible && <source media="(max-width: 767px)" srcSet={mobilePoster} />}
-      {visible && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={poster} alt="" loading="lazy" decoding="async" fetchPriority="low" className={className} />
-      )}
-    </picture>
+    <InViewVideo
+      src={src}
+      poster={isDesktop ? poster : mobilePoster}
+      className={className}
+      active={isDesktop ? active : true}
+    />
   );
 }
 
