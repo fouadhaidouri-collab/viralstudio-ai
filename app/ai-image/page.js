@@ -44,38 +44,6 @@ function calcImageCredits(model, aspectRatio, resolution, quantity, settings) {
   return Math.max(minCredits, credits) * quantity;
 }
 
-const imageProviderMeta = {
-  OpenAI: { icon: "psychology", color: "#10b981" },
-  Google: { icon: "videocam", color: "#4285F4" },
-  ByteDance: { icon: "auto_awesome", color: "#ec4899" },
-  "Black Forest Labs": { icon: "auto_awesome", color: "#22d3ee" },
-  xAI: { icon: "psychology", color: "#06b6d4" },
-};
-
-function buildImageProviders(models, creditSettings) {
-  const cheapest = models.slice().sort((a, b) => {
-    const pa = a.unitPrice ?? 0.05;
-    const pb = b.unitPrice ?? 0.05;
-    return pa - pb;
-  })[0];
-  const groups = {};
-  for (const m of models) {
-    if (!groups[m.provider]) groups[m.provider] = [];
-    let badge = null;
-    let badgeColor = null;
-    if (m.label === cheapest.label) { badge = "Cheapest"; badgeColor = "#facc15"; }
-    else if (models.indexOf(m) >= models.length - 2) { badge = "New"; badgeColor = "#8b5cf6"; }
-    else { badge = "Best Quality"; badgeColor = "#f97316"; }
-    groups[m.provider].push({ ...m, badge, badgeColor });
-  }
-  return Object.entries(groups).map(([name, mods]) => ({
-    name,
-    icon: imageProviderMeta[name]?.icon || "smart_toy",
-    color: imageProviderMeta[name]?.color || "#a855f7",
-    models: mods,
-  }));
-}
-
 function Dropdown({ label, value, options, onChange, compact }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
