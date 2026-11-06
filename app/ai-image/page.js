@@ -8,7 +8,7 @@ import { SidebarProvider } from "../components/SidebarContext";
 import MenuButton from "../components/MenuButton";
 import { useAuth } from "../lib/AuthContext";
 import InsufficientCreditsModal from "../components/InsufficientCreditsModal";
-import ModelSelector from "../components/ModelSelector";
+import ImageModelCatalog from "../components/ImageModelCatalog";
 import Icon from "../components/Icon";
 import useScrollActivated from "../lib/useScrollActivated";
 import useLiveCredits from "../lib/useLiveCredits";
@@ -316,7 +316,7 @@ export default function AIImagePage() {
               ></textarea>
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelSelector label="Image Model" providers={buildImageProviders(imageModels, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} calcStartingCredits={(m) => calcImageCredits(m, m.options?.aspect_ratio?.[0] || currentConfig.aspectRatio.label, m.options?.resolution?.[0] || currentConfig.resolution, 1, creditSettings)} compact />
+                <ImageModelCatalog models={imageModels} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} calcStartingCredits={(m) => calcImageCredits(m, m.options?.aspect_ratio?.[0] || currentConfig.aspectRatio.label, m.options?.resolution?.[0] || currentConfig.resolution, 1, creditSettings)} />
 
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-wider text-white/45">Image settings</span><span className="text-[10px] text-white/30">Model-compatible options</span></div><div className="grid grid-cols-3 gap-2">
                   <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
