@@ -85,9 +85,6 @@ function SidebarContent() {
           <Icon name={homeItem.icon} className="shrink-0" size={20} />
           <span className="sidebar-link-text flex-1">{homeItem.label}</span>
         </Link>
-        <div className="pt-3 pb-1 px-4">
-          <span className="sidebar-heading-text">AI Tools</span>
-        </div>
         {[...toolItems, ...(showAdmin ? [{ href: "/admin", label: "Admin Panel", icon: "shield" }] : [])].map((item) => {
           const isActive =
             pathname === item.href ||
@@ -143,7 +140,6 @@ function SidebarContent() {
                   <div className="hidden md:block md:fixed md:left-64 md:top-12 md:z-[60] md:mt-0 md:w-[min(520px,calc(100vw-288px))] rounded-2xl border border-white/10 bg-[#171619]/95 p-3 shadow-xl md:p-5 md:shadow-2xl md:backdrop-blur-xl">
                     <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">AI Tools</p>
                         <h3 className="mt-1 text-lg font-bold text-white">AI Video</h3>
                       </div>
                       <button
