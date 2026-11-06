@@ -122,6 +122,7 @@ export default function AIImagePage() {
     if (needed != null && credits < needed) { setNeededCredits(needed); setShowCreditModal(true); return; }
     setGenerating(true);
     setImageUrls([]);
+    setSelectedImageIndex(0);
     setImageError(null);
 
     try {
@@ -269,46 +270,50 @@ export default function AIImagePage() {
           </div>
 
           {/* RIGHT: Preview */}
-          <div className="flex flex-col glass-card rounded-2xl relative bg-black flex-1 border border-white/10 card-glow min-h-[420px] xl:min-h-0 shadow-2xl shadow-black/20" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
+          <div className="flex min-w-0 flex-col glass-card rounded-2xl relative bg-black flex-1 border border-white/10 card-glow min-h-[420px] xl:min-h-[calc(100vh-7.5rem)] overflow-hidden shadow-2xl shadow-black/20" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
             
             {imageError && <div className="mx-4 mt-4 rounded-xl border border-red-400/20 bg-red-400/[0.07] px-3 py-2.5 text-xs text-red-200">{imageError}</div>}
             {imageUrls.length > 0 ? (
-              <>
-                <div className="flex-1 p-4">
-                  {selectedImageIndex !== null ? (
-                    <div className="flex flex-col gap-3">
-                      <button onClick={() => setSelectedImageIndex(null)} className="flex items-center gap-1.5 text-xs text-on-surface-variant hover:text-white transition-colors">
-                        <Icon name="arrow_back" className="text-sm" /> Back to all
-                      </button>
-                      <img src={imageUrls[selectedImageIndex]} alt="Selected" className="w-full max-h-[68vh] rounded-xl object-contain bg-black/30" />
-                      <a href={imageUrls[selectedImageIndex]} download className="primary-gradient text-white text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5">
-                        <Icon name="download" className="text-sm" /> Download
-                      </a>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold flex items-center gap-2">
-                          <Icon name="checklist" className="text-primary text-base" />
-                          Generated ({imageUrls.length})
-                        </h3>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-3">
-                        {imageUrls.map((url, i) => (
-                          <button key={i} onClick={() => setSelectedImageIndex(i)} className="aspect-square rounded-lg overflow-hidden border border-surface-border group relative hover:border-primary/50 transition-colors">
-                            <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Icon name="visibility" className="text-white text-lg" />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
+              <div className="relative flex min-h-[420px] flex-1 flex-col overflow-hidden bg-black">
+                <div className="relative min-h-0 flex-1">
+                  <img
+                    src={imageUrls[selectedImageIndex ?? 0] || imageUrls[0]}
+                    alt={`Generated image ${(selectedImageIndex ?? 0) + 1}`}
+                    className="absolute inset-0 h-full w-full bg-black object-contain"
+                  />
+                  <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+                    <span className="rounded-full border border-white/10 bg-black/65 px-3 py-1.5 text-[11px] font-medium text-white/85 backdrop-blur">
+                      {imageUrls.length} {imageUrls.length === 1 ? "image" : "images"}
+                    </span>
+                    <a
+                      href={imageUrls[selectedImageIndex ?? 0] || imageUrls[0]}
+                      download
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-black/65 text-white backdrop-blur transition hover:bg-black/85"
+                      aria-label="Download selected image"
+                    >
+                      <Icon name="download" className="text-sm" />
+                    </a>
+                  </div>
                 </div>
-              </>
+                {imageUrls.length > 1 && (
+                  <div className="z-10 flex shrink-0 items-center gap-2 overflow-x-auto border-t border-white/10 bg-black/80 p-3">
+                    {imageUrls.map((url, i) => (
+                      <button
+                        key={url + i}
+                        type="button"
+                        onClick={() => setSelectedImageIndex(i)}
+                        aria-label={`Show image ${i + 1}`}
+                        aria-pressed={(selectedImageIndex ?? 0) === i}
+                        className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border transition sm:h-20 sm:w-24 ${(selectedImageIndex ?? 0) === i ? "border-primary ring-2 ring-primary/30" : "border-white/10 opacity-70 hover:opacity-100"}`}
+                      >
+                        <img src={url} alt={`Image ${i + 1}`} className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : generating ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-10">
+              <div className="relative flex min-h-[420px] flex-1 flex-col items-center justify-center overflow-hidden p-10">
                 <svg className="animate-spin h-10 w-10 text-primary mb-4" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -316,7 +321,7 @@ export default function AIImagePage() {
                 <p className="text-sm font-semibold text-white">Generating your images...</p><p className="mt-1 text-xs text-white/40">Your results will appear here as soon as each image is ready.</p><div className="mt-4 h-1.5 w-48 overflow-hidden rounded-full bg-white/10"><div className="h-full w-1/3 animate-pulse rounded-full bg-primary" /></div>
               </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center p-10">
+              <div className="relative flex min-h-[420px] flex-1 flex-col items-center justify-center overflow-hidden p-10">
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-5">
                   <Icon name="auto_awesome" size={36} className="text-primary" />
                 </div>
