@@ -113,8 +113,34 @@ function SidebarContent() {
                   <span className="sidebar-link-text flex-1 text-left">{item.label}</span>
                   <Icon name={openMegaMenu === item.href ? "chevron-left" : "chevron-right"} size={16} />
                 </button>
+                {/* Compact mobile submenu, shown directly below AI Video */}
                 {openMegaMenu === item.href && (
-                  <div className="relative z-[60] mt-2 w-full rounded-2xl border border-white/10 bg-[#171619]/95 p-3 shadow-xl md:fixed md:left-64 md:top-12 md:mt-0 md:w-[min(520px,calc(100vw-288px))] md:p-5 md:shadow-2xl md:backdrop-blur-xl">
+                  <div className="mt-1.5 ml-11 space-y-1 md:hidden">
+                    {item.children.map((child) => {
+                      const childActive = pathname === child.href;
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={() => {
+                            handleNav();
+                            setOpenMegaMenu(null);
+                          }}
+                          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
+                            childActive
+                              ? "bg-primary/15 text-white"
+                              : "text-on-surface-variant hover:bg-white/[0.05] hover:text-white"
+                          }`}
+                        >
+                          <Icon name={child.icon} className="shrink-0" size={17} />
+                          <span>{child.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+                {openMegaMenu === item.href && (
+                  <div className="hidden md:block md:fixed md:left-64 md:top-12 md:z-[60] md:mt-0 md:w-[min(520px,calc(100vw-288px))] rounded-2xl border border-white/10 bg-[#171619]/95 p-3 shadow-xl md:p-5 md:shadow-2xl md:backdrop-blur-xl">
                     <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">AI Tools</p>
