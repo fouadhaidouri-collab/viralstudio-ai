@@ -334,8 +334,7 @@ export default function AIImagePage() {
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-5">
                   <Icon name="auto_awesome" size={36} className="text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Ready to create</h3>
-                <p className="text-sm text-on-surface-variant/70 text-center max-w-xs">Your generated images will appear here. Select any result to preview or download it.</p>
+                <p className="text-sm text-on-surface-variant/70 text-center max-w-xs">Your generated images will appear here.</p>
               </div>
             )}
           </div>
