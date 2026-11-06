@@ -307,7 +307,7 @@ export default function AIImagePage() {
           {/* LEFT: Composer */}
           <div className="flex flex-col flex-1">
             <div className="glass-card rounded-2xl p-4 lg:p-5 border border-white/10 flex-1 flex flex-col gap-0 card-glow shadow-2xl shadow-black/20" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-              <div className="mb-3 flex items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/90">Image Lab</p><h2 className="mt-1 text-base font-semibold text-white">Create images with AI</h2><p className="mt-1 text-[11px] text-white/40">Choose a model version, customize the output, and generate.</p></div><span className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold text-white/55">{imageModels.length} models</span></div>
+              
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
