@@ -1136,9 +1136,8 @@ export default function VideoLab({ mode = "image" }) {
                         loop
                         muted={selectedVideoUrl === DEFAULT_PREVIEW_VIDEO}
                         playsInline
-                        className={`absolute inset-0 z-10 h-full w-full bg-black object-contain ${
-                          selectedVideoUrl === DEFAULT_PREVIEW_VIDEO ? "sm:object-cover" : "sm:object-contain"
-                        }`}
+                        preload="auto"
+                        className="absolute inset-0 z-10 h-full w-full bg-black object-contain"
                       />
                       {generating && (
                         <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur">
