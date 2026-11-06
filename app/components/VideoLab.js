@@ -835,6 +835,11 @@ export default function VideoLab({ mode = "image" }) {
 
   const selectedVideoUrl =
     videoUrls[selectedVideoIndex] || videoUrls[0] || DEFAULT_PREVIEW_VIDEO;
+  const [defaultPreviewReady, setDefaultPreviewReady] = useState(false);
+
+  useEffect(() => {
+    setDefaultPreviewReady(selectedVideoUrl !== DEFAULT_PREVIEW_VIDEO);
+  }, [selectedVideoUrl]);
 
   const generateDisabled =
     generating ||
@@ -1132,13 +1137,31 @@ export default function VideoLab({ mode = "image" }) {
                         key={selectedVideoUrl}
                         src={selectedVideoUrl}
                         controls
-                        autoPlay
+                        autoPlay={selectedVideoUrl !== DEFAULT_PREVIEW_VIDEO || defaultPreviewReady}
                         loop
                         muted={selectedVideoUrl === DEFAULT_PREVIEW_VIDEO}
                         playsInline
                         preload="auto"
-                        className="absolute inset-0 z-10 h-full w-full bg-black object-contain"
+                        onCanPlay={() => {
+                          if (selectedVideoUrl === DEFAULT_PREVIEW_VIDEO) {
+                            setDefaultPreviewReady(true);
+                          }
+                        }}
+                        className={`absolute inset-0 z-10 h-full w-full bg-black object-contain transition-opacity duration-300 ${
+                          selectedVideoUrl === DEFAULT_PREVIEW_VIDEO && !defaultPreviewReady
+                            ? "opacity-0"
+                            : "opacity-100"
+                        }`}
                       />
+                      {selectedVideoUrl === DEFAULT_PREVIEW_VIDEO && !defaultPreviewReady && (
+                        <img
+                          src="/templates/template1-thumb.webp"
+                          alt="Tropical beach video preview"
+                          fetchPriority="high"
+                          decoding="async"
+                          className="absolute inset-0 z-20 h-full w-full bg-black object-contain"
+                        />
+                      )}
                       {generating && (
                         <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur">
                           <svg
