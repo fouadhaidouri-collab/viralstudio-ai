@@ -811,7 +811,7 @@ export default function VideoLab({ mode = "image" }) {
             return { success: true };
           } catch (err) {
             setGenerationBatch((items) => items.map((item, itemIndex) =>
-              itemIndex === index ? { ...item, status: "failed" } : item
+              itemIndex === index ? { ...item, status: "failed", error: err.message || "The video provider could not complete this generation." } : item
             ));
             return {
               success: false,
@@ -824,7 +824,7 @@ export default function VideoLab({ mode = "image" }) {
       const failures = results.filter((result) => !result.success);
       if (failures.length > 0) {
         setVideoError(
-          `${failures.length} of ${videoCount} videos failed. ${failures[0].error}`
+          `${failures.length} of ${videoCount} videos could not be generated. ${failures[0].error}`
         );
       }
     } finally {
@@ -1288,6 +1288,7 @@ export default function VideoLab({ mode = "image" }) {
                     <button
                       key={item.id}
                       type="button"
+                      title={item.error || (item.status === "failed" ? "The video provider could not complete this generation." : "")}
                       disabled={!item.videoUrl}
                       onClick={() => item.videoUrl && setSelectedVideoIndex(videoUrls.indexOf(item.videoUrl))}
                       className={`group relative w-40 shrink-0 overflow-hidden rounded-xl border text-left transition-all sm:w-48 ${item.videoUrl ? "border-white/10 hover:border-primary/50" : "border-white/10 bg-black/30"}`}

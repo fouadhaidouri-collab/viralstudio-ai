@@ -11,7 +11,25 @@ import {
 import { saveImageDataUrl } from "@/lib/uploads";
 
 const PROVIDER_UNAVAILABLE =
-  "AI generation service is temporarily unavailable. Please try again later.";
+  "The video provider is temporarily unavailable. Your credits were not charged. Please try again later.";
+
+function getCustomerProviderMessage(value) {
+  const message = String(value?.message ?? value?.error?.message ?? value?.error ?? value ?? "").toLowerCase();
+
+  if (/insufficient\s+(balance|funds|credits)|low\s+balance|balance\s+(too\s+low|insufficient)|not enough\s+(balance|funds|credits)|quota\s+exceeded/.test(message)) {
+    return "The video provider cannot process this request right now because its service balance or quota is unavailable. Your credits were not charged. Please try again later.";
+  }
+  if (/rate.?limit|too many requests|throttl/.test(message)) {
+    return "The video provider is receiving too many requests right now. Your credits were not charged. Please wait a moment and try again.";
+  }
+  if (/timeout|timed out|temporar|unavailable|connection|network/.test(message)) {
+    return "The video provider is temporarily unavailable. Your credits were not charged. Please try again in a few minutes.";
+  }
+  if (/invalid|unsupported|required|parameter|payload/.test(message)) {
+    return "The video provider rejected this request because some generation settings may not be supported by this model. Your credits were not charged. Please review the settings or try another model.";
+  }
+  return "The video provider could not complete this generation. This may be a temporary provider-side issue. Your credits were not charged. Please try again later.";
+}
 
 function secondsFromDuration(duration) {
   const value = parseInt(String(duration || ""), 10);
@@ -238,7 +256,10 @@ export async function POST(request) {
       return Response.json({ error: "Generation service is not configured yet. No credits were charged.", setupRequired: true }, { status: 503 });
     }
     console.error("generate-video Renderful submit error:", err.message);
-    return Response.json({ error: err.status && err.status < 500 ? err.message : PROVIDER_UNAVAILABLE, noCreditsCharged: true }, { status: err.status && err.status < 500 ? 400 : 503 });
+    return Response.json(
+      { error: getCustomerProviderMessage(err.message), noCreditsCharged: true },
+      { status: err.status && err.status < 500 ? 400 : 503 }
+    );
   }
 
   if (!data?.id) {
@@ -358,8 +379,8 @@ export async function GET(request) {
       null;
     const providerError = rawProviderError
       ? String(rawProviderError)
-          .replace(/Bearer\\s+\\S+/gi, "Bearer [redacted]")
-          .replace(/(api[_-]?key|token|secret)\\s*[:=]\\s*\\S+/gi, "$1=[redacted]")
+          .replace(/Bearer\s+\\S+/gi, "Bearer [redacted]")
+          .replace(/(api[_-]?key|token|secret)\s*[:=]\s*\\S+/gi, "$1=[redacted]")
           .slice(0, 500)
       : null;
 
@@ -371,10 +392,10 @@ export async function GET(request) {
 
     return Response.json({
       status,
-      providerError,
-      error: providerError
-        ? `The provider failed: ${providerError}. Reserved credits were released; no credits were charged.`
-        : "The provider marked this generation as failed but returned no reason. Reserved credits were released; no credits were charged.",
+      error: getCustomerProviderMessage(providerError),
+      failureCategory: /insufficient\s+(balance|funds|credits)|low\s+balance|quota\s+exceeded/i.test(String(providerError || ""))
+        ? "provider_balance"
+        : "provider_error",
       noCreditsCharged: true,
     });
   }
