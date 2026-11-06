@@ -114,7 +114,7 @@ function SidebarContent() {
                   <Icon name={openMegaMenu === item.href ? "chevron-left" : "chevron-right"} size={16} />
                 </button>
                 {openMegaMenu === item.href && (
-                  <div className="fixed left-64 top-12 z-[60] w-[min(520px,calc(100vw-288px))] rounded-2xl border border-white/10 bg-[#171619]/95 p-5 shadow-2xl backdrop-blur-xl">
+                  <div className="relative z-[60] mt-2 w-full rounded-2xl border border-white/10 bg-[#171619]/95 p-3 shadow-xl md:fixed md:left-64 md:top-12 md:mt-0 md:w-[min(520px,calc(100vw-288px))] md:p-5 md:shadow-2xl md:backdrop-blur-xl">
                     <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">AI Tools</p>
