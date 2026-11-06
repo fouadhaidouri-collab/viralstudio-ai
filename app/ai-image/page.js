@@ -372,8 +372,8 @@ export default function AIImagePage() {
           </div>
         </div>
       )}
-      <SidebarProvider>
       {showCreditModal && <InsufficientCreditsModal needed={neededCredits} available={credits} onClose={() => setShowCreditModal(false)} />}
+      </SidebarProvider>
     </div>
   );
 }
