@@ -316,7 +316,7 @@ export default function AIImagePage() {
               ></textarea>
 
               <div className="mt-auto pt-3 shrink-0 space-y-2">
-                <ModelSelector label="AI Image Model · Choose version" providers={buildImageProviders(imageModels, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} calcStartingCredits={(m) => calcImageCredits(m, m.options?.aspect_ratio?.[0] || currentConfig.aspectRatio.label, m.options?.resolution?.[0] || currentConfig.resolution, 1, creditSettings)} compact />
+                <ModelSelector label="Image Model" providers={buildImageProviders(imageModels, creditSettings)} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} calcStartingCredits={(m) => calcImageCredits(m, m.options?.aspect_ratio?.[0] || currentConfig.aspectRatio.label, m.options?.resolution?.[0] || currentConfig.resolution, 1, creditSettings)} compact />
 
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-wider text-white/45">Image settings</span><span className="text-[10px] text-white/30">Model-compatible options</span></div><div className="grid grid-cols-3 gap-2">
                   <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
@@ -345,7 +345,7 @@ export default function AIImagePage() {
 
           {/* RIGHT: Preview */}
           <div className="flex flex-col glass-card rounded-2xl relative bg-black flex-1 border border-white/10 card-glow min-h-[420px] xl:min-h-0 shadow-2xl shadow-black/20" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/80">Workspace</p><h3 className="mt-0.5 text-sm font-semibold text-white">Your image results</h3></div><span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/50">{imageUrls.length} generated</span></div>
+            
             {imageError && <div className="mx-4 mt-4 rounded-xl border border-red-400/20 bg-red-400/[0.07] px-3 py-2.5 text-xs text-red-200">{imageError}</div>}
             {imageUrls.length > 0 ? (
               <>
