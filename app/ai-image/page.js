@@ -44,53 +44,6 @@ function calcImageCredits(model, aspectRatio, resolution, quantity, settings) {
   return Math.max(minCredits, credits) * quantity;
 }
 
-function Dropdown({ label, value, options, onChange, compact }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  return (
-    <div ref={ref} className="relative w-full">
-      <div className="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5 font-medium">{label}</div>
-      <button
-        onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-2 bg-surface-container-lowest border border-surface-border rounded-lg hover:border-primary/50 transition-colors ${compact ? 'px-2.5 py-2 text-xs' : 'px-3 py-2.5 text-sm'}`}
-      >
-        <span className="truncate flex items-center gap-1.5">
-          {(() => {
-            const match = options.find(o => (typeof o === "string" ? o : o.label) === value);
-            if (match && typeof match !== "string") {
-              if (match.label?.includes(":")) return <><AspectIcon label={match.label} />{value}</>;
-              return <><Icon name={match.icon} className="text-sm" style={{color: match.color || "#d2bbff"}} />{value}</>;
-            }
-            return value;
-          })()}
-        </span>
-        <Icon name="expand_more" className={`text-sm text-on-surface-variant shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-      </button>
-      {open && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 bg-surface-container border border-surface-border rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto py-1">
-          {options.map((opt) => (
-            <button
-              key={typeof opt === "string" ? opt : opt.label}
-              onClick={() => { onChange(opt); setOpen(false); }}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-surface-container-high transition-colors flex items-center gap-2 ${value === (typeof opt === "string" ? opt : opt.label) ? "text-primary bg-primary/5" : "text-on-surface"}`}
-            >
-              {typeof opt !== "string" && (opt.label?.includes(":") ? <AspectIcon label={opt.label} /> : <Icon name={opt.icon} className="text-base" style={{color: opt.color || "#d2bbff"}} />)}
-              {typeof opt === "string" ? opt : opt.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function AIImagePage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -102,6 +55,7 @@ export default function AIImagePage() {
     setModelConfigs(prev => ({ ...prev, [selectedModel.label]: { ...(prev[selectedModel.label] || {}), [key]: value } }));
   };
   const [imageCount, setImageCount] = useState(1);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
   const [imageError, setImageError] = useState(null);
@@ -286,11 +240,14 @@ export default function AIImagePage() {
               <div className="mt-auto pt-3 shrink-0 space-y-2">
                 <ImageModelCatalog models={imageModels} selectedModel={selectedModel} onSelect={setSelectedModel} calcCredits={(m) => calcImageCredits(m, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings)} calcStartingCredits={(m) => calcImageCredits(m, m.options?.aspect_ratio?.[0] || currentConfig.aspectRatio.label, m.options?.resolution?.[0] || currentConfig.resolution, 1, creditSettings)} />
 
-                <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-wider text-white/45">Image settings</span><span className="text-[10px] text-white/30">Model-compatible options</span></div><div className="grid grid-cols-3 gap-2">
-                  <Dropdown label="Aspect Ratio" value={currentConfig.aspectRatio.label} options={availableAspectRatios} onChange={(v) => updateConfig("aspectRatio", v)} />
-                  <Dropdown label="Resolution" value={currentConfig.resolution} options={availableResolutions} onChange={(v) => updateConfig("resolution", v)} />
-                  <Dropdown label="Quantity" value={String(imageCount)} options={["1", "2", "3", "4", "5"]} onChange={(v) => setImageCount(Number(v))} />
-                </div></div>
+                <button type="button" onClick={() => setSettingsOpen(true)} disabled={generating}
+                  aria-label={`Image Settings: ${currentConfig.aspectRatio?.label || "Aspect ratio"}, ${currentConfig.resolution || "1k"}, ${imageCount} images`}
+                  className="group flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.025] px-4 py-3.5 text-left shadow-sm transition-all duration-200 hover:border-primary/40 hover:from-primary/[0.1] hover:to-primary/[0.03] active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60">
+                  <span className="min-w-0 flex-1"><span className="block text-xs font-semibold tracking-wide text-white/75">Image Settings</span>
+                    <span className="mt-1.5 block whitespace-normal break-words text-xs font-semibold leading-relaxed text-white">{currentConfig.aspectRatio?.label || "Aspect ratio"} · {currentConfig.resolution?.toUpperCase() || "1K"} · {imageCount} {imageCount === 1 ? "image" : "images"}</span>
+                  </span>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/65 transition-all duration-200 group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary"><Icon name="expand_more" className="text-base" /></span>
+                </button>
 
                 <button
                   onClick={handleGenerate}
@@ -370,7 +327,52 @@ export default function AIImagePage() {
           </div>
         </div>
       </main>
-      </SidebarProvider>
+      {settingsOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) setSettingsOpen(false); }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="image-settings-title" className="max-h-[calc(100dvh-1.5rem)] w-full max-w-4xl overflow-y-auto rounded-2xl border border-white/10 bg-[#15131d] p-3 shadow-[0_30px_100px_rgba(0,0,0,0.65)] sm:max-h-[calc(100dvh-2rem)] sm:p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div><div className="mb-1.5 flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-lg border border-indigo-400/25 bg-gradient-to-br from-violet-500/15 to-indigo-500/10 text-indigo-200"><Icon name="tune" className="text-base" /></span><h2 id="image-settings-title" className="text-base font-semibold tracking-tight text-white">Image Settings</h2></div><p className="text-xs text-white/45">Customize your image output before generating.</p></div>
+              <button type="button" onClick={() => setSettingsOpen(false)} aria-label="Close settings" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-white/60 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"><Icon name="close" /></button>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+              <section className="md:col-span-2">
+                <div className="mb-2 flex items-center justify-between"><h3 className="text-xs font-semibold text-white/80">Aspect Ratio</h3><span className="text-[10px] text-white/35">Choose your image format</span></div>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+                  {availableAspectRatios.map((ratio) => { const selected = currentConfig.aspectRatio?.label === ratio.label; return (
+                    <button key={ratio.label} type="button" onClick={() => updateConfig("aspectRatio", ratio)} aria-pressed={selected}
+                      className={`flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-lg border px-2 py-2 transition-colors duration-100 ${selected ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-sm" : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"}`}>
+                      <AspectIcon label={ratio.label} size="text-base" /><span className="text-[10px] font-semibold leading-tight">{ratio.label}</span>
+                    </button>
+                  ); })}
+                </div>
+              </section>
+              {availableResolutions.length > 0 && <section>
+                <div className="mb-2.5 flex items-center justify-between"><h3 className="text-xs font-semibold text-white/80">Resolution</h3><span className="text-[10px] text-white/35">Output quality</span></div>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableResolutions.map((resolution) => { const selected = currentConfig.resolution === resolution; return (
+                    <button key={resolution} type="button" onClick={() => updateConfig("resolution", resolution)} aria-pressed={selected}
+                      className={`rounded-lg border px-3 py-2.5 text-xs font-semibold uppercase transition-colors duration-100 ${selected ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-sm" : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"}`}>{resolution}</button>
+                  ); })}
+                </div>
+              </section>}
+              <section>
+                <div className="mb-2 flex items-center justify-between"><h3 className="text-xs font-semibold text-white/80">Quantity</h3><span className="text-[10px] text-white/35">Number of images</span></div>
+                <div className="grid grid-cols-5 gap-2">
+                  {[1, 2, 3, 4, 5].map((count) => { const selected = imageCount === count; return (
+                    <button key={count} type="button" onClick={() => setImageCount(count)} aria-pressed={selected}
+                      className={`flex h-10 items-center justify-center rounded-lg border text-sm font-semibold transition-colors duration-100 ${selected ? "border-indigo-400/70 bg-gradient-to-br from-violet-500/25 to-indigo-500/15 text-white shadow-sm" : "border-white/[0.08] bg-white/[0.025] text-white/55 hover:border-white/20 hover:bg-white/[0.055] hover:text-white/85"}`}>{count}</button>
+                  ); })}
+                </div>
+              </section>
+            </div>
+            <div className="mt-5 flex flex-col-reverse gap-2 border-t border-white/[0.07] pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-xs text-white/45">Estimated total <span className="ml-1 font-semibold text-yellow-300">{calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, imageCount, creditSettings)} credits</span></div>
+              <button type="button" onClick={() => setSettingsOpen(false)} className="primary-gradient rounded-xl px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-primary/20 transition hover:brightness-110">Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+      <SidebarProvider>
       {showCreditModal && <InsufficientCreditsModal needed={neededCredits} available={credits} onClose={() => setShowCreditModal(false)} />}
     </div>
   );
