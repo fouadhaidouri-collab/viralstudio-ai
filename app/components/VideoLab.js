@@ -925,11 +925,6 @@ export default function VideoLab({ mode = "image" }) {
                     <h1 className="text-sm font-semibold text-white">
                       {isTextMode ? "Text to Video" : "Image to Video"}
                     </h1>
-                    {isTextMode && (
-                      <p className="text-[11px] text-on-surface-variant/60">
-                        Describe a scene and generate a video from text.
-                      </p>
-                    )}
                   </div>
                 </div>
 
