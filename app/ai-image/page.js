@@ -231,10 +231,19 @@ export default function AIImagePage() {
           <div className="flex flex-col flex-1">
             <div className="glass-card rounded-2xl p-4 lg:p-5 border border-white/10 flex-1 flex flex-col gap-0 card-glow shadow-2xl shadow-black/20" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
               
+              <div className="mb-3 flex shrink-0 items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                  <Icon name="image" className="text-base" />
+                </div>
+                <div>
+                  <h1 className="text-sm font-semibold text-white">AI Image</h1>
+                </div>
+              </div>
+
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                className="w-full min-h-[150px] xl:flex-1 bg-[#09090d]/80 border border-white/10 rounded-xl p-4 text-sm text-white focus:border-primary/60 focus:ring-1 focus:ring-primary/30 outline-none resize-none transition-all placeholder:text-white/30"
+                className="min-h-[200px] w-full resize-none rounded-xl border border-white/10 bg-[#050507] p-4 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary xl:flex-1"
                 placeholder="Describe the image you want to create. Be as detailed as possible for best results."
               ></textarea>
 
