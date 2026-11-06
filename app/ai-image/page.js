@@ -136,7 +136,6 @@ export default function AIImagePage() {
   const [imageCount, setImageCount] = useState(1);
   const [generating, setGenerating] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
-  const [imageHistory, setImageHistory] = useState([]);
   const [imageError, setImageError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const credits = useLiveCredits();
@@ -145,19 +144,6 @@ export default function AIImagePage() {
   const [creditSettings, setCreditSettings] = useState({ credit_usd_value: 0.01, default_markup_multiplier: 2.0, minimum_generation_credits: 1 });
   const [bgVideoIdx, setBgVideoIdx] = useState(0);
   const scrollActivated = useScrollActivated();
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/generations")
-      .then((r) => r.ok ? r.json() : Promise.reject())
-      .then((payload) => {
-        if (cancelled) return;
-        const rows = (payload.data || []).filter((item) => item.type === "Image Lab" && item.output_url);
-        setImageHistory(rows);
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
 
   useEffect(() => {
     fetch("/api/pricing/settings")
@@ -359,7 +345,7 @@ export default function AIImagePage() {
 
           {/* RIGHT: Preview */}
           <div className="flex flex-col glass-card rounded-2xl relative bg-black flex-1 border border-white/10 card-glow min-h-[420px] xl:min-h-0 shadow-2xl shadow-black/20" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
-            <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/80">Workspace</p><h3 className="mt-0.5 text-sm font-semibold text-white">Your image results</h3></div><span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/50">{imageUrls.length} new · {imageHistory.length} saved</span></div>
+            <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/80">Workspace</p><h3 className="mt-0.5 text-sm font-semibold text-white">Your image results</h3></div><span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/50">{imageUrls.length} generated</span></div>
             {imageError && <div className="mx-4 mt-4 rounded-xl border border-red-400/20 bg-red-400/[0.07] px-3 py-2.5 text-xs text-red-200">{imageError}</div>}
             {imageUrls.length > 0 ? (
               <>
@@ -414,14 +400,6 @@ export default function AIImagePage() {
               </div>
             )}
           </div>
-          {imageHistory.length > 0 && (
-            <section className="xl:col-span-2 rounded-2xl border border-white/10 bg-black/20 p-4 md:p-5">
-              <div className="mb-4 flex items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/80">Library</p><h3 className="mt-1 text-sm font-semibold text-white">Previous image generations</h3></div><span className="text-[10px] text-white/35">{imageHistory.length} saved images</span></div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6 gap-3">
-                {imageHistory.map((item) => <a key={item.id} href={item.output_url} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] transition hover:border-primary/40"><div className="aspect-square overflow-hidden bg-black/30"><img src={item.thumbnail_url || item.output_url} alt={item.prompt || "Generated image"} loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" /></div><div className="p-2.5"><p className="truncate text-[10px] font-medium text-white/75">{item.model || item.provider || "AI Image"}</p><p className="mt-1 line-clamp-2 text-[9px] text-white/35">{item.prompt || "Generated image"}</p></div></a>)}
-              </div>
-            </section>
-          )}
         </div>
       </main>
       </SidebarProvider>
