@@ -133,7 +133,7 @@ function SidebarContent() {
                       </Link>
                     ))}
                   </div>
-                )}}
+                )}
               </div>
             );
           }
