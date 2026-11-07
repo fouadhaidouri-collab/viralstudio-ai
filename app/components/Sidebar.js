@@ -66,13 +66,17 @@ function SidebarContent() {
                     setOpenMegaMenu(false);
                   }
                 }}
-                onFocus={() => setOpenMegaMenu(true)}
+                onFocus={() => {
+                  if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
+                    setOpenMegaMenu(true);
+                  }
+                }}
               >
                 <button
                   type="button"
                   onClick={() => setOpenMegaMenu((value) => !value)}
                   aria-expanded={openMegaMenu}
-                  className={`group flex h-10 w-full items-center gap-3 rounded-full px-3.5 text-left text-[15px] font-semibold transition-all duration-200 ${
+                  className={`group flex h-10 w-full items-center gap-3 rounded-full px-3.5 text-left text-[15px] font-semibold transition-colors duration-150 active:scale-[0.985] motion-reduce:transform-none ${
                     active || openMegaMenu
                       ? "bg-white/[0.09] text-white"
                       : "text-white/75 hover:bg-white/[0.06] hover:text-white"
@@ -124,13 +128,13 @@ function SidebarContent() {
                         key={child.href}
                         href={child.href}
                         onClick={handleNav}
-                        className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[15px] font-semibold transition-all duration-200 ${
+                        className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[15px] font-semibold transition-colors duration-150 active:scale-[0.985] motion-reduce:transform-none ${
                           pathname === child.href
                             ? "bg-primary/[0.12] text-primary shadow-[inset_0_0_0_1px_rgba(168,85,247,0.08)]"
                             : "text-white/75 hover:bg-white/[0.06] hover:text-white"
                         }`}
                       >
-                        <Icon name={child.icon} size={18} className={pathname === child.href ? "text-primary" : "text-white/65 group-hover:text-white"} />
+                        <Icon name={child.icon} size={child.icon === "image" ? 21 : 19} className={pathname === child.href ? "text-primary" : "text-white/65 group-hover:text-white"} />
                         <span className="whitespace-nowrap leading-5">{child.label}</span>
                       </Link>
                     ))}
