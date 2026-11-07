@@ -72,7 +72,8 @@ function SidebarContent() {
                 >
                   <Icon name={item.icon} size={18} className={active ? "text-primary" : "text-white/65 group-hover:text-white"} />
                   <span className="flex-1">{item.label}</span>
-                  <Icon name="chevron-right" size={15} className={`transition-transform ${openMegaMenu ? "rotate-90 text-primary" : "text-white/45"}`} />
+                  <Icon name="chevron-right" size={15} className={`hidden md:block transition-transform ${openMegaMenu ? "rotate-90 text-primary" : "text-white/45"}`} />
+                  <span aria-hidden="true" className={`ml-auto text-[21px] font-normal leading-none md:hidden ${openMegaMenu ? "text-primary" : "text-white/55"}`}>›</span>
                 </button>
 
                 {openMegaMenu && (
