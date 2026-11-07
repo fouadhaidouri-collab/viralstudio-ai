@@ -80,13 +80,6 @@ function SidebarContent() {
                   <>
                     <div className="absolute left-0 top-0 z-[-1] h-10 w-full" />
                     <div className="absolute left-[calc(100%+10px)] top-0 z-[80] hidden w-[360px] rounded-[18px] border border-white/[0.10] bg-[#19191d]/85 p-3 shadow-[0_20px_64px_rgba(0,0,0,0.45)] backdrop-blur-2xl md:block">
-                      <div className="mb-2 flex items-center justify-between px-1">
-                        <div>
-                          <div className="text-[10px] font-medium text-white/40">CREATE</div>
-                          <div className="mt-0.5 text-[13px] font-semibold text-white">AI Video</div>
-                        </div>
-                        <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-semibold text-primary">2 tools</span>
-                      </div>
                       <div className="flex flex-col gap-1.5">
                         {item.children.map((child) => {
                           const childActive = pathname === child.href;
