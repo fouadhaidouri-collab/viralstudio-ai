@@ -96,7 +96,7 @@ function SidebarContent() {
                               key={child.href}
                               href={child.href}
                               onClick={handleNav}
-                              className={`group flex min-h-[60px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left transition-all duration-200 ${
+                              className={`group flex min-h-[68px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left transition-all duration-200 ${
                                 childActive
                                   ? "border-primary/40 bg-primary/[0.12]"
                                   : "border-white/[0.07] bg-white/[0.025] hover:border-primary/30 hover:bg-white/[0.07]"
@@ -106,7 +106,7 @@ function SidebarContent() {
                                 <Icon name={child.icon} size={19} />
                               </span>
                               <span className="min-w-0 flex-1">
-                                <span className="block text-[14px] font-semibold text-white/95">{child.label}</span>
+                                <span className="block whitespace-nowrap text-[14px] font-semibold leading-5 text-white/95">{child.label}</span>
                                 <span className="mt-1 block text-[12px] leading-5 text-white/50">{child.description}</span>
                               </span>
                             </Link>
@@ -124,14 +124,14 @@ function SidebarContent() {
                         key={child.href}
                         href={child.href}
                         onClick={handleNav}
-                        className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[14px] font-semibold transition-all duration-200 ${
+                        className={`group flex min-h-[48px] items-center gap-3 rounded-full px-3.5 py-1.5 text-[14px] font-semibold transition-all duration-200 ${
                           pathname === child.href
                             ? "bg-primary/[0.12] text-primary shadow-[inset_0_0_0_1px_rgba(168,85,247,0.08)]"
                             : "text-white/75 hover:bg-white/[0.06] hover:text-white"
                         }`}
                       >
                         <Icon name={child.icon} size={18} className={pathname === child.href ? "text-primary" : "text-white/65 group-hover:text-white"} />
-                        <span>{child.label}</span>
+                        <span className="whitespace-nowrap leading-5">{child.label}</span>
                       </Link>
                     ))}
                   </div>
