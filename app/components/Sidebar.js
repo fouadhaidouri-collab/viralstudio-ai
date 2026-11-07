@@ -58,6 +58,7 @@ function SidebarContent() {
                 className="relative"
                 onMouseEnter={() => setOpenMegaMenu(true)}
                 onMouseLeave={() => setOpenMegaMenu(false)}
+                onFocus={() => setOpenMegaMenu(true)}
               >
                 <button
                   type="button"
@@ -77,7 +78,7 @@ function SidebarContent() {
                 {openMegaMenu && (
                   <>
                     <div className="absolute left-0 top-0 z-[-1] h-10 w-full" />
-                    <div className="absolute left-[calc(100%+10px)] top-[-52px] z-[80] hidden w-[460px] rounded-[22px] border border-white/[0.10] bg-[#19191d]/65 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.48)] backdrop-blur-2xl md:block">
+                    <div className="absolute left-[calc(100%+10px)] top-0 z-[80] hidden w-[460px] rounded-[22px] border border-white/[0.10] bg-[#19191d]/65 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.48)] backdrop-blur-2xl md:block">
                       <div className="mb-3 flex items-center justify-between px-1">
                         <div>
                           <div className="text-[11px] font-medium text-white/40">CREATE</div>
