@@ -110,22 +110,20 @@ function SidebarContent() {
                 )}
 
                 {openMegaMenu && (
-                  <div className="mt-2 space-y-2 pl-2 md:hidden">
-                    <div className="flex items-center justify-between px-2 pb-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">CREATE · AI VIDEO</span>
-                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">2 tools</span>
-                    </div>
+                  <div className="mt-1.5 flex flex-col gap-1 pl-3 md:hidden">
                     {item.children.map((child) => (
-                      <Link key={child.href} href={child.href} onClick={handleNav}
-                        className={`flex min-h-[76px] items-center gap-3 rounded-2xl border px-3 py-3 transition ${
-                          pathname === child.href ? "border-primary/40 bg-primary/[0.12] text-white" : "border-white/[0.08] bg-white/[0.035] text-white/80 hover:border-primary/30 hover:bg-white/[0.07]"
-                        }`}>
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-primary"><Icon name={child.icon} size={19} /></span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[14px] font-semibold">{child.label}</span>
-                          <span className="mt-1 block text-[11px] leading-4 text-white/45">{child.description}</span>
-                        </span>
-                        <Icon name="chevron-right" size={16} className="shrink-0 text-white/35" />
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={handleNav}
+                        className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[14px] font-semibold transition-all duration-200 ${
+                          pathname === child.href
+                            ? "bg-primary/[0.12] text-primary shadow-[inset_0_0_0_1px_rgba(168,85,247,0.08)]"
+                            : "text-white/75 hover:bg-white/[0.06] hover:text-white"
+                        }`}
+                      >
+                        <Icon name={child.icon} size={18} className={pathname === child.href ? "text-primary" : "text-white/65 group-hover:text-white"} />
+                        <span>{child.label}</span>
                       </Link>
                     ))}
                   </div>
