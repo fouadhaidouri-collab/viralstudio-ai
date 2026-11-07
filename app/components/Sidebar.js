@@ -87,7 +87,7 @@ function SidebarContent() {
                         </div>
                         <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">2 tools</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-2">
                         {item.children.map((child) => {
                           const childActive = pathname === child.href;
                           return (
@@ -95,17 +95,19 @@ function SidebarContent() {
                               key={child.href}
                               href={child.href}
                               onClick={handleNav}
-                              className={`group flex min-h-[136px] flex-col rounded-2xl border p-4 transition-all duration-200 ${
+                              className={`group flex min-h-[76px] items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all duration-200 ${
                                 childActive
                                   ? "border-primary/40 bg-primary/[0.12]"
                                   : "border-white/[0.07] bg-white/[0.025] hover:border-primary/30 hover:bg-white/[0.07]"
                               }`}
                             >
-                              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.07] text-primary transition group-hover:bg-primary/15">
+                              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-primary transition group-hover:bg-primary/15">
                                 <Icon name={child.icon} size={19} />
                               </span>
-                              <span className="text-[14px] font-semibold text-white/95">{child.label}</span>
-                              <span className="mt-1 text-[12px] leading-5 text-white/50">{child.description}</span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block text-[14px] font-semibold text-white/95">{child.label}</span>
+                                <span className="mt-1 block text-[12px] leading-5 text-white/50">{child.description}</span>
+                              </span>
                             </Link>
                           );
                         })}
