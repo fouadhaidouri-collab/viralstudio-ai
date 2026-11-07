@@ -1,28 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Icon from "./Icon";
 
-const homeItem = { href: "/", label: "Home", icon: "dashboard" };
-const toolItems = [
+const navItems = [
+  { href: "/", label: "Home", icon: "dashboard" },
   {
     href: "/ai-video",
     label: "AI Video",
     icon: "movie",
     children: [
-      {
-        href: "/ai-video/text-to-video",
-        label: "Text to Video",
-        icon: "description",
-      },
-      {
-        href: "/ai-video/image-to-video",
-        label: "Image to Video",
-        icon: "image",
-      },
+      { href: "/ai-video/text-to-video", label: "Text to Video", icon: "description", description: "Create videos from a text prompt" },
+      { href: "/ai-video/image-to-video", label: "Image to Video", icon: "image", description: "Turn an image into a video" },
     ],
   },
   { href: "/ai-image", label: "Image Lab", icon: "image" },
@@ -31,154 +23,104 @@ const toolItems = [
 
 function SidebarContent() {
   const pathname = usePathname();
-  const router = useRouter();
   const { setMobileOpen } = useSidebar();
-  const [showAdmin, setShowAdmin] = useState(false);
-  const [openMegaMenu, setOpenMegaMenu] = useState(null);
-
-  useEffect(() => {
-    const host = window.location.hostname;
-    setShowAdmin(!host.endsWith("viralstudio-ai.com"));
-  }, []);
-
-  useEffect(() => {
-    const routes = [
-      homeItem.href,
-      ...toolItems.flatMap((i) => [i.href, ...(i.children || []).map((c) => c.href)]),
-      ...(showAdmin ? ["/admin"] : []),
-    ];
-    routes.forEach((href) => router.prefetch(href));
-  }, [router, showAdmin]);
-
-  const handleNav = () => setMobileOpen(false);
+  const [openMegaMenu, setOpenMegaMenu] = useState(false);
+  const handleNav = () => {
+    setMobileOpen(false);
+    setOpenMegaMenu(false);
+  };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-surface border-r border-surface-border/80 z-50 flex flex-col p-4 overflow-hidden" style={{ boxShadow: '4px 0 32px rgba(0,0,0,0.4)' }}>
-      <Link href="/" onClick={handleNav} className="mb-5 px-2 flex items-center gap-3 group relative">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-xl blur-xl bg-primary/40 animate-pulse-glow" />
-          <div className="w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 relative z-10" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #3b0764 100%)', boxShadow: '0 0 30px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.2)' }}>
-            <Icon name="bolt" className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" size={20} />
-          </div>
+    <aside className="fixed left-0 top-0 z-50 flex h-full w-56 flex-col overflow-visible border-r border-white/[0.09] bg-[#0d0d12] p-3">
+      <Link href="/" onClick={handleNav} className="mb-7 flex items-center gap-3 px-2 py-2">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 shadow-[0_0_22px_rgba(249,115,22,0.24)]">
+          <Icon name="bolt" size={19} className="text-white" />
         </div>
-        <div>
-          <h1 className="whitespace-nowrap font-extrabold tracking-tight leading-none" style={{ background: 'linear-gradient(135deg, #fff 30%, #a855f7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '16px', fontFamily: 'Geist, sans-serif' }}>ViralStudio AI</h1>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-primary" />
-            <span className="text-[9px] text-on-surface-variant font-bold uppercase tracking-[0.15em]">Premium Suite</span>
-          </div>
+        <div className="min-w-0">
+          <div className="whitespace-nowrap text-[15px] font-extrabold tracking-tight text-white">ViralStudio AI</div>
+          <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.17em] text-white/35">Creative Studio</div>
         </div>
       </Link>
-      <nav className="flex-1 space-y-1">
-        <Link
-          key={homeItem.href}
-          href={homeItem.href}
-          onClick={handleNav}
-          className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-[0.97] ${
-            pathname === homeItem.href
-              ? "primary-gradient text-white shadow-lg shadow-primary/30"
-              : "text-on-surface-variant hover:bg-[rgba(255,255,255,0.04)] hover:text-white hover:translate-x-0.5"
-          }`}
-        >
-          <Icon name={homeItem.icon} className="shrink-0" size={20} />
-          <span className="sidebar-link-text flex-1">{homeItem.label}</span>
-        </Link>
-        {[...toolItems, ...(showAdmin ? [{ href: "/admin", label: "Admin Panel", icon: "shield" }] : [])].map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.children && pathname.startsWith(`${item.href}/`));
 
+      <nav className="flex flex-col gap-1">
+        {navItems.map((item) => {
+          const active = pathname === item.href || (item.children && pathname.startsWith(item.href + "/"));
           if (item.children) {
             return (
               <div
                 key={item.href}
-                onMouseEnter={() => setOpenMegaMenu(item.href)}
-                onMouseLeave={() => setOpenMegaMenu(null)}
+                className="relative"
+                onMouseEnter={() => setOpenMegaMenu(true)}
+                onMouseLeave={() => setOpenMegaMenu(false)}
               >
                 <button
-                  onClick={() => setOpenMegaMenu(item.href)}
-                  aria-expanded={openMegaMenu === item.href}
-                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-200 active:scale-[0.97] ${
-                    isActive || openMegaMenu === item.href
-                      ? "bg-white/[0.06] text-white"
-                      : "text-on-surface-variant hover:bg-[rgba(255,255,255,0.04)] hover:text-white hover:translate-x-0.5"
+                  type="button"
+                  onClick={() => setOpenMegaMenu((value) => !value)}
+                  aria-expanded={openMegaMenu}
+                  className={`group flex h-10 w-full items-center gap-3 rounded-full px-3.5 text-left text-[14px] font-medium transition-all duration-200 ${
+                    active || openMegaMenu
+                      ? "bg-white/[0.09] text-white"
+                      : "text-white/75 hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
-                  <Icon name={item.icon} className="shrink-0" size={20} />
-                  <span className="sidebar-link-text flex-1 text-left">{item.label}</span>
-                  <Icon name={openMegaMenu === item.href ? "chevron-left" : "chevron-right"} size={16} />
+                  <Icon name={item.icon} size={18} className={active ? "text-orange-400" : "text-white/65 group-hover:text-white"} />
+                  <span className="flex-1">{item.label}</span>
+                  <Icon name="chevron-right" size={15} className={`transition-transform ${openMegaMenu ? "rotate-90 text-orange-400" : "text-white/45"}`} />
                 </button>
-                {/* Compact mobile submenu, shown directly below AI Video */}
-                {openMegaMenu === item.href && (
-                  <div className="mt-1.5 ml-11 space-y-1 md:hidden">
-                    {item.children.map((child) => {
-                      const childActive = pathname === child.href;
-                      return (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          onClick={() => {
-                            handleNav();
-                            setOpenMegaMenu(null);
-                          }}
-                          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
-                            childActive
-                              ? "bg-primary/15 text-white"
-                              : "text-on-surface-variant hover:bg-white/[0.05] hover:text-white"
-                          }`}
-                        >
-                          <Icon name={child.icon} className="shrink-0" size={17} />
-                          <span>{child.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-                {openMegaMenu === item.href && (
-                  <div className="hidden md:block md:fixed md:left-64 md:top-12 md:z-[60] md:mt-0 md:w-[min(520px,calc(100vw-288px))] rounded-2xl border border-white/10 bg-[#171619]/95 p-3 shadow-xl md:p-5 md:shadow-2xl md:backdrop-blur-xl">
-                    <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
-                      <div>
-                        <h3 className="mt-1 text-lg font-bold text-white">AI Video</h3>
+
+                {openMegaMenu && (
+                  <>
+                    <div className="absolute left-0 top-0 z-[-1] h-10 w-full" />
+                    <div className="absolute left-[calc(100%+10px)] top-[-52px] z-[80] hidden w-[430px] rounded-[22px] border border-white/[0.09] bg-[#19191d]/95 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-2xl md:block">
+                      <div className="mb-3 flex items-center justify-between px-1">
+                        <div>
+                          <div className="text-[11px] font-medium text-white/40">CREATE</div>
+                          <div className="mt-1 text-[15px] font-semibold text-white">AI Video</div>
+                        </div>
+                        <span className="rounded-full border border-orange-400/20 bg-orange-500/10 px-2.5 py-1 text-[10px] font-semibold text-orange-300">2 tools</span>
                       </div>
-                      <button
-                        onClick={() => setOpenMegaMenu(null)}
-                        aria-label="Close AI Video menu"
-                        className="rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
-                      >
-                        <Icon name="x" size={18} />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3">
-                      {item.children.map((child) => {
-                        const childActive = pathname === child.href;
-                        return (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            onClick={() => {
-                              handleNav();
-                              setOpenMegaMenu(null);
-                            }}
-                            className={`group flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 ${
-                              childActive
-                                ? "border-primary/50 bg-primary/15 text-white"
-                                : "border-white/[0.07] bg-white/[0.025] text-white/75 hover:border-primary/40 hover:bg-white/[0.07] hover:text-white"
-                            }`}
-                          >
-                            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-primary transition group-hover:bg-primary/15">
-                              <Icon name={child.icon} size={21} />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block text-sm font-bold">{child.label}</span>
-                              <span className="mt-1 block text-xs text-white/45">
-                                {child.label === "Text to Video" ? "Create a video from a text prompt" : "Animate an image into a video"}
+                      <div className="grid grid-cols-2 gap-2">
+                        {item.children.map((child) => {
+                          const childActive = pathname === child.href;
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={handleNav}
+                              className={`group flex min-h-[112px] flex-col rounded-2xl border p-3.5 transition-all duration-200 ${
+                                childActive
+                                  ? "border-orange-400/40 bg-orange-500/[0.12]"
+                                  : "border-white/[0.07] bg-white/[0.025] hover:border-orange-400/30 hover:bg-white/[0.07]"
+                              }`}
+                            >
+                              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.07] text-orange-300 transition group-hover:bg-orange-500/15">
+                                <Icon name={child.icon} size={19} />
                               </span>
-                            </span>
-                            <Icon name="arrow-up-right" size={17} className="text-white/35 transition group-hover:text-primary" />
-                          </Link>
-                        );
-                      })}
+                              <span className="text-[13px] font-semibold text-white/90">{child.label}</span>
+                              <span className="mt-1 text-[11px] leading-4 text-white/40">{child.description}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
+                  </>
+                )}
+
+                {openMegaMenu && (
+                  <div className="mt-1.5 space-y-1 pl-8 md:hidden">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={handleNav}
+                        className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] transition ${
+                          pathname === child.href ? "bg-orange-500/15 text-orange-300" : "text-white/65 hover:bg-white/[0.06] hover:text-white"
+                        }`}
+                      >
+                        <Icon name={child.icon} size={16} />
+                        {child.label}
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
@@ -190,29 +132,19 @@ function SidebarContent() {
               key={item.href}
               href={item.href}
               onClick={handleNav}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-[0.97] ${
-                isActive
-                  ? "primary-gradient text-white shadow-lg shadow-primary/30"
-                  : "text-on-surface-variant hover:bg-[rgba(255,255,255,0.04)] hover:text-white hover:translate-x-0.5"
+              className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[14px] font-medium transition-all duration-200 ${
+                active
+                  ? "bg-orange-500/[0.12] text-orange-400 shadow-[inset_0_0_0_1px_rgba(249,115,22,0.08)]"
+                  : "text-white/75 hover:bg-white/[0.06] hover:text-white"
               }`}
             >
-              <Icon name={item.icon} className="shrink-0" size={20} />
-              <span className="sidebar-link-text flex-1">{item.label}</span>
+              <Icon name={item.icon} size={18} className={active ? "text-orange-400" : "text-white/65 group-hover:text-white"} />
+              <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="mt-auto pt-4 border-t border-surface-border/40 px-2">
-        <Link
-          href="/affiliate"
-          onClick={handleNav}
-          className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/50 transition-all duration-200 font-semibold text-sm"
-        >
-          <Icon name="users" size={17} />
-          <span>Affiliate</span>
-          <Icon name="arrow-up-right" size={14} className="ml-auto opacity-70" />
-        </Link>
-      </div>
+      <div className="mt-auto px-3 pb-2 pt-4 text-[10px] font-medium tracking-wide text-white/25">VIRALSTUDIO AI</div>
     </aside>
   );
 }
@@ -222,52 +154,14 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Desktop sidebar - always visible */}
-      <div className="hidden md:block">
-        <SidebarContent />
-      </div>
-
-      {/* Mobile sidebar - overlay */}
-      <div className={`md:hidden ${isMobileOpen ? '' : 'pointer-events-none'}`}>
-        <div className={`mobile-sidebar-overlay transition-opacity duration-300 ${isMobileOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setMobileOpen(false)} />
-        <div className={`fixed inset-0 z-[70] flex transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className="hidden md:block"><SidebarContent /></div>
+      <div className={`md:hidden ${isMobileOpen ? "" : "pointer-events-none"}`}>
+        <div className={`mobile-sidebar-overlay transition-opacity duration-300 ${isMobileOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setMobileOpen(false)} />
+        <div className={`fixed inset-0 z-[70] flex transition-transform duration-300 ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <SidebarContent />
           <div className="flex-1" onClick={() => setMobileOpen(false)} />
         </div>
       </div>
-
-      <style jsx global>{`
-        .sidebar-link-text {
-          font-size: 14px;
-          font-weight: 700;
-          font-family: Geist, sans-serif;
-          white-space: nowrap;
-          text-align: left;
-          display: block;
-          flex: 1;
-        }
-        .sidebar-heading-text {
-          font-size: 10px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.2em;
-          color: var(--color-on-surface-variant);
-          opacity: 0.6;
-          display: block;
-        }
-        .sidebar-credits-text {
-          font-size: 11px;
-          font-weight: 500;
-          color: var(--color-on-surface-variant);
-        }
-        @keyframes slide-in-left {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-        .animate-slide-in-left {
-          animation: slide-in-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
     </>
   );
 }
