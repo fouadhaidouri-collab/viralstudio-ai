@@ -114,22 +114,26 @@ function SidebarContent() {
                 )}
 
                 {openMegaMenu && (
-                  <div className="mt-1.5 space-y-1 pl-8 md:hidden">
+                  <div className="mt-2 space-y-2 pl-2 md:hidden">
+                    <div className="flex items-center justify-between px-2 pb-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">CREATE · AI VIDEO</span>
+                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">2 tools</span>
+                    </div>
                     {item.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        onClick={handleNav}
-                        className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] transition ${
-                          pathname === child.href ? "bg-primary/15 text-primary" : "text-white/65 hover:bg-white/[0.06] hover:text-white"
-                        }`}
-                      >
-                        <Icon name={child.icon} size={16} />
-                        {child.label}
+                      <Link key={child.href} href={child.href} onClick={handleNav}
+                        className={`flex min-h-[76px] items-center gap-3 rounded-2xl border px-3 py-3 transition ${
+                          pathname === child.href ? "border-primary/40 bg-primary/[0.12] text-white" : "border-white/[0.08] bg-white/[0.035] text-white/80 hover:border-primary/30 hover:bg-white/[0.07]"
+                        }`}>
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-primary"><Icon name={child.icon} size={19} /></span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[14px] font-semibold">{child.label}</span>
+                          <span className="mt-1 block text-[11px] leading-4 text-white/45">{child.description}</span>
+                        </span>
+                        <Icon name="chevron-right" size={16} className="shrink-0 text-white/35" />
                       </Link>
                     ))}
                   </div>
-                )}
+                )}}
               </div>
             );
           }
