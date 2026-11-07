@@ -1,9 +1,14 @@
 import { auth } from "../../../lib/auth";
 import { findUser } from "../../../lib/userStore";
-import { getAffiliateByUserId, getOrCreateAffiliate } from "../../../../lib/affiliateStore";
+import { getAffiliateByCode, getAffiliateByUserId, getOrCreateAffiliate } from "../../../../lib/affiliateStore";
 
-export async function POST() {
+export async function POST(req) {
   try {
+    const body = await req.json().catch(() => ({}));
+    const code = String(body.code || "").trim().toUpperCase();
+    if (!/^[A-Z0-9]{3,20}$/.test(code)) {
+      return Response.json({ error: "Choose a coupon code with 3–20 letters or numbers" }, { status: 400 });
+    }
     const session = await auth();
     if (!session?.user?.email) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,8 +24,14 @@ export async function POST() {
       return Response.json({ ok: true, affiliate: existing, existing: true });
     }
 
+    const codeOwner = await getAffiliateByCode(code);
+    if (codeOwner) {
+      return Response.json({ error: "This coupon code is already taken. Please choose another one." }, { status: 409 });
+    }
+
     const affiliate = await getOrCreateAffiliate({
       user_id: user.id,
+      code,
       name: user.name || session.user.name || user.email.split("@")[0],
       email: user.email,
     });
@@ -31,6 +42,9 @@ export async function POST() {
 
     return Response.json({ ok: true, affiliate, existing: false }, { status: 201 });
   } catch (err) {
+    if (String(err.message || "").toLowerCase().includes("unique") || String(err.message || "").toLowerCase().includes("already in use")) {
+      return Response.json({ error: "This coupon code is already taken. Please choose another one." }, { status: 409 });
+    }
     console.error("affiliate join error:", err);
     return Response.json({ error: err.message || "Could not join the Affiliate Program" }, { status: 500 });
   }
