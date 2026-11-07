@@ -150,7 +150,17 @@ function SidebarContent() {
           );
         })}
       </nav>
-      <div className="mt-auto px-3 pb-2 pt-4 text-[10px] font-medium tracking-wide text-white/25">VIRALSTUDIO AI</div>
+      <div className="mt-auto border-t border-white/[0.07] px-2 pb-2 pt-4">
+        <Link
+          href="/affiliate"
+          onClick={handleNav}
+          className="flex h-10 w-full items-center gap-3 rounded-full px-3.5 text-[14px] font-medium text-white/75 transition-all duration-200 hover:bg-white/[0.06] hover:text-white"
+        >
+          <Icon name="users" size={18} className="text-white/65" />
+          <span>Affiliate</span>
+          <Icon name="arrow-up-right" size={14} className="ml-auto text-white/40" />
+        </Link>
+      </div>
     </aside>
   );
 }
