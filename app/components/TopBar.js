@@ -21,6 +21,14 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center gap-3 md:gap-6">
+        <button
+          onClick={() => router.push("/affiliate")}
+          className="inline-flex items-center gap-1.5 px-2.5 md:px-3 py-2 rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/50 transition-all duration-200 text-xs md:text-sm font-semibold whitespace-nowrap"
+          aria-label="Open Affiliate Program"
+        >
+          <Icon name="users" size={15} />
+          <span>Affiliate</span>
+        </button>
         <div className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 bg-surface-container-low border border-surface-border/50 rounded-xl hover:border-yellow-400/20 transition-all duration-200" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
           <Icon name="bolt" className="text-yellow-400" size={14} />
           <span className="text-sm font-bold text-yellow-400">{credits ?? 0}</span>
