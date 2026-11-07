@@ -56,8 +56,16 @@ function SidebarContent() {
               <div
                 key={item.href}
                 className="relative"
-                onMouseEnter={() => setOpenMegaMenu(true)}
-                onMouseLeave={() => setOpenMegaMenu(false)}
+                onMouseEnter={() => {
+                  if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
+                    setOpenMegaMenu(true);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
+                    setOpenMegaMenu(false);
+                  }
+                }}
                 onFocus={() => setOpenMegaMenu(true)}
               >
                 <button
