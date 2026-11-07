@@ -63,7 +63,7 @@ function SidebarContent() {
                   type="button"
                   onClick={() => setOpenMegaMenu((value) => !value)}
                   aria-expanded={openMegaMenu}
-                  className={`group flex h-10 w-full items-center gap-3 rounded-full px-3.5 text-left text-[14px] font-medium transition-all duration-200 ${
+                  className={`group flex h-10 w-full items-center gap-3 rounded-full px-3.5 text-left text-[15px] font-semibold transition-all duration-200 ${
                     active || openMegaMenu
                       ? "bg-white/[0.09] text-white"
                       : "text-white/75 hover:bg-white/[0.06] hover:text-white"
@@ -138,7 +138,7 @@ function SidebarContent() {
               key={item.href}
               href={item.href}
               onClick={handleNav}
-              className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[14px] font-medium transition-all duration-200 ${
+              className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[15px] font-semibold transition-all duration-200 ${
                 active
                   ? "bg-primary/[0.12] text-primary shadow-[inset_0_0_0_1px_rgba(168,85,247,0.08)]"
                   : "text-white/75 hover:bg-white/[0.06] hover:text-white"
@@ -154,11 +154,11 @@ function SidebarContent() {
         <Link
           href="/affiliate"
           onClick={handleNav}
-          className="flex h-10 w-full items-center gap-3 rounded-full px-3.5 text-[14px] font-medium text-white/75 transition-all duration-200 hover:bg-white/[0.06] hover:text-white"
+          className="group flex h-11 w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/[0.08] px-3.5 text-[15px] font-semibold text-white/90 shadow-[0_4px_18px_rgba(0,0,0,0.16)] transition-all duration-200 hover:border-primary/35 hover:bg-primary/[0.14] hover:text-white"
         >
-          <Icon name="users" size={18} className="text-white/65" />
+          <Icon name="users" size={18} className="text-primary" />
           <span>Affiliate</span>
-          <Icon name="arrow-up-right" size={14} className="ml-auto text-white/40" />
+          <Icon name="arrow-up-right" size={14} className="ml-auto text-white/45 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </Link>
       </div>
     </aside>
