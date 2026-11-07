@@ -32,13 +32,19 @@ function SidebarContent() {
 
   return (
     <aside className="fixed left-0 top-0 z-50 flex h-full w-56 flex-col overflow-visible border-r border-white/[0.09] bg-[#0d0d12] p-3">
-      <Link href="/" onClick={handleNav} className="mb-7 flex items-center gap-3 px-2 py-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 shadow-[0_0_22px_rgba(249,115,22,0.24)]">
-          <Icon name="bolt" size={19} className="text-white" />
+      <Link href="/" onClick={handleNav} className="mb-5 px-2 flex items-center gap-3 group relative">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-xl blur-xl bg-primary/40 animate-pulse-glow" />
+          <div className="w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 relative z-10" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #3b0764 100%)', boxShadow: '0 0 30px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.2)' }}>
+            <Icon name="bolt" className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" size={20} />
+          </div>
         </div>
-        <div className="min-w-0">
-          <div className="whitespace-nowrap text-[15px] font-extrabold tracking-tight text-white">ViralStudio AI</div>
-          <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.17em] text-white/35">Creative Studio</div>
+        <div>
+          <h1 className="whitespace-nowrap font-extrabold tracking-tight leading-none" style={{ background: 'linear-gradient(135deg, #fff 30%, #a855f7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '16px', fontFamily: 'Geist, sans-serif' }}>ViralStudio AI</h1>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-primary" />
+            <span className="text-[9px] text-on-surface-variant font-bold uppercase tracking-[0.15em]">Premium Suite</span>
+          </div>
         </div>
       </Link>
 
@@ -63,9 +69,9 @@ function SidebarContent() {
                       : "text-white/75 hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
-                  <Icon name={item.icon} size={18} className={active ? "text-orange-400" : "text-white/65 group-hover:text-white"} />
+                  <Icon name={item.icon} size={18} className={active ? "text-primary" : "text-white/65 group-hover:text-white"} />
                   <span className="flex-1">{item.label}</span>
-                  <Icon name="chevron-right" size={15} className={`transition-transform ${openMegaMenu ? "rotate-90 text-orange-400" : "text-white/45"}`} />
+                  <Icon name="chevron-right" size={15} className={`transition-transform ${openMegaMenu ? "rotate-90 text-primary" : "text-white/45"}`} />
                 </button>
 
                 {openMegaMenu && (
@@ -77,7 +83,7 @@ function SidebarContent() {
                           <div className="text-[11px] font-medium text-white/40">CREATE</div>
                           <div className="mt-1 text-[15px] font-semibold text-white">AI Video</div>
                         </div>
-                        <span className="rounded-full border border-orange-400/20 bg-orange-500/10 px-2.5 py-1 text-[10px] font-semibold text-orange-300">2 tools</span>
+                        <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">2 tools</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {item.children.map((child) => {
@@ -89,11 +95,11 @@ function SidebarContent() {
                               onClick={handleNav}
                               className={`group flex min-h-[112px] flex-col rounded-2xl border p-3.5 transition-all duration-200 ${
                                 childActive
-                                  ? "border-orange-400/40 bg-orange-500/[0.12]"
-                                  : "border-white/[0.07] bg-white/[0.025] hover:border-orange-400/30 hover:bg-white/[0.07]"
+                                  ? "border-primary/40 bg-primary/[0.12]"
+                                  : "border-white/[0.07] bg-white/[0.025] hover:border-primary/30 hover:bg-white/[0.07]"
                               }`}
                             >
-                              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.07] text-orange-300 transition group-hover:bg-orange-500/15">
+                              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.07] text-primary transition group-hover:bg-primary/15">
                                 <Icon name={child.icon} size={19} />
                               </span>
                               <span className="text-[13px] font-semibold text-white/90">{child.label}</span>
@@ -114,7 +120,7 @@ function SidebarContent() {
                         href={child.href}
                         onClick={handleNav}
                         className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] transition ${
-                          pathname === child.href ? "bg-orange-500/15 text-orange-300" : "text-white/65 hover:bg-white/[0.06] hover:text-white"
+                          pathname === child.href ? "bg-primary/15 text-primary" : "text-white/65 hover:bg-white/[0.06] hover:text-white"
                         }`}
                       >
                         <Icon name={child.icon} size={16} />
@@ -134,11 +140,11 @@ function SidebarContent() {
               onClick={handleNav}
               className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[14px] font-medium transition-all duration-200 ${
                 active
-                  ? "bg-orange-500/[0.12] text-orange-400 shadow-[inset_0_0_0_1px_rgba(249,115,22,0.08)]"
+                  ? "bg-primary/[0.12] text-primary shadow-[inset_0_0_0_1px_rgba(168,85,247,0.08)]"
                   : "text-white/75 hover:bg-white/[0.06] hover:text-white"
               }`}
             >
-              <Icon name={item.icon} size={18} className={active ? "text-orange-400" : "text-white/65 group-hover:text-white"} />
+              <Icon name={item.icon} size={18} className={active ? "text-primary" : "text-white/65 group-hover:text-white"} />
               <span>{item.label}</span>
             </Link>
           );
