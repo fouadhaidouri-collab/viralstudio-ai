@@ -106,7 +106,7 @@ function SidebarContent() {
                                 <Icon name={child.icon} size={19} />
                               </span>
                               <span className="min-w-0 flex-1">
-                                <span className="block max-w-[88px] text-[14px] font-semibold leading-[1.15] text-white/95">{child.label === "Text to Video" ? <>Text to<br />Video</> : <>Image to<br />Video</>}</span>
+                                <span className="block whitespace-nowrap text-[14px] font-semibold leading-5 text-white/95">{child.label}</span>
                                 <span className="mt-1 block text-[12px] leading-5 text-white/50">{child.description}</span>
                               </span>
                             </Link>
@@ -131,7 +131,7 @@ function SidebarContent() {
                         }`}
                       >
                         <Icon name={child.icon} size={18} className={pathname === child.href ? "text-primary" : "text-white/65 group-hover:text-white"} />
-                        <span className="max-w-[78px] leading-[1.1]">{child.label === "Text to Video" ? <>Text to<br />Video</> : <>Image to<br />Video</>}</span>
+                        <span className="whitespace-nowrap leading-5">{child.label}</span>
                       </Link>
                     ))}
                   </div>
