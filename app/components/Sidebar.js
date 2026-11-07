@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
 import { useState, useEffect } from "react";
-import useLiveCredits from "../lib/useLiveCredits";
 import Icon from "./Icon";
 
 const homeItem = { href: "/", label: "Home", icon: "dashboard" };
@@ -34,7 +33,6 @@ function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
   const { setMobileOpen } = useSidebar();
-  const credits = useLiveCredits();
   const [showAdmin, setShowAdmin] = useState(false);
   const [openMegaMenu, setOpenMegaMenu] = useState(null);
 
@@ -205,12 +203,15 @@ function SidebarContent() {
         })}
       </nav>
       <div className="mt-auto pt-4 border-t border-surface-border/40 px-2">
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-surface-container-low border border-surface-border/40" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-accent-cyan to-primary flex items-center justify-center shrink-0">
-            <Icon name="auto_awesome" className="text-white" size={12} />
-          </div>
-          <span className="sidebar-credits-text">AI Credits: <span className="text-yellow-400 font-bold">{credits ?? 0}</span></span>
-        </div>
+        <Link
+          href="/affiliate"
+          onClick={handleNav}
+          className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/50 transition-all duration-200 font-semibold text-sm"
+        >
+          <Icon name="users" size={17} />
+          <span>Affiliate</span>
+          <Icon name="arrow-up-right" size={14} className="ml-auto opacity-70" />
+        </Link>
       </div>
     </aside>
   );
