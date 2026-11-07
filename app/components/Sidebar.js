@@ -88,7 +88,7 @@ function SidebarContent() {
                   <>
                     <div className="absolute left-0 top-0 z-[-1] h-10 w-full" />
                     <div className="absolute left-[calc(100%+10px)] top-0 z-[80] hidden w-[360px] rounded-[18px] border border-white/[0.10] bg-[#19191d]/85 p-3 shadow-[0_20px_64px_rgba(0,0,0,0.45)] backdrop-blur-2xl md:block">
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-1">
                         {item.children.map((child) => {
                           const childActive = pathname === child.href;
                           return (
@@ -96,13 +96,13 @@ function SidebarContent() {
                               key={child.href}
                               href={child.href}
                               onClick={handleNav}
-                              className={`group flex min-h-[68px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left transition-all duration-200 ${
+                              className={`group flex h-10 items-center gap-2.5 rounded-xl border px-3 text-left text-[14px] font-semibold transition-all duration-200 ${
                                 childActive
                                   ? "border-primary/40 bg-primary/[0.12]"
                                   : "border-white/[0.07] bg-white/[0.025] hover:border-primary/30 hover:bg-white/[0.07]"
                               }`}
                             >
-                              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.07] text-primary transition group-hover:bg-primary/15">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.07] text-primary transition group-hover:bg-primary/15">
                                 <Icon name={child.icon} size={19} />
                               </span>
                               <span className="min-w-0 flex-1">
@@ -118,13 +118,13 @@ function SidebarContent() {
                 )}
 
                 {openMegaMenu && (
-                  <div className="mt-1.5 flex flex-col gap-1 pl-3 md:hidden">
+                  <div className="mt-1 flex flex-col gap-1 pl-3 md:hidden">
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}
                         onClick={handleNav}
-                        className={`group flex min-h-[48px] items-center gap-3 rounded-full px-3.5 py-1.5 text-[14px] font-semibold transition-all duration-200 ${
+                        className={`group flex h-10 items-center gap-3 rounded-full px-3.5 text-[15px] font-semibold transition-all duration-200 ${
                           pathname === child.href
                             ? "bg-primary/[0.12] text-primary shadow-[inset_0_0_0_1px_rgba(168,85,247,0.08)]"
                             : "text-white/75 hover:bg-white/[0.06] hover:text-white"
