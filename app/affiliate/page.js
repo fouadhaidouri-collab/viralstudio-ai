@@ -20,6 +20,7 @@ export default function AffiliatePage() {
   const [needsJoin, setNeedsJoin] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [couponCodeInput, setCouponCodeInput] = useState("");
   const [joinBusy, setJoinBusy] = useState(false);
   const [joinError, setJoinError] = useState("");
   const [referrals, setReferrals] = useState([]);
@@ -80,11 +81,20 @@ export default function AffiliatePage() {
   }, []);
 
   const handleJoin = async () => {
+    const selectedCode = couponCodeInput.trim().toUpperCase();
     if (!agreed || joinBusy) return;
+    if (!/^[A-Z0-9]{3,20}$/.test(selectedCode)) {
+      setJoinError("Choose a code with 3–20 letters or numbers.");
+      return;
+    }
     setJoinBusy(true);
     setJoinError("");
     try {
-      const res = await fetch("/api/affiliate/join", { method: "POST" });
+      const res = await fetch("/api/affiliate/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: selectedCode }),
+      });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) {
         setJoinError(d.error || "Could not join the Affiliate Program");
@@ -214,7 +224,26 @@ export default function AffiliatePage() {
                     </div>
                   </div>
 
-                  <label className="flex items-start gap-3 mt-7 cursor-pointer select-none">
+                  <div className="mt-7">
+                    <label htmlFor="affiliate-coupon-code" className="block text-sm font-semibold text-white mb-2">
+                      Choose your Coupon Code
+                    </label>
+                    <input
+                      id="affiliate-coupon-code"
+                      type="text"
+                      value={couponCodeInput}
+                      onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20))}
+                      placeholder="e.g. FOUAD20"
+                      maxLength={20}
+                      autoComplete="off"
+                      className="w-full px-4 py-3.5 rounded-xl bg-surface-container-lowest border border-surface-border/60 text-white text-sm font-semibold tracking-wider uppercase outline-none focus:border-primary"
+                    />
+                    <p className="text-[11px] text-on-surface-variant mt-2">
+                      3–20 letters or numbers. Once saved, your coupon code and referral link cannot be changed.
+                    </p>
+                  </div>
+
+                  <label className="flex items-start gap-3 mt-5 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={agreed}
@@ -233,7 +262,7 @@ export default function AffiliatePage() {
                   <div className="flex flex-col sm:flex-row gap-3 mt-6">
                     <button
                       onClick={handleJoin}
-                      disabled={!agreed || joinBusy}
+                      disabled={!agreed || !/^[A-Z0-9]{3,20}$/.test(couponCodeInput) || joinBusy}
                       className="flex-1 px-6 py-3.5 rounded-xl primary-gradient text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {joinBusy ? "Creating your affiliate account..." : "Agree & Become an Affiliate"}
