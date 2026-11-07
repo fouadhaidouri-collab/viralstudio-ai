@@ -46,36 +46,7 @@ const features = [
     bg: "bg-secondary/20",
     btn: "Open Image Lab",
   },
-  {
-    href: "/ugc-engine",
-    title: "UGC Engine",
-    desc: "Create realistic AI avatars and voiceovers for authentic-feeling user content.",
-    icon: "record_voice_over",
-    color: "text-tertiary",
-    bg: "bg-tertiary/20",
-    btn: "Design Avatar",
-    soon: true,
-  },
-  {
-    href: "/hook-gen",
-    title: "Hook Gen",
-    desc: "Optimize your video intros with AI hooks designed for maximum retention.",
-    icon: "auto_awesome",
-    color: "text-primary",
-    bg: "bg-primary/20",
-    btn: "Optimize Script",
-    soon: true,
-  },
-  {
-    href: "/clipping",
-    title: "Clipping",
-    desc: "Automatically extract high-engagement vertical clips from long-form content.",
-    icon: "content_cut",
-    color: "text-accent-orange",
-    bg: "bg-accent-orange/20",
-    btn: "Process Video",
-    soon: true,
-  },
+
 ];
 
 function useIsDesktop() {
@@ -272,7 +243,7 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
             {features.map((f) => (
               <Link key={f.href} href={f.href} className={`glass-card p-5 rounded-2xl flex flex-col group min-h-[200px] glass-card-hover card-glow ${f.soon ? 'opacity-60 hover:opacity-80' : ''}`} style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.02), transparent)' }}>
                 <div className="flex justify-between items-start mb-4">
@@ -291,12 +262,7 @@ export default function Dashboard() {
                 </div>
               </Link>
             ))}
-            <div className="glass-card p-5 rounded-2xl border border-surface-border/60 relative overflow-hidden flex flex-col justify-center items-center text-center min-h-[200px]" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.05), rgba(6,182,212,0.03))' }}>
-              <div className="shimmer-border absolute inset-0 opacity-20"></div>
-              <p className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Geist, sans-serif' }}>New Feature Incoming</p>
-              <p className="text-sm text-on-surface-variant mb-4">Live Streaming AI is coming soon to your dashboard.</p>
-              <button className="border border-primary/30 px-6 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/15 active:scale-95" style={{ fontFamily: 'Geist, sans-serif' }}>Join Waitlist</button>
-            </div>
+
           </div>
           <section className="mt-6">
             <div className="flex items-center justify-between mb-4">
