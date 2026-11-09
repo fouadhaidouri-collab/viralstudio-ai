@@ -49,6 +49,10 @@ export default function AdminSettingsPage() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingError, setLoadingError] = useState(null);
   const [loadingAttempt, setLoadingAttempt] = useState(0);
+  const [renderfulKey, setRenderfulKey] = useState("");
+  const [renderfulStatus, setRenderfulStatus] = useState({ loading: true, configured: false, masked: "", source: "" });
+  const [renderfulBusy, setRenderfulBusy] = useState("");
+  const [renderfulMessage, setRenderfulMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +120,20 @@ export default function AdminSettingsPage() {
     };
   }, [loadingAttempt]);
 
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/renderful-key", { cache: "no-store" })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Could not load Renderful key status");
+        if (active) setRenderfulStatus({ loading: false, ...data });
+      })
+      .catch((err) => {
+        if (active) setRenderfulStatus({ loading: false, configured: false, error: err.message });
+      });
+    return () => { active = false; };
+  }, []);
+
   const retrySettingsLoad = () => {
     setLoadingError(null);
     setLoadingProgress(0);
@@ -132,6 +150,37 @@ export default function AdminSettingsPage() {
   const updateGeneral = (key, value) => setSettings({ ...settings, general: { ...settings.general, [key]: value } });
   const updateCredits = (key, value) => setSettings({ ...settings, credits: { ...settings.credits, [key]: value } });
   const updateApi = (key, value) => setSettings({ ...settings, api: { ...settings.api, [key]: value } });
+
+  const runRenderfulAction = async (action) => {
+    if (action === "save" && !renderfulKey.trim()) {
+      setRenderfulMessage("Enter a Renderful API key first.");
+      return;
+    }
+    setRenderfulBusy(action);
+    setRenderfulMessage("");
+    try {
+      const res = await fetch("/api/admin/renderful-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, key: renderfulKey.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || data.message || "Request failed");
+      if (action === "save") {
+        setRenderfulKey("");
+        setRenderfulStatus({ loading: false, configured: true, masked: data.masked, source: data.source || "database" });
+        setRenderfulMessage("Renderful API key saved securely.");
+      } else {
+        setRenderfulMessage(data.valid
+          ? `Connection successful${data.balance != null ? ` · Balance: ${data.balance}` : ""}${data.tier ? ` · ${data.tier}` : ""}`
+          : (data.message || "Renderful rejected this key."));
+      }
+    } catch (err) {
+      setRenderfulMessage(err.message || "Could not complete the request.");
+    } finally {
+      setRenderfulBusy("");
+    }
+  };
   const updateStorage = (key, value) => setSettings({ ...settings, storage: { ...settings.storage, [key]: value } });
   const updateBranding = (key, value) => setSettings({ ...settings, branding: { ...settings.branding, [key]: value } });
 
@@ -225,26 +274,41 @@ export default function AdminSettingsPage() {
           </div>
         </SettingCard>
 
-        <SettingCard title="API Settings" description="Configure third-party API integrations" icon="key">
+        <SettingCard title="Renderful API Key" description="Manage the live Renderful.ai connection used by AI generation" icon="key">
           <div className="space-y-3">
-            {[
-              { key: "renderful", label: "Renderful.ai" },
-              { key: "openrouter", label: "OpenRouter" },
-              { key: "elevenlabs", label: "ElevenLabs" },
-              { key: "stripe", label: "Stripe" },
-              { key: "paypal", label: "PayPal" },
-            ].map(({ key, label }) => (
-              <div key={key} className="flex items-center gap-2">
-                <div className="flex-1">
-                  <label className="text-xs text-on-surface-variant block mb-1">{label}</label>
-                  <input type="password" value={settings.api[key]} onChange={(e) => updateApi(key, e.target.value)} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-                </div>
-                <button onClick={() => showToast(`${label} API key saved`)} className="mt-5 px-3 py-2 btn-subtle rounded-lg text-xs font-medium transition-all">
-                  Save
-                </button>
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-surface-border/50 bg-surface-container-lowest px-3 py-2.5">
+              <div>
+                <p className="text-xs font-semibold text-white">Connection status</p>
+                <p className="mt-0.5 text-[10px] text-on-surface-variant">
+                  {renderfulStatus.loading ? "Checking saved key..." : renderfulStatus.configured ? `Key saved · ${renderfulStatus.masked || "Hidden"} · ${renderfulStatus.source || "secure storage"}` : "No Renderful key saved"}
+                </p>
               </div>
-            ))}
-            <p className="text-[10px] text-on-surface-variant/60 italic">Do not expose real API keys in frontend. Use environment variables only.</p>
+              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${renderfulStatus.configured ? "bg-green-500/10 text-green-400" : "bg-amber-500/10 text-amber-400"}`}>
+                {renderfulStatus.loading ? "Checking" : renderfulStatus.configured ? "Configured" : "Not configured"}
+              </span>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-on-surface-variant">New Renderful API Key</label>
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={renderfulKey}
+                onChange={(e) => setRenderfulKey(e.target.value)}
+                placeholder={renderfulStatus.configured ? "Enter a new key to replace the saved key" : "Paste Renderful API key"}
+                className="w-full rounded-lg border border-surface-border/50 bg-surface-container-lowest px-3 py-2.5 text-xs text-white focus:border-primary focus:outline-none"
+              />
+              <p className="mt-1 text-[10px] text-on-surface-variant/70">The full key is never returned to the browser or displayed after saving.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => runRenderfulAction("test")} disabled={!renderfulKey.trim() || !!renderfulBusy} className="rounded-lg border border-surface-border/70 bg-surface-container-high px-4 py-2 text-xs font-semibold text-white transition-all hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-40">
+                {renderfulBusy === "test" ? "Testing..." : "Test Connection"}
+              </button>
+              <button onClick={() => runRenderfulAction("save")} disabled={!renderfulKey.trim() || !!renderfulBusy} className="rounded-lg primary-gradient px-4 py-2 text-xs font-semibold text-white transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40">
+                {renderfulBusy === "save" ? "Saving..." : "Save API Key"}
+              </button>
+            </div>
+            {renderfulMessage && <p role="status" className="rounded-lg border border-surface-border/50 bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">{renderfulMessage}</p>}
+            {renderfulStatus.error && <p className="text-xs text-amber-400">{renderfulStatus.error}</p>}
           </div>
         </SettingCard>
 
