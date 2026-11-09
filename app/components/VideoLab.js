@@ -583,13 +583,15 @@ export default function VideoLab({ mode = "image" }) {
         }));
 
         const pending = firstChecks.filter(Boolean);
-        if (!pending.length || cancelled) return;
+        if (cancelled) return;
 
-        if (!pending.length) {
-          if (!cancelled) {
-            setGenerationBatch([]);
-            setGenerating(false);
-          }
+        // Every job may already have completed while the user was away.
+        // Clear the restored loading UI instead of leaving a permanent
+        // Generating state when the first status check returns COMPLETED.
+        if (pending.length === 0) {
+          setGenerationBatch([]);
+          setGenerating(false);
+          setGenerationProgress(null);
           return;
         }
 
