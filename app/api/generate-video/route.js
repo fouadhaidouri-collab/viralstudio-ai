@@ -13,6 +13,36 @@ import { saveImageDataUrl } from "@/lib/uploads";
 const PROVIDER_UNAVAILABLE =
   "The video provider is temporarily unavailable. Your credits were not charged. Please try again later.";
 
+async function ensureVideoDiagnosticColumns() {
+  for (const column of [
+    ["error_message", "TEXT"],
+    ["provider_status", "TEXT"],
+    ["prediction_id", "TEXT"],
+  ]) {
+    try {
+      await run(`ALTER TABLE ai_generations ADD COLUMN ${column[0]} ${column[1]}`);
+    } catch {}
+  }
+}
+
+function safeProviderError(value) {
+  const raw = value?.message || value?.error?.message || value?.error ||
+    value?.failure_reason || value?.error_message || value?.message || value ||
+    "The provider marked this generation as failed without a reason.";
+  return String(raw)
+    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/(api[_-]?key|token|secret)\s*[:=]\s*\S+/gi, "$1=[redacted]")
+    .slice(0, 1000);
+}
+
+async function saveFailedVideoGeneration({ requestId, userId, provider, model, prompt, providerId, status, error }) {
+  await ensureVideoDiagnosticColumns();
+  await run(
+    "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, error_message, provider_status, prediction_id, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'failed', 0, ?, ?, ?, datetime('now'))",
+    [`video_${requestId}`, userId, provider || "Renderful", model || "", prompt || "", safeProviderError(error), status || "FAILED", providerId || null]
+  );
+}
+
 function getCustomerProviderMessage(value) {
   const message = String(value?.message ?? value?.error?.message ?? value?.error ?? value ?? "").toLowerCase();
 
@@ -252,6 +282,10 @@ export async function POST(request) {
       { sql: "UPDATE video_credit_holds SET status = 'released' WHERE request_id = ? AND user_id = ? AND status = 'held'", params: [requestId, userId] },
       { sql: "UPDATE video_generation_billing SET status = 'failed' WHERE request_id = ? AND user_id = ? AND status = 'pending'", params: [requestId, userId] }
     ]).catch((releaseError) => console.error("Video credit hold release failed:", releaseError.message));
+    await saveFailedVideoGeneration({
+      requestId, userId, provider: model.provider || "Renderful",
+      model: model.model_id, prompt, status: "SUBMISSION_FAILED", error: err.message,
+    }).catch((saveError) => console.error("Could not save failed video generation:", saveError.message));
     if (err.code === "NO_KEY") {
       return Response.json({ error: "Generation service is not configured yet. No credits were charged.", setupRequired: true }, { status: 503 });
     }
@@ -267,6 +301,11 @@ export async function POST(request) {
       { sql: "UPDATE video_credit_holds SET status = 'released' WHERE request_id = ? AND user_id = ? AND status = 'held'", params: [requestId, userId] },
       { sql: "UPDATE video_generation_billing SET status = 'failed' WHERE request_id = ? AND user_id = ? AND status = 'pending'", params: [requestId, userId] }
     ]);
+    await saveFailedVideoGeneration({
+      requestId, userId, provider: model.provider || "Renderful",
+      model: model.model_id, prompt, status: "INVALID_PROVIDER_RESPONSE",
+      error: "Renderful accepted the request but did not return a generation ID.",
+    }).catch((saveError) => console.error("Could not save failed video generation:", saveError.message));
     return Response.json({ error: PROVIDER_UNAVAILABLE, noCreditsCharged: true }, { status: 503 });
   }
   try {
@@ -383,6 +422,13 @@ export async function GET(request) {
           .replace(/(api[_-]?key|token|secret)\s*[:=]\s*\\S+/gi, "$1=[redacted]")
           .slice(0, 500)
       : null;
+
+    await saveFailedVideoGeneration({
+      requestId: billing.request_id, userId: session.user.id,
+      provider: billing.provider || "Renderful", model: billing.model_id,
+      prompt: billing.prompt, providerId: billing.provider_id,
+      status, error: providerError || data,
+    }).catch((saveError) => console.error("Could not save failed video generation:", saveError.message));
 
     console.error("Renderful video generation failed:", {
       providerId: billing.provider_id,
