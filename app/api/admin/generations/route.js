@@ -25,27 +25,34 @@ export async function GET() {
       ORDER BY g.created_at DESC
     `;
     const rows = await query(sql);
-    // Older failed jobs were recorded only in the billing table, not ai_generations.
-    // Include them so Admin can still see their status even when no output was saved.
-    let legacyFailedVideos = [];
+    // Include billing-only video jobs of every state. This covers older records
+    // and accepted jobs created before the AI Video row was persisted.
+    let billingVideoRows = [];
     try {
-      legacyFailedVideos = await query(`
-        SELECT b.request_id AS id, b.user_id, u.name AS user_name, u.email AS user_email,
+      billingVideoRows = await query(`
+        SELECT 'video_' || b.request_id AS id, b.user_id, u.name AS user_name, u.email AS user_email,
           'AI Video' AS type, b.provider, b.model_id AS model, b.prompt,
-          'failed' AS status, 0 AS credits_used, NULL AS output_url,
-          NULL AS thumbnail_url, b.created_at, b.provider_id AS prediction_id
+          CASE
+            WHEN LOWER(b.status) IN ('pending') THEN 'generating'
+            WHEN LOWER(b.status) IN ('charged', 'completed_unpaid') THEN 'completed'
+            WHEN LOWER(b.status) IN ('failed', 'cancelled', 'expired') THEN 'failed'
+            ELSE LOWER(b.status)
+          END AS status,
+          CASE WHEN LOWER(b.status) = 'charged' THEN b.amount ELSE 0 END AS credits_used,
+          NULL AS output_url, NULL AS thumbnail_url, b.created_at,
+          b.provider_id AS prediction_id, b.status AS provider_status,
+          NULL AS error_message
         FROM video_generation_billing b
         LEFT JOIN users u ON u.id = b.user_id
-        WHERE LOWER(b.status) IN ('failed', 'cancelled')
-          AND NOT EXISTS (
-            SELECT 1 FROM ai_generations g WHERE g.id = 'video_' || b.request_id
-          )
+        WHERE NOT EXISTS (
+          SELECT 1 FROM ai_generations g WHERE g.id = 'video_' || b.request_id
+        )
         ORDER BY b.created_at DESC
       `);
     } catch {
       // The billing table is created only after the first video generation.
     }
-    const combinedRows = [...rows, ...legacyFailedVideos];
+    const combinedRows = [...rows, ...billingVideoRows];
     const data = combinedRows.map((row) => ({
       ...row,
       tool: (() => {
