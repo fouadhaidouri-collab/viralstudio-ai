@@ -27,7 +27,12 @@ export async function GET() {
     const rows = await query(sql);
     const data = rows.map((row) => ({
       ...row,
-      tool: row.type || "AI Tool",
+      tool: (() => {
+        const type = String(row.type || "").toLowerCase().replace(/[ _]/g, "-");
+        if (type.includes("video") || type === "text-to-video" || type === "image-to-video") return "AI Video";
+        if (type.includes("image")) return "Image Lab";
+        return row.type || "AI Tool";
+      })(),
       output_file: row.output_url || null,
       failure_reason: row.failure_reason || row.provider_error_message ||
         row.provider_error || row.error_message || row.error_details || row.error || null,
