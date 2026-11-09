@@ -39,6 +39,18 @@ export async function POST(request) {
     const action = String(body.action || "");
     const key = String(body.key || "").trim();
 
+    if (action === "test_saved") {
+      const current = await getRenderfulKey();
+      if (!current.hasKey) return Response.json({ valid: false, message: "No active Renderful API key is configured." }, { status: 422 });
+      const result = await testRenderfulKey(current.key);
+      return Response.json({ ...result, source: current.source }, { status: result.valid ? 200 : 422 });
+    }
+    if (action === "remove") {
+      const { removeRenderfulKey } = await import("../../../../lib/renderful.js");
+      await removeRenderfulKey();
+      return Response.json({ removed: true });
+    }
+
     if (!key || key.length > 500) {
       return Response.json({ error: "Enter a valid Renderful API key." }, { status: 400 });
     }
