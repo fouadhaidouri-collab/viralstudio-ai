@@ -1,18 +1,40 @@
 import { query } from "../../../../lib/db";
 
+const DIAGNOSTIC_COLUMNS = [
+  "error", "error_message", "failure_reason", "failure_details",
+  "provider_error", "provider_error_message", "error_details",
+  "prediction_id", "provider_request_id", "provider_status",
+];
+
 export async function GET() {
-  let rows = [];
   try {
-    rows = await query(
-      "SELECT g.id, g.user_id, u.name AS user_name, u.email AS user_email, g.type, g.provider, g.model, g.prompt, g.status, g.progress, g.credits_used, g.generation_time, g.output_url, g.thumbnail_url, g.created_at FROM ai_generations g LEFT JOIN users u ON g.user_id = u.id ORDER BY g.created_at DESC"
-    );
-  } catch { rows = []; }
-
-  const data = rows.map((r) => ({
-    ...r,
-    tool: r.type || "AI Tool",
-    output_file: r.output_url || null,
-  }));
-
-  return Response.json({ data, total: data.length });
+    // Discover optional diagnostic columns so older D1 schemas keep working.
+    const schema = await query("PRAGMA table_info(ai_generations)");
+    const available = new Set(schema.map((column) => column.name));
+    const diagnosticSelect = DIAGNOSTIC_COLUMNS
+      .filter((column) => available.has(column))
+      .map((column) => `g.${column}`)
+      .join(", ");
+    const sql = `
+      SELECT g.id, g.user_id, u.name AS user_name, u.email AS user_email,
+        g.type, g.provider, g.model, g.prompt, g.status, g.progress,
+        g.credits_used, g.generation_time, g.output_url, g.thumbnail_url,
+        g.created_at${diagnosticSelect ? `, ${diagnosticSelect}` : ""}
+      FROM ai_generations g
+      LEFT JOIN users u ON g.user_id = u.id
+      ORDER BY g.created_at DESC
+    `;
+    const rows = await query(sql);
+    const data = rows.map((row) => ({
+      ...row,
+      tool: row.type || "AI Tool",
+      output_file: row.output_url || null,
+      failure_reason: row.failure_reason || row.provider_error_message ||
+        row.provider_error || row.error_message || row.error_details || row.error || null,
+    }));
+    return Response.json({ data, total: data.length });
+  } catch (error) {
+    console.error("[admin/generations] Could not load generation diagnostics:", error);
+    return Response.json({ error: "Could not load generation history" }, { status: 500 });
+  }
 }

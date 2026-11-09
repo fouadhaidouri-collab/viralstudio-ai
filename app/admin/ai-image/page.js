@@ -20,7 +20,7 @@ export default function AdminAiImagePage() {
     let list = allGenerations.filter((g) => g.tool === "Image Lab");
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter((g) => (g.user_name || "").toLowerCase().includes(q) || g.prompt.toLowerCase().includes(q));
+      list = list.filter((g) => (g.user_name || "").toLowerCase().includes(q) || (g.prompt || "").toLowerCase().includes(q));
     }
     return list;
   }, [search, allGenerations]);
@@ -61,13 +61,14 @@ export default function AdminAiImagePage() {
                 <th className="text-left p-3 font-semibold">Prompt</th>
                 <th className="text-left p-3 font-semibold">Credits Used</th>
                 <th className="text-left p-3 font-semibold">Status</th>
+                <th className="text-left p-3 font-semibold">Failure Reason</th>
                 <th className="text-left p-3 font-semibold">Date</th>
                 <th className="text-left p-3 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {generations.length === 0 ? (
-                <tr><td colSpan={7} className="p-6 text-center text-on-surface-variant text-xs">No image generations found</td></tr>
+                <tr><td colSpan={8} className="p-6 text-center text-on-surface-variant text-xs">No image generations found</td></tr>
               ) : (
                 generations.map((g) => (
                   <tr key={g.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
@@ -76,6 +77,7 @@ export default function AdminAiImagePage() {
                     <td className="p-3 text-on-surface-variant max-w-[250px] truncate">{g.prompt}</td>
                     <td className="p-3 text-yellow-400 font-semibold">{g.credits_used}</td>
                     <td className="p-3"><StatusBadge status={g.status} /></td>
+                    <td className="p-3 text-red-300 max-w-[280px] whitespace-normal break-words">{g.failure_reason || (String(g.status || "").toLowerCase().includes("fail") ? "Failure reason was not recorded for this operation." : "—")}</td>
                     <td className="p-3 text-on-surface-variant">{new Date(g.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</td>
                     <td className="p-3">
                       <button onClick={() => showAlert(`Add credits to ${g.user_name}`)} className="px-2.5 py-1.5 rounded-lg bg-yellow-500/15 text-yellow-400 hover:bg-yellow-500/25 text-[10px] font-semibold transition-all">Add Credits</button>
