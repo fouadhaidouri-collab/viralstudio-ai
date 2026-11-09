@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Icon from "./Icon";
 
 const navItems = [
@@ -26,6 +26,11 @@ function SidebarContent() {
   const pathname = usePathname();
   const { setMobileOpen } = useSidebar();
   const [openMegaMenu, setOpenMegaMenu] = useState(false);
+  const [showAdminLink, setShowAdminLink] = useState(false);
+
+  useEffect(() => {
+    setShowAdminLink(window.location.hostname === "viralstudio-ai-git-master-fouadhaidouri-collabs-projects.vercel.app");
+  }, []);
   const handleNav = () => {
     setMobileOpen(false);
     setOpenMegaMenu(false);
@@ -50,7 +55,7 @@ function SidebarContent() {
       </Link>
 
       <nav className="flex flex-col gap-1">
-        {navItems.map((item) => {
+        {navItems.filter((item) => item.href !== "/admin" || showAdminLink).map((item) => {
           const active = pathname === item.href || (item.children && pathname.startsWith(item.href + "/"));
           if (item.children) {
             return (
