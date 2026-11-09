@@ -47,10 +47,15 @@ export async function POST(request) {
   // Match the provider task to a generation submitted by this application.
   // Fetch the task from Renderful using our server-side key before trusting
   // the callback payload or changing a customer's credits.
-  const billing = await get(
-    "SELECT * FROM video_generation_billing WHERE provider_id = ?",
-    [providerId]
-  );
+  let billing = null;
+  try {
+    billing = await get(
+      "SELECT * FROM video_generation_billing WHERE provider_id = ?",
+      [providerId]
+    );
+  } catch {
+    // Image-only projects may not have created the video billing table yet.
+  }
   if (!billing) {
     // Image generations are stored directly in ai_generations and share this
     // webhook endpoint. Verify the provider state before updating their record.
