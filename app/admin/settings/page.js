@@ -9,8 +9,6 @@ const defaultSettings = {
   general: { app_name: "", logo: null, default_language: "en", default_currency: "USD", maintenance_mode: false, signup_enabled: true },
   credits: { default_credits: 0, minimum_purchase: 10, credit_value: 0.05, auto_refund_failed: true },
   api: { renderful: "", openrouter: "", elevenlabs: "", stripe: "", paypal: "" },
-  storage: { provider: "Supabase", max_upload_size: 500, allowed_file_types: "mp4,mov,avi,jpg,png,gif,mp3,wav", auto_delete_old: false },
-  branding: { primary_color: "#a855f7", accent_color: "#22d3ee", button_style: "gradient", dark_mode_default: true, arabic_rtl_enabled: true },
 };
 
 function Toggle({ value, onChange }) {
@@ -189,8 +187,6 @@ export default function AdminSettingsPage() {
       setRenderfulBusy("");
     }
   };
-  const updateStorage = (key, value) => setSettings({ ...settings, storage: { ...settings.storage, [key]: value } });
-  const updateBranding = (key, value) => setSettings({ ...settings, branding: { ...settings.branding, [key]: value } });
 
   return (
     <>
@@ -322,72 +318,6 @@ export default function AdminSettingsPage() {
           </div>
         </SettingCard>
 
-        <SettingCard title="Storage Settings" description="File storage configuration" icon="folder">
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs text-on-surface-variant block mb-1">Provider</label>
-              <input type="text" value={settings.storage.provider} disabled className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-on-surface-variant/50 focus:outline-none cursor-not-allowed" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Max Upload Size (MB)</label>
-                <input type="number" value={settings.storage.max_upload_size} onChange={(e) => updateStorage("max_upload_size", Number(e.target.value))} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Allowed File Types</label>
-                <input type="text" value={settings.storage.allowed_file_types} onChange={(e) => updateStorage("allowed_file_types", e.target.value)} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between bg-surface-container-lowest rounded-lg px-3 py-2.5">
-              <span className="text-xs text-on-surface-variant">Auto Delete Old Files</span>
-              <Toggle value={settings.storage.auto_delete_old} onChange={(v) => updateStorage("auto_delete_old", v)} />
-            </div>
-            <button onClick={() => showToast("Storage settings saved")} className="px-4 py-2 primary-gradient text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all">
-              Save Changes
-            </button>
-          </div>
-        </SettingCard>
-
-        <SettingCard title="Branding Settings" description="Customize platform appearance" icon="palette">
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Primary Color</label>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg border border-surface-border/50 shrink-0" style={{ backgroundColor: settings.branding.primary_color }} />
-                  <input type="text" value={settings.branding.primary_color} onChange={(e) => updateBranding("primary_color", e.target.value)} className="flex-1 bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Accent Color</label>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg border border-surface-border/50 shrink-0" style={{ backgroundColor: settings.branding.accent_color }} />
-                  <input type="text" value={settings.branding.accent_color} onChange={(e) => updateBranding("accent_color", e.target.value)} className="flex-1 bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-on-surface-variant block mb-1">Button Style</label>
-              <select value={settings.branding.button_style} onChange={(e) => updateBranding("button_style", e.target.value)} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all">
-                <option value="gradient">Gradient</option>
-                <option value="subtle">Subtle</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center justify-between bg-surface-container-lowest rounded-lg px-3 py-2.5">
-                <span className="text-xs text-on-surface-variant">Dark Mode Default</span>
-                <Toggle value={settings.branding.dark_mode_default} onChange={(v) => updateBranding("dark_mode_default", v)} />
-              </div>
-              <div className="flex items-center justify-between bg-surface-container-lowest rounded-lg px-3 py-2.5">
-                <span className="text-xs text-on-surface-variant">Arabic RTL Enabled</span>
-                <Toggle value={settings.branding.arabic_rtl_enabled} onChange={(v) => updateBranding("arabic_rtl_enabled", v)} />
-              </div>
-            </div>
-            <button onClick={() => showToast("Branding settings saved")} className="px-4 py-2 primary-gradient text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all">
-              Save Changes
-            </button>
-          </div>
-        </SettingCard>
       </div>
     </div>
     </>
