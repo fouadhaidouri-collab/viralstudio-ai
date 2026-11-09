@@ -161,13 +161,7 @@ export default function AIImagePage() {
             results.push(statusData.imageUrl);
             setImageUrls([...results]);
             done = true;
-            fetch("/api/generations", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ type: "Image Lab", provider: selectedModel.provider, model: selectedModel.model_id, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings) }),
-            }).then((r) => r.ok ? r.json() : null).then((saved) => {
-              if (saved?.id) setImageHistory((prev) => [{ id: saved.id, type: "Image Lab", provider: selectedModel.provider, model: selectedModel.model_id, prompt, output_url: statusData.imageUrl, thumbnail_url: statusData.imageUrl, credits_used: calcImageCredits(selectedModel, currentConfig.aspectRatio.label, currentConfig.resolution, 1, creditSettings), created_at: new Date().toISOString() }, ...prev]);
-            }).catch(() => {});
+            // The generation API already persisted this result for Admin and Library.
           } else if (statusData.status === "FAILED" || statusData.status === "CANCELLED") {
             throw new Error("The AI generation failed on the provider. No credits were charged.");
           }
