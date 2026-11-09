@@ -24,9 +24,9 @@ function Toggle({ value, onChange }) {
   );
 }
 
-function SettingCard({ title, description, icon, children }) {
+function SettingCard({ title, description, icon, id, children }) {
   return (
-    <div className="glass-card rounded-xl p-5 card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
+    <div id={id} className="glass-card rounded-xl p-5 card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
           <Icon name={icon} className="text-primary" size={18} />
@@ -53,6 +53,7 @@ export default function AdminSettingsPage() {
   const [renderfulStatus, setRenderfulStatus] = useState({ loading: true, configured: false, masked: "", source: "" });
   const [renderfulBusy, setRenderfulBusy] = useState("");
   const [renderfulMessage, setRenderfulMessage] = useState("");
+  const [renderfulVerified, setRenderfulVerified] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -168,9 +169,16 @@ export default function AdminSettingsPage() {
       if (!res.ok) throw new Error(data.error || data.message || "Request failed");
       if (action === "save") {
         setRenderfulKey("");
+        setRenderfulVerified(false);
         setRenderfulStatus({ loading: false, configured: true, masked: data.masked, source: data.source || "database" });
-        setRenderfulMessage("Renderful API key saved securely.");
+        setRenderfulMessage("New Renderful API key saved. Generation requests now use this key.");
+      } else if (action === "remove") {
+        setRenderfulKey("");
+        setRenderfulVerified(false);
+        setRenderfulStatus({ loading: false, configured: false, masked: "", source: "removed" });
+        setRenderfulMessage("Renderful API key removed. Add a new key to enable Renderful generation.");
       } else {
+        setRenderfulVerified(Boolean(data.valid));
         setRenderfulMessage(data.valid
           ? `Connection successful${data.balance != null ? ` · Balance: ${data.balance}` : ""}${data.tier ? ` · ${data.tier}` : ""}`
           : (data.message || "Renderful rejected this key."));
@@ -274,17 +282,17 @@ export default function AdminSettingsPage() {
           </div>
         </SettingCard>
 
-        <SettingCard title="Renderful API Key" description="Manage the live Renderful.ai connection used by AI generation" icon="key">
+        <SettingCard id="renderful-api-key" title="Renderful.ai" description="Active provider connection used by AI generation. Replace or remove the API key at any time." icon="key">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-surface-border/50 bg-surface-container-lowest px-3 py-2.5">
               <div>
                 <p className="text-xs font-semibold text-white">Connection status</p>
                 <p className="mt-0.5 text-[10px] text-on-surface-variant">
-                  {renderfulStatus.loading ? "Checking saved key..." : renderfulStatus.configured ? `Key saved · ${renderfulStatus.masked || "Hidden"} · ${renderfulStatus.source || "secure storage"}` : "No Renderful key saved"}
+                  {renderfulStatus.loading ? "Checking saved key..." : renderfulStatus.configured ? `Active key · ${renderfulStatus.masked || "Hidden"} · ${renderfulStatus.source || "secure storage"}` : "No active Renderful API key"}
                 </p>
               </div>
               <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${renderfulStatus.configured ? "bg-green-500/10 text-green-400" : "bg-amber-500/10 text-amber-400"}`}>
-                {renderfulStatus.loading ? "Checking" : renderfulStatus.configured ? "Configured" : "Not configured"}
+                {renderfulStatus.loading ? "Checking" : renderfulVerified ? "Working" : renderfulStatus.configured ? "Saved · Not tested" : "Not connected"}
               </span>
             </div>
             <div>
@@ -300,12 +308,14 @@ export default function AdminSettingsPage() {
               <p className="mt-1 text-[10px] text-on-surface-variant/70">The full key is never returned to the browser or displayed after saving.</p>
             </div>
             <div className="flex flex-wrap gap-2">
+              {renderfulStatus.configured && <button onClick={() => runRenderfulAction("test_saved")} disabled={!!renderfulBusy} className="rounded-lg border border-surface-border/70 bg-surface-container-high px-4 py-2 text-xs font-semibold text-white transition-all hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-40">{renderfulBusy === "test_saved" ? "Checking..." : "Check Current Key"}</button>}
               <button onClick={() => runRenderfulAction("test")} disabled={!renderfulKey.trim() || !!renderfulBusy} className="rounded-lg border border-surface-border/70 bg-surface-container-high px-4 py-2 text-xs font-semibold text-white transition-all hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-40">
                 {renderfulBusy === "test" ? "Testing..." : "Test Connection"}
               </button>
               <button onClick={() => runRenderfulAction("save")} disabled={!renderfulKey.trim() || !!renderfulBusy} className="rounded-lg primary-gradient px-4 py-2 text-xs font-semibold text-white transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40">
                 {renderfulBusy === "save" ? "Saving..." : "Save API Key"}
               </button>
+              {renderfulStatus.configured && <button onClick={() => { if (window.confirm("Remove the active Renderful API key? AI generation will stop using Renderful until a new key is saved.")) runRenderfulAction("remove"); }} disabled={!!renderfulBusy} className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs font-semibold text-red-300 transition-all hover:bg-red-500/15 disabled:opacity-40">{renderfulBusy === "remove" ? "Removing..." : "Remove Key"}</button>}
             </div>
             {renderfulMessage && <p role="status" className="rounded-lg border border-surface-border/50 bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">{renderfulMessage}</p>}
             {renderfulStatus.error && <p className="text-xs text-amber-400">{renderfulStatus.error}</p>}
