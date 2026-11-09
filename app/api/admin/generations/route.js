@@ -25,7 +25,28 @@ export async function GET() {
       ORDER BY g.created_at DESC
     `;
     const rows = await query(sql);
-    const data = rows.map((row) => ({
+    // Older failed jobs were recorded only in the billing table, not ai_generations.
+    // Include them so Admin can still see their status even when no output was saved.
+    let legacyFailedVideos = [];
+    try {
+      legacyFailedVideos = await query(`
+        SELECT b.request_id AS id, b.user_id, u.name AS user_name, u.email AS user_email,
+          'AI Video' AS type, b.provider, b.model_id AS model, b.prompt,
+          'failed' AS status, 0 AS credits_used, NULL AS output_url,
+          NULL AS thumbnail_url, b.created_at, b.provider_id AS prediction_id
+        FROM video_generation_billing b
+        LEFT JOIN users u ON u.id = b.user_id
+        WHERE LOWER(b.status) IN ('failed', 'cancelled')
+          AND NOT EXISTS (
+            SELECT 1 FROM ai_generations g WHERE g.id = 'video_' || b.request_id
+          )
+        ORDER BY b.created_at DESC
+      `);
+    } catch {
+      // The billing table is created only after the first video generation.
+    }
+    const combinedRows = [...rows, ...legacyFailedVideos];
+    const data = combinedRows.map((row) => ({
       ...row,
       tool: (() => {
         const type = String(row.type || "").toLowerCase().replace(/[ _]/g, "-");
@@ -36,7 +57,7 @@ export async function GET() {
       output_file: row.output_url || null,
       failure_reason: row.failure_reason || row.provider_error_message ||
         row.provider_error || row.error_message || row.error_details || row.error || null,
-    }));
+    })).sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
     return Response.json({ data, total: data.length });
   } catch (error) {
     console.error("[admin/generations] Could not load generation diagnostics:", error);
