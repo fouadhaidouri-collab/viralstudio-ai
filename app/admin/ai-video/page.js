@@ -7,9 +7,23 @@ export default function AdminAiVideoPage() {
   const [allGenerations, setAllGenerations] = useState([]);
   const [search, setSearch] = useState("");
   const [alertMsg, setAlertMsg] = useState(null);
-  useEffect(() => {
-    fetch("/api/admin/generations").then((r) => r.json()).then((d) => setAllGenerations(d.data || [])).catch(() => {});
-  }, []);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const loadGenerations = async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const response = await fetch("/api/admin/generations", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not load generations.");
+      setAllGenerations(data.data || []);
+    } catch (error) {
+      setLoadError(error.message || "Could not load generations.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { loadGenerations(); }, []);
 
   const showAlert = (msg) => {
     setAlertMsg(msg);
@@ -38,6 +52,7 @@ export default function AdminAiVideoPage() {
         </div>
       )}
 
+      {loadError && <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-300">{loadError}</div>}
       <div className="flex items-center gap-2">
         <div className="relative max-w-xs w-full">
           <Icon name="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
@@ -49,6 +64,7 @@ export default function AdminAiVideoPage() {
             className="w-full bg-[rgba(255,255,255,0.03)] border border-white/5 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-on-surface-variant focus:outline-none focus:border-primary/50 transition-all"
           />
         </div>
+        <button onClick={loadGenerations} disabled={loading} className="px-3 py-2 rounded-xl border border-white/10 text-xs text-white/80 hover:bg-white/5 disabled:opacity-50">{loading ? "Loading..." : "Refresh"}</button>
       </div>
 
       <div className="bg-[rgba(255,255,255,0.02)] border border-white/5 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), transparent)" }}>
@@ -67,7 +83,9 @@ export default function AdminAiVideoPage() {
               </tr>
             </thead>
             <tbody>
-              {generations.length === 0 ? (
+              {loading ? (
+                <tr><td colSpan={8} className="p-6 text-center text-on-surface-variant text-xs">Loading video generations...</td></tr>
+              ) : generations.length === 0 ? (
                 <tr><td colSpan={8} className="p-6 text-center text-on-surface-variant text-xs">No video generations found</td></tr>
               ) : (
                 generations.map((g) => (

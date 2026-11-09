@@ -1,4 +1,34 @@
 import { get, run, batch } from "@/lib/db";
+
+async function ensureVideoDiagnosticColumns() {
+  for (const column of [
+    ["error_message", "TEXT"],
+    ["provider_status", "TEXT"],
+    ["prediction_id", "TEXT"],
+  ]) {
+    try {
+      await run(`ALTER TABLE ai_generations ADD COLUMN ${column[0]} ${column[1]}`);
+    } catch {}
+  }
+}
+
+function safeProviderError(value) {
+  const raw = value?.message || value?.error?.message || value?.error ||
+    value?.failure_reason || value?.error_message || value?.message || value ||
+    "The provider marked this generation as failed without a reason.";
+  return String(raw)
+    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/(api[_-]?key|token|secret)\s*[:=]\s*\S+/gi, "$1=[redacted]")
+    .slice(0, 1000);
+}
+
+async function saveFailedVideoGeneration({ requestId, userId, provider, model, prompt, providerId, status, error }) {
+  await ensureVideoDiagnosticColumns();
+  await run(
+    "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, error_message, provider_status, prediction_id, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'failed', 0, ?, ?, ?, datetime('now'))",
+    [`video_${requestId}`, userId, provider || "Renderful", model || "", prompt || "", safeProviderError(error), status || "FAILED", providerId || null]
+  );
+}
 import { getGeneration, normalizeStatus, outputUrl } from "@/lib/renderful";
  
 export async function POST(request) {
@@ -114,6 +144,11 @@ export async function POST(request) {
         params: [billing.request_id, billing.user_id],
       },
     ]);
+    await saveFailedVideoGeneration({
+      requestId: billing.request_id, userId: billing.user_id,
+      provider: billing.provider || "Renderful", model: billing.model_id,
+      prompt: billing.prompt, providerId, status, error: generation,
+    }).catch((error) => console.error("Could not save failed video generation:", error.message));
     console.error("Renderful video generation failed:", {
       providerId,
       modelId: billing.model_id,
