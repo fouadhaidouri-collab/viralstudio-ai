@@ -552,8 +552,17 @@ export default function VideoLab({ mode = "image" }) {
         const activeJobs = Array.isArray(data.activeJobs) ? data.activeJobs : [];
         if (!activeJobs.length) return;
 
-        // Check every saved job once before showing any Generating UI. Jobs
-        // that already completed are persisted by the status API and stay in Library.
+        // Show the persisted jobs immediately. Do not wait for a slow provider
+        // status request before restoring the Generating state after navigation.
+        setGenerationBatch(activeJobs.map((job) => ({
+          id: job.request_id,
+          requestId: job.request_id,
+          modelId: job.model_id,
+          status: "generating",
+          videoUrl: null,
+        })));
+        setGenerating(true);
+
         const firstChecks = await Promise.all(activeJobs.map(async (job) => {
           try {
             const statusData = await checkJob(job);
@@ -576,14 +585,13 @@ export default function VideoLab({ mode = "image" }) {
         const pending = firstChecks.filter(Boolean);
         if (!pending.length || cancelled) return;
 
-        setGenerationBatch(pending.map(({ job }) => ({
-          id: job.request_id,
-          requestId: job.request_id,
-          modelId: job.model_id,
-          status: "generating",
-          videoUrl: null,
-        })));
-        setGenerating(true);
+        if (!pending.length) {
+          if (!cancelled) {
+            setGenerationBatch([]);
+            setGenerating(false);
+          }
+          return;
+        }
 
         await Promise.all(pending.map(async ({ job, statusData: initialStatus }) => {
           let currentStatus = initialStatus;
