@@ -38,7 +38,7 @@ function safeProviderError(value) {
 async function saveFailedVideoGeneration({ requestId, userId, provider, model, prompt, providerId, status, error }) {
   await ensureVideoDiagnosticColumns();
   await run(
-    "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, error_message, provider_status, prediction_id, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'failed', 0, ?, ?, ?, datetime('now'))",
+    "INSERT INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, error_message, provider_status, prediction_id, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'failed', 0, ?, ?, ?, datetime('now')) ON CONFLICT(id) DO UPDATE SET status = 'failed', credits_used = 0, error_message = excluded.error_message, provider_status = excluded.provider_status, prediction_id = COALESCE(excluded.prediction_id, ai_generations.prediction_id)",
     [`video_${requestId}`, userId, provider || "Renderful", model || "", prompt || "", safeProviderError(error), status || "FAILED", providerId || null]
   );
 }
@@ -310,6 +310,12 @@ export async function POST(request) {
   }
   try {
     await run("UPDATE video_generation_billing SET provider_id = ? WHERE request_id = ? AND user_id = ?", [String(data.id), requestId, userId]);
+    // Persist the accepted job immediately so Admin and returning users can see it
+    // even if the generation page is closed before the provider finishes.
+    await run(
+      "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'generating', 0, datetime('now'))",
+      [`video_${requestId}`, userId, model.provider || "Renderful", model.model_id, String(prompt || "")]
+    );
   } catch (err) {
     console.error("Video provider reference could not be saved:", err.message);
     return Response.json({ error: "Your request was accepted but could not be tracked safely. Please contact support and do not submit it again.", requestId, noCreditsCharged: true }, { status: 503 });
@@ -387,7 +393,7 @@ export async function GET(request) {
     const finalBilling = await get("SELECT status, amount, model_id, prompt, provider FROM video_generation_billing WHERE request_id = ? AND user_id = ?", [String(requestId), session.user.id]);
     if (["charged", "completed_unpaid"].includes(finalBilling?.status)) {
       await run(
-        "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, output_url, thumbnail_url, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'completed', ?, ?, ?, datetime('now'))",
+        "INSERT INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, output_url, thumbnail_url, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'completed', ?, ?, ?, datetime('now')) ON CONFLICT(id) DO UPDATE SET status = 'completed', credits_used = excluded.credits_used, output_url = excluded.output_url, thumbnail_url = excluded.thumbnail_url",
         [`video_${requestId}`, session.user.id, finalBilling.provider || "Renderful", finalBilling.model_id, finalBilling.prompt || "", finalBilling.status === "charged" ? (finalBilling.amount || 0) : 0, videoUrl, videoUrl]
       );
     }
