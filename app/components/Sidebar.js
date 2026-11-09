@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
 import { useState } from "react";
 import Icon from "./Icon";
-import { useAuth } from "../lib/AuthContext";
 
 const navItems = [
   { href: "/", label: "Home", icon: "dashboard" },
@@ -24,8 +23,6 @@ const navItems = [
 
 function SidebarContent() {
   const pathname = usePathname();
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
   const { setMobileOpen } = useSidebar();
   const [openMegaMenu, setOpenMegaMenu] = useState(false);
   const handleNav = () => {
@@ -165,17 +162,6 @@ function SidebarContent() {
         })}
       </nav>
       <div className="mt-auto border-t border-white/[0.07] px-2 pb-2 pt-4">
-        {isAdmin && (
-          <Link
-            href="/admin"
-            onClick={handleNav}
-            className={`mb-2 group flex h-11 w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/[0.08] px-3.5 text-[15px] font-semibold text-white/90 shadow-[0_4px_18px_rgba(0,0,0,0.16)] transition-all duration-200 hover:border-primary/35 hover:bg-primary/[0.14] hover:text-white ${pathname.startsWith("/admin") ? "border-primary/40 bg-primary/[0.16]" : ""}`}
-          >
-            <Icon name="shield" size={18} className="text-primary" />
-            <span>Admin Panel</span>
-            <Icon name="arrow-up-right" size={14} className="ml-auto text-white/45 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </Link>
-        )}
         <Link
           href="/affiliate"
           onClick={handleNav}
