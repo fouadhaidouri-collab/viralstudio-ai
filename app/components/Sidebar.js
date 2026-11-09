@@ -19,6 +19,7 @@ const navItems = [
   },
   { href: "/ai-image", label: "Image Lab", icon: "image" },
   { href: "/library", label: "Library", icon: "folder" },
+  { href: "/admin", label: "Admin Panel", icon: "settings" },
 ];
 
 function SidebarContent() {
