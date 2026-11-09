@@ -24,9 +24,9 @@ function Toggle({ value, onChange }) {
   );
 }
 
-function SettingCard({ title, description, icon, children }) {
+function SettingCard({ title, description, icon, id, children }) {
   return (
-    <div className="glass-card rounded-xl p-5 card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
+    <div id={id} className="glass-card rounded-xl p-5 card-glow" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02), transparent)" }}>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
           <Icon name={icon} className="text-primary" size={18} />
@@ -282,7 +282,7 @@ export default function AdminSettingsPage() {
           </div>
         </SettingCard>
 
-        <SettingCard title="Renderful.ai" description="Active provider connection used by AI generation. Replace or remove the API key at any time." icon="key">
+        <SettingCard id="renderful-api-key" title="Renderful.ai" description="Active provider connection used by AI generation. Replace or remove the API key at any time." icon="key">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-surface-border/50 bg-surface-container-lowest px-3 py-2.5">
               <div>
