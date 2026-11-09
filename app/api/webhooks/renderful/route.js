@@ -51,7 +51,40 @@ export async function POST(request) {
     "SELECT * FROM video_generation_billing WHERE provider_id = ?",
     [providerId]
   );
-  if (!billing) return Response.json({ received: true, ignored: true });
+  if (!billing) {
+    // Image generations are stored directly in ai_generations and share this
+    // webhook endpoint. Verify the provider state before updating their record.
+    await ensureVideoDiagnosticColumns();
+    const imageJob = await get(
+      "SELECT * FROM ai_generations WHERE prediction_id = ? AND LOWER(type) LIKE '%image%'",
+      [providerId]
+    );
+    if (!imageJob) return Response.json({ received: true, ignored: true });
+
+    let imageGeneration;
+    try {
+      imageGeneration = await getGeneration(providerId);
+    } catch (error) {
+      console.error("Renderful image webhook verification failed:", error.message);
+      return Response.json({ error: "Could not verify provider generation." }, { status: 503 });
+    }
+
+    const imageStatus = normalizeStatus(imageGeneration.status);
+    if (imageStatus === "COMPLETED") {
+      const imageUrl = outputUrl(imageGeneration);
+      if (!imageUrl) return Response.json({ error: "Completed image has no output URL." }, { status: 503 });
+      await run(
+        "UPDATE ai_generations SET status = 'completed', output_url = ?, thumbnail_url = ?, provider_status = ? WHERE id = ?",
+        [imageUrl, imageUrl, imageStatus, imageJob.id]
+      );
+    } else if (imageStatus === "FAILED" || imageStatus === "CANCELLED") {
+      await run(
+        "UPDATE ai_generations SET status = 'failed', error_message = ?, provider_status = ? WHERE id = ?",
+        [safeProviderError(imageGeneration), imageStatus, imageJob.id]
+      );
+    }
+    return Response.json({ received: true, status: imageStatus });
+  }
 
   let generation;
   try {
@@ -116,7 +149,7 @@ export async function POST(request) {
     );
     if (["charged", "completed_unpaid"].includes(finalBilling?.status)) {
       await run(
-        "INSERT OR IGNORE INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, output_url, thumbnail_url, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'completed', ?, ?, ?, datetime('now'))",
+        "INSERT INTO ai_generations (id, user_id, type, provider, model, prompt, status, credits_used, output_url, thumbnail_url, created_at) VALUES (?, ?, 'AI Video', ?, ?, ?, 'completed', ?, ?, ?, datetime('now')) ON CONFLICT(id) DO UPDATE SET status = 'completed', credits_used = excluded.credits_used, output_url = excluded.output_url, thumbnail_url = excluded.thumbnail_url",
         [
           `video_${billing.request_id}`,
           billing.user_id,
