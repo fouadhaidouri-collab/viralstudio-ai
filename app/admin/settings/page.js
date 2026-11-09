@@ -146,10 +146,6 @@ export default function AdminSettingsPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const updateGeneral = (key, value) => setSettings({ ...settings, general: { ...settings.general, [key]: value } });
-  const updateCredits = (key, value) => setSettings({ ...settings, credits: { ...settings.credits, [key]: value } });
-  const updateApi = (key, value) => setSettings({ ...settings, api: { ...settings.api, [key]: value } });
-
   const runRenderfulAction = async (action) => {
     if (action === "save" && !renderfulKey.trim()) {
       setRenderfulMessage("Enter a Renderful API key first.");
@@ -200,84 +196,19 @@ export default function AdminSettingsPage() {
         />
       )}
       <div className="space-y-5 animate-fade-in-up">
-      <PageHeader
-        title="Settings"
-        subtitle="Configure your ViralStudio AI platform"
-        breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Settings" }]}
-      />
-
-      {toast && (
-        <div className="px-4 py-2.5 bg-surface-container border border-surface-border/80 rounded-xl text-xs text-white flex items-center gap-2 animate-dropdown-open">
-          <Icon name="check_circle" className="text-primary shrink-0" size={14} />
-          {toast}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-4">
-        <SettingCard title="General Settings" description="Basic platform configuration" icon="settings">
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs text-on-surface-variant block mb-1">App Name</label>
-              <input type="text" value={settings.general.app_name} onChange={(e) => updateGeneral("app_name", e.target.value)} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Default Language</label>
-                <select value={settings.general.default_language} onChange={(e) => updateGeneral("default_language", e.target.value)} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all">
-                  <option value="en">English</option>
-                  <option value="ar">العربية</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Default Currency</label>
-                <select value={settings.general.default_currency} onChange={(e) => updateGeneral("default_currency", e.target.value)} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all">
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                </select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center justify-between bg-surface-container-lowest rounded-lg px-3 py-2.5">
-                <span className="text-xs text-on-surface-variant">Maintenance Mode</span>
-                <Toggle value={settings.general.maintenance_mode} onChange={(v) => updateGeneral("maintenance_mode", v)} />
-              </div>
-              <div className="flex items-center justify-between bg-surface-container-lowest rounded-lg px-3 py-2.5">
-                <span className="text-xs text-on-surface-variant">Signup Enabled</span>
-                <Toggle value={settings.general.signup_enabled} onChange={(v) => updateGeneral("signup_enabled", v)} />
-              </div>
-            </div>
-            <button onClick={() => showToast("General settings saved")} className="px-4 py-2 primary-gradient text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all">
-              Save Changes
-            </button>
+      <div className="space-y-5">
+        <PageHeader
+          title="Settings"
+          subtitle="Manage provider connections"
+          breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Settings" }]}
+        />
+        {toast && (
+          <div className="px-4 py-2.5 bg-surface-container border border-surface-border/80 rounded-xl text-xs text-white flex items-center gap-2 animate-dropdown-open">
+            <Icon name="check_circle" className="text-primary shrink-0" size={14} />
+            {toast}
           </div>
-        </SettingCard>
-
-        <SettingCard title="Credits Settings" description="Configure credit system" icon="currency_bitcoin">
-          <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Default Credits</label>
-                <input type="number" value={settings.credits.default_credits} onChange={(e) => updateCredits("default_credits", Number(e.target.value))} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Minimum Purchase</label>
-                <input type="number" value={settings.credits.minimum_purchase} onChange={(e) => updateCredits("minimum_purchase", Number(e.target.value))} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-on-surface-variant block mb-1">Credit Value ($)</label>
-                <input type="number" step="0.001" value={settings.credits.credit_value} onChange={(e) => updateCredits("credit_value", Number(e.target.value))} className="w-full bg-surface-container-lowest border border-surface-border/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between bg-surface-container-lowest rounded-lg px-3 py-2.5">
-              <span className="text-xs text-on-surface-variant">Auto Refund Failed Generations</span>
-              <Toggle value={settings.credits.auto_refund_failed} onChange={(v) => updateCredits("auto_refund_failed", v)} />
-            </div>
-            <button onClick={() => showToast("Credit settings saved")} className="px-4 py-2 primary-gradient text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all">
-              Save Changes
-            </button>
-          </div>
-        </SettingCard>
-
+        )}
+        <div className="grid grid-cols-1 gap-4">
         <SettingCard id="renderful-api-key" title="Renderful.ai" description="Active provider connection used by AI generation. Replace or remove the API key at any time." icon="key">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-surface-border/50 bg-surface-container-lowest px-3 py-2.5">
