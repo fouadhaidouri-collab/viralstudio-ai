@@ -23,6 +23,7 @@ const menuGroups = [
     items: [
       { href: "/admin/affiliates", label: "Affiliates", icon: "share" },
       { href: "/admin/withdrawal-requests", label: "Withdrawals", icon: "payments" },
+      { href: "/admin/settings#renderful-api-key", label: "API Key", icon: "key" },
     ],
   },
 
@@ -35,7 +36,7 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }) {
 
   const isActive = (href) => {
     if (href === "/admin") return pathname === "/admin";
-    return pathname.startsWith(href);
+    return pathname.startsWith(href.split("#")[0]);
   };
 
   const sidebarContent = (
