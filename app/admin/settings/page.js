@@ -165,7 +165,7 @@ export default function AdminSettingsPage() {
         body: JSON.stringify({ action, key: renderfulKey.trim() }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Request failed");
+      if (!res.ok) throw new Error(data.error || data.message || "Request failed");
       if (action === "save") {
         setRenderfulKey("");
         setRenderfulStatus({ loading: false, configured: true, masked: data.masked, source: data.source || "database" });
