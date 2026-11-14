@@ -1,5 +1,12 @@
 "use client";
 
+declare global {
+  interface Window {
+    Paddle?: any;
+    __viralStudioPaddleInitialized?: boolean;
+  }
+}
+
 import { useState } from "react";
 import { useAuth } from "../../app/lib/AuthContext";
 
@@ -53,7 +60,8 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
       else {
         const existing = document.querySelector('script[data-paddle-js="true"]');
         if (existing) {
-          existing.addEventListener("load", openCheckout, { once: true });
+          const retry = () => { if (window.Paddle) openCheckout(); else setError("Paddle Checkout could not be loaded. Please refresh and try again."); };
+          existing.addEventListener("load", retry, { once: true });
           return;
         }
         const script = document.createElement("script");
