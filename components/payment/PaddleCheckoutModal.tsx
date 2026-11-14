@@ -205,11 +205,14 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
           >
             {loading ? "Preparing secure checkout…" : "Continue to secure payment"}
           </button>
-        ) : (
-          <div id="viralstudio-paddle-checkout" className="viralstudio-paddle-checkout min-h-[450px] w-full overflow-hidden rounded-xl">
-            {loading && <p className="py-5 text-center text-sm text-white/55">Loading secure payment form…</p>}
-          </div>
         )}
+        <div
+          id="viralstudio-paddle-checkout"
+          className="viralstudio-paddle-checkout min-h-[450px] w-full overflow-hidden rounded-xl"
+          style={{ display: started ? "block" : "none" }}
+        >
+          {loading && <p className="py-5 text-center text-sm text-white/55">Loading secure payment form…</p>}
+        </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-white/40">
           <span>Secure payment powered by Paddle</span>
