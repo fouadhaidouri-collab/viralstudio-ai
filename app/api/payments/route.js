@@ -140,45 +140,6 @@ export async function POST(req) {
       return Response.json({ checkoutUrl: approvalUrl, orderId: orderData.id, transactionId: tx.id });
     }
 
-    // ——— YOUCANPAY CHECKOUT ———
-    if (provider === "youcanpay") {
-      const privateKey = process.env.YOUCANPAY_PRIVATE_KEY;
-      if (!privateKey) {
-        return Response.json({ error: "YouCanPay not configured" }, { status: 500 });
-      }
-
-      const isSandbox = privateKey.includes("sandbox");
-      const baseUrl = isSandbox ? "https://sandbox.youcanpay.com" : "https://youcanpay.com";
-
-      const body = {
-        amount: Math.round(amount * 100),
-        currency: "USD",
-        order_id: tx.id,
-        customer: { name: session.user.name || "", email: session.user.email },
-        metadata: { transactionId: tx.id, userId, planId, billingCycle, credits: String(credits), refCode: refCode || "" },
-        url: {
-          success: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pay/success?transactionId=${tx.id}`,
-          cancel: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pay/cancel?transactionId=${tx.id}`,
-          ipn: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/webhooks/youcanpay`,
-        },
-      };
-
-      const res = await fetch(`${baseUrl}/api/payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "API-KEY": privateKey },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        console.error("YouCanPay error:", data);
-        return Response.json({ error: data.message || "YouCanPay request failed" }, { status: res.status });
-      }
-
-      updateTransaction(tx.id, { provider_payment_id: data.id });
-      return Response.json({ checkoutUrl: data.redirect_url || data.url, paymentId: data.id, transactionId: tx.id });
-    }
-
     return Response.json({ error: "Unsupported provider" }, { status: 400 });
   } catch (err) {
     console.error("Create checkout error:", err);
