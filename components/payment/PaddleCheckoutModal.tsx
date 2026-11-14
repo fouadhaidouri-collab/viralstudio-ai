@@ -197,7 +197,7 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
           </div>
         )}
 
-        {!started ? (
+        {!started && (
           <button
             onClick={startCheckout}
             disabled={!accepted || loading}
