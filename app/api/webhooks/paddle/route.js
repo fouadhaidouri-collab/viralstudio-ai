@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import {
   getTransaction, updateTransaction, addCreditLedgerEntry,
-} from "../../../../../lib/paymentTransactions";
-import { addUserCredits } from "../../../../../lib/pricing";
+} from "../../../../lib/paymentTransactions";
+import { addUserCredits } from "../../../../lib/pricing";
 import { processCommissionForPayment } from "../../../../lib/affiliateStore";
 
 export const runtime = "nodejs";
