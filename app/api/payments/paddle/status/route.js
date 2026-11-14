@@ -1,5 +1,5 @@
-import { auth } from "../../../../../lib/auth";
-import { getTransaction } from "../../../../../../lib/paymentTransactions";
+import { auth } from "../../../../lib/auth";
+import { getTransaction } from "../../../../../lib/paymentTransactions";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
