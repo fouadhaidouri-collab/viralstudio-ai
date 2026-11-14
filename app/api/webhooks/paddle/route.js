@@ -40,7 +40,7 @@ export async function POST(req) {
       if (!tx || tx.provider !== "paddle") return Response.json({ received: true, ignored: true });
 
       const expectedAmount = Math.round(Number(tx.amount) * 100);
-      const paidAmount = Number(data.details?.totals?.total ?? data.details?.totals?.grand_total ?? NaN);
+      const paidAmount = Number(data.details?.totals?.subtotal ?? NaN);
       if (!Number.isFinite(paidAmount) || paidAmount !== expectedAmount || data.currency_code !== "USD") {
         console.error("Paddle transaction amount/currency mismatch", { transactionId, expectedAmount, paidAmount, currency: data.currency_code });
         return Response.json({ error: "Transaction amount mismatch" }, { status: 409 });
