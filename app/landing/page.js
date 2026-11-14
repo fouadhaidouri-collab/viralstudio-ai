@@ -218,9 +218,11 @@ export default function LandingPage() {
               </a>
               <p className="text-xs text-[#52525b]">&copy; 2026 All Rights Reserved.</p>
               <nav className="flex gap-4 flex-wrap">
-                <a href="#" className="text-xs text-[#52525b] hover:text-white transition-colors">Privacy Policy</a>
-                <a href="#" className="text-xs text-[#52525b] hover:text-white transition-colors">Terms of Service</a>
-                <a href="#" className="text-xs text-[#52525b] hover:text-white transition-colors">Support</a>
+                <a href="/privacy" className="text-xs text-[#52525b] hover:text-white transition-colors">Privacy Policy</a>
+                <a href="/terms" className="text-xs text-[#52525b] hover:text-white transition-colors">Terms of Service</a>
+                <a href="/refund-policy" className="text-xs text-[#52525b] hover:text-white transition-colors">Refund Policy</a>
+                <a href="/pricing" className="text-xs text-[#52525b] hover:text-white transition-colors">Pricing</a>
+                <a href="mailto:contact@viralstudio-ai.com" className="text-xs text-[#52525b] hover:text-white transition-colors">Support</a>
               </nav>
             </div>
           </footer>
