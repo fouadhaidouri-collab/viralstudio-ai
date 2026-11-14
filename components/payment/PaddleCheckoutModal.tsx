@@ -106,8 +106,9 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
 
     return () => {
       cancelled = true;
+      openingRef.current = false;
     };
-  }, [isOpen, planId, billingCycle, user?.email, onClose]);
+  }, [isOpen, planId, billingCycle, user?.email]);
 
   return null;
 }
