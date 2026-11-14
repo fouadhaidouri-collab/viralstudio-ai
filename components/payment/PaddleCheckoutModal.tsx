@@ -185,7 +185,7 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
                 className="mt-1 h-4 w-4 shrink-0 accent-[#06C668]"
               />
               <span>
-                I have read and agree to the <a href="/terms" target="_blank" rel="noreferrer" className="text-[#06C668] underline underline-offset-2">Terms of Service</a> and <a href="/refund-policy" target="_blank" rel="noreferrer" className="text-[#06C668] underline underline-offset-2">Refund Policy</a>, and acknowledge the <a href="/privacy-policy" target="_blank" rel="noreferrer" className="text-[#06C668] underline underline-offset-2">Privacy Policy</a>.
+                I have read and agree to the <a href="/terms" target="_blank" rel="noreferrer" className="text-[#06C668] underline underline-offset-2">Terms of Service</a> and <a href="/refund-policy" target="_blank" rel="noreferrer" className="text-[#06C668] underline underline-offset-2">Refund Policy</a>, and acknowledge the <a href="/privacy" target="_blank" rel="noreferrer" className="text-[#06C668] underline underline-offset-2">Privacy Policy</a>.
               </span>
             </label>
           </div>
@@ -206,7 +206,7 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
             {loading ? "Preparing secure checkout…" : "Continue to secure payment"}
           </button>
         ) : (
-          <div id="viralstudio-paddle-checkout" className="min-h-[450px] w-full overflow-hidden rounded-xl">
+          <div id="viralstudio-paddle-checkout" className="viralstudio-paddle-checkout min-h-[450px] w-full overflow-hidden rounded-xl">
             {loading && <p className="py-5 text-center text-sm text-white/55">Loading secure payment form…</p>}
           </div>
         )}
