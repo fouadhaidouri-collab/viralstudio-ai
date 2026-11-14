@@ -7,7 +7,7 @@ import { SidebarProvider } from "../components/SidebarContext";
 import MenuButton from "../components/MenuButton";
 import { useAuth } from "../lib/AuthContext";
 import Icon from "../components/Icon";
-import YouCanPayCheckoutModal from "../../components/payment/YouCanPayCheckoutModal";
+import PaddleCheckoutModal from "../../components/payment/PaddleCheckoutModal";
 
 // Credit packs: $10 = 1,000 credits (1 credit = $0.01).
 // Bonus % is added on top of the base credits for each pack.
@@ -27,83 +27,42 @@ export default function PricingPage() {
   const [modalPlan, setModalPlan] = useState(null);
   const [paidResult, setPaidResult] = useState(null);
   const [verifying, setVerifying] = useState(false);
-  const [verifyParams, setVerifyParams] = useState(null);
 
   const loadCredits = () => {
     fetch("/api/credits").then(r => r.json()).then(d => { if (d.balance != null) setCredits(d.balance); }).catch(() => {});
   };
 
-  // YouCan Pay can redirect back before the transaction is marked paid, so keep
-  // polling for a while instead of showing "pending" on the first attempt.
-  const runVerify = (params, attempt = 0) => {
-    fetch(`/api/payments/youcanpay/verify?${params.toString()}`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.pending && attempt < 8) {
-          setTimeout(() => runVerify(params, attempt + 1), 2500);
-          return;
-        }
-        setPaidResult(d);
-        setVerifying(false);
-        loadCredits();
-      })
-      .catch(() => {
-        if (attempt < 8) {
-          setTimeout(() => runVerify(params, attempt + 1), 2500);
-          return;
-        }
-        setPaidResult({ success: false, pending: true, message: "Payment received — confirming with YouCan Pay." });
-        setVerifying(false);
-      });
-  };
-
   useEffect(() => {
     loadCredits();
-
-    const sp = new URLSearchParams(window.location.search);
-    // YouCan Pay appends these to success_url / error_url:
-    //   ?transaction_id=<youcanpay id>&order_id=<our tx id>&is_success=1&code=000
-    const providerTransactionId = sp.get("transaction_id");
-    const orderId = sp.get("order_id") || sp.get("transactionId");
-    const isSuccess = sp.get("is_success") || sp.get("success");
-    const paid = sp.get("paid");
-
-    if (providerTransactionId || orderId || paid) {
-      window.history.replaceState({}, "", "/pricing");
-    }
-
-    if (paid === "failed" || isSuccess === "0") {
-      setPaidResult({ success: false, message: "Payment was cancelled or failed." });
-      return;
-    }
-
-    if (orderId || providerTransactionId) {
-      setVerifying(true);
-      const params = new URLSearchParams();
-      if (orderId) params.set("orderId", orderId);
-      if (providerTransactionId) params.set("providerTransactionId", providerTransactionId);
-      setVerifyParams(params);
-      runVerify(params);
-      return;
-    }
-
-    // No return params: re-check recently pending payments. This recovers a
-    // payment that settled after the buyer closed the tab or lost the redirect.
-    if (!paid) {
-      fetch("/api/payments/youcanpay/pending")
-        .then(r => r.json())
-        .then(async (d) => {
-          for (const id of (d.orders || [])) {
-            const res = await fetch(`/api/payments/youcanpay/verify?orderId=${encodeURIComponent(id)}`).then(r => r.json()).catch(() => null);
-            if (res?.success) {
-              setPaidResult(res);
-              loadCredits();
-              break;
-            }
-          }
-        })
-        .catch(() => {});
-    }
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get("transactionId");
+    if (!transactionId) return;
+    window.history.replaceState({}, "", "/pricing");
+    setVerifying(true);
+    let attempt = 0;
+    let stopped = false;
+    const check = async () => {
+      try {
+        const response = await fetch(`/api/payments/paddle/status?transactionId=${encodeURIComponent(transactionId)}`);
+        const data = await response.json();
+        if (stopped) return;
+        if (data.success) {
+          setPaidResult({ success: true, credits: data.credits });
+          setVerifying(false);
+          loadCredits();
+          return;
+        }
+        if (data.status === "failed" || attempt >= 12) {
+          setPaidResult({ success: false, pending: data.status !== "failed", message: data.status === "failed" ? "Payment was not completed." : "Your payment is still being confirmed. Your credits will appear once confirmation is received." });
+          setVerifying(false);
+          return;
+        }
+      } catch {}
+      attempt += 1;
+      if (!stopped) setTimeout(check, 2500);
+    };
+    check();
+    return () => { stopped = true; };
   }, []);
 
   const buy = (pack) => {
@@ -192,7 +151,7 @@ export default function PricingPage() {
           </div>
         </div>
 
-        <YouCanPayCheckoutModal
+        <PaddleCheckoutModal
           isOpen={modalPlan !== null}
           onClose={() => { setModalPlan(null); loadCredits(); }}
           planId={modalPlan || "pro"}
@@ -209,7 +168,7 @@ export default function PricingPage() {
                     <span className="w-6 h-6 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
                   </div>
                   <h2 className="text-xl font-extrabold text-white mb-2">Confirming payment...</h2>
-                  <p className="text-sm text-on-surface-variant/60">Verifying with YouCan Pay.</p>
+                  <p className="text-sm text-on-surface-variant/60">Verifying your payment with Paddle.</p>
                 </>
               ) : paidResult?.success ? (
                 <>
@@ -231,11 +190,7 @@ export default function PricingPage() {
                   <h2 className="text-xl font-extrabold text-white mb-2">Payment received</h2>
                   <p className="text-sm text-on-surface-variant/60 mb-6">{paidResult?.message || "We are confirming your payment. Your credits will be added shortly."}</p>
                   <div className="flex items-center justify-center gap-3">
-                    {verifyParams && (
-                      <button onClick={() => { setPaidResult(null); setVerifying(true); runVerify(verifyParams); }} className="px-6 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-primary to-purple-700 text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all">
-                        Check again
-                      </button>
-                    )}
+  
                     <button onClick={() => setPaidResult(null)} className="px-6 py-3.5 rounded-xl font-bold text-sm bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
                       Close
                     </button>
