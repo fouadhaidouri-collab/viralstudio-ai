@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AuthProvider } from "./lib/AuthContext";
 import SiteLoader from "./components/SiteLoader";
+import Contentsquare from "./components/Contentsquare";
 
 const criticalStyles = `
 *,*::before,*::after{border-width:0;border-style:solid;border-color:currentColor}
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="h-full">
         <AuthProvider>
+          <Contentsquare />
           <SiteLoader />
           {children}
         </AuthProvider>
