@@ -1,5 +1,7 @@
 import crypto from "node:crypto";
-import { getTransaction, updateTransaction } from "../../../../lib/paymentTransactions";
+import { getTransaction, updateTransaction, addCreditLedgerEntry } from "../../../../lib/paymentTransactions";
+import { addUserCredits } from "../../../../lib/pricing";
+import { processCommissionForPayment } from "../../../../lib/affiliateStore";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,7 +13,7 @@ function validSignature(rawBody, header, secret) {
     return index > -1 ? [part.slice(0, index), part.slice(index + 1)] : ["", ""];
   }));
   if (!parts.ts || !parts.h1) return false;
-  const expected = crypto.createHmac("sha256", secret).update(`${parts.ts}:${rawBody}`).digest("hex");
+  const expected = crypto.createHmac("sha256", secret).update(parts.ts + ":" + rawBody).digest("hex");
   const a = Buffer.from(expected);
   const b = Buffer.from(parts.h1);
   return a.length === b.length && crypto.timingSafeEqual(a, b);
@@ -19,39 +21,57 @@ function validSignature(rawBody, header, secret) {
 
 export async function POST(req) {
   const rawBody = await req.text();
-  const secret = process.env.PADDLE_TEST_WEBHOOK_SECRET ||
-    (process.env.PADDLE_ENVIRONMENT === "sandbox" ? process.env.PADDLE_WEBHOOK_SECRET : null);
-  if (!secret || !validSignature(rawBody, req.headers.get("paddle-signature"), secret)) {
+  const secret = process.env.PADDLE_TEST_WEBHOOK_SECRET;
+  if (process.env.PADDLE_ENVIRONMENT !== "sandbox" || !secret) {
+    return Response.json({ error: "Sandbox webhook is not configured" }, { status: 503 });
+  }
+  if (!validSignature(rawBody, req.headers.get("paddle-signature"), secret)) {
     return Response.json({ error: "Invalid webhook signature" }, { status: 401 });
   }
 
   try {
     const event = JSON.parse(rawBody);
     const data = event.data || {};
-    const transactionId = data.custom_data?.transactionId;
-    if (!transactionId) return Response.json({ received: true, ignored: true });
+    const customData = data.custom_data || {};
+    const localTransactionId = customData.transactionId;
+    if (!localTransactionId) return Response.json({ received: true, ignored: true });
 
-    const tx = await getTransaction(transactionId);
-    if (!tx || tx.provider !== "paddle_sandbox") {
-      return Response.json({ received: true, ignored: true });
-    }
+    const tx = await getTransaction(localTransactionId);
+    if (!tx || tx.provider !== "paddle_sandbox") return Response.json({ received: true, ignored: true });
 
     if (event.event_type === "transaction.completed") {
-      const expectedAmount = Math.round(Number(tx.amount) * 100);
-      const paidAmount = Number(data.details?.totals?.subtotal ?? NaN);
-      if (!Number.isFinite(paidAmount) || paidAmount !== expectedAmount || data.currency_code !== "USD") {
-        console.error("Paddle Sandbox transaction amount/currency mismatch", {
-          transactionId, expectedAmount, paidAmount, currency: data.currency_code,
+      if (tx.status === "completed") return Response.json({ received: true, alreadyProcessed: true });
+
+      const expectedSubtotal = Math.round(Number(tx.amount) * 100);
+      const actualSubtotal = Number(data.details?.totals?.subtotal ?? NaN);
+      if (!Number.isFinite(actualSubtotal) || actualSubtotal !== expectedSubtotal ||
+          data.currency_code !== "USD" || data.status !== "completed") {
+        console.error("Paddle Sandbox transaction validation failed", {
+          localTransactionId, paddleTransactionId: data.id, expectedSubtotal,
+          actualSubtotal, currency: data.currency_code, status: data.status,
         });
-        return Response.json({ error: "Transaction amount mismatch" }, { status: 409 });
+        return Response.json({ error: "Transaction validation failed" }, { status: 409 });
       }
-      await updateTransaction(tx.id, { status: "completed", transaction_id: data.id });
-    } else if (
-      event.event_type === "transaction.payment_failed" ||
-      event.event_type === "transaction.canceled"
-    ) {
+
+      const credits = Number(tx.credits || customData.credits || 0);
+      if (!Number.isSafeInteger(credits) || credits <= 0) {
+        return Response.json({ error: "Invalid credit quantity" }, { status: 409 });
+      }
+
+      const ledgerEntry = await addCreditLedgerEntry({
+        userId: tx.user_id, transactionId: tx.id, creditsAdded: credits,
+        reason: "Paddle Sandbox payment",
+      });
+      if (ledgerEntry) {
+        await addUserCredits(tx.user_id, credits, "purchase", {
+          transactionId: tx.id, provider: "paddle_sandbox",
+        });
+        await processCommissionForPayment(tx.user_id, null, tx.amount);
+      }
+      await updateTransaction(tx.id, { status: "completed", transactionId: data.id });
+    } else if (event.event_type === "transaction.payment_failed" || event.event_type === "transaction.canceled") {
       if (tx.status !== "completed") {
-        await updateTransaction(tx.id, { status: "failed", transaction_id: data.id });
+        await updateTransaction(tx.id, { status: "failed", transactionId: data.id || tx.transaction_id });
       }
     }
 

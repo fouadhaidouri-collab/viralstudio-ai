@@ -9,7 +9,6 @@ declare global {
 }
 
 import { useEffect, useRef } from "react";
-import { useAuth } from "../../app/lib/AuthContext";
 
 function loadPaddle(): Promise<void> {
   if (window.Paddle) return Promise.resolve();
@@ -32,8 +31,7 @@ function loadPaddle(): Promise<void> {
   });
 }
 
-export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCycle = "one_time" }) {
-  const { user } = useAuth();
+export default function PaddleCheckoutModal({ isOpen, onClose, planId }) {
   const openingRef = useRef(false);
 
   useEffect(() => {
@@ -41,8 +39,8 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
       openingRef.current = false;
       return;
     }
-
     if (openingRef.current) return;
+
     openingRef.current = true;
     let cancelled = false;
 
@@ -51,12 +49,12 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
         const response = await fetch("/api/payments/paddle/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planId, billingCycle }),
+          body: JSON.stringify({ planId }),
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Unable to start checkout");
-        if (!data.clientToken || !data.priceId) {
-          throw new Error("Paddle Checkout is temporarily unavailable.");
+        if (!data.clientToken || !data.paddleTransactionId || data.environment !== "sandbox") {
+          throw new Error("Secure checkout is temporarily unavailable.");
         }
 
         await loadPaddle();
@@ -65,10 +63,13 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
 
         window.__viralStudioPaddleEventCallback = (event) => {
           if (event?.name === "checkout.closed") onClose?.();
+          if (event?.name === "checkout.error") {
+            console.error("[ViralStudio] Paddle checkout error event:", event);
+          }
         };
 
         if (!window.__viralStudioPaddleInitialized) {
-          if (data.environment === "sandbox") window.Paddle.Environment.set("sandbox");
+          window.Paddle.Environment.set("sandbox");
           window.Paddle.Initialize({
             token: data.clientToken,
             eventCallback: (event) => window.__viralStudioPaddleEventCallback?.(event),
@@ -78,37 +79,28 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
 
         if (cancelled) return;
         window.Paddle.Checkout.open({
-          items: [{ priceId: data.priceId, quantity: 1 }],
-          customer: user?.email ? { email: user.email } : undefined,
-          customData: {
-            transactionId: data.transactionId,
-            userId: data.userId,
-            planId: data.planId,
-            credits: data.credits,
-          },
+          transactionId: data.paddleTransactionId,
           settings: {
             displayMode: "overlay",
-            variant: "multi-page",
-            showAddDiscounts: true,
-            successUrl: `${window.location.origin}/pricing?transactionId=${encodeURIComponent(data.transactionId)}`,
+            variant: "one-page",
+            successUrl: window.location.origin + "/pricing?transactionId=" + encodeURIComponent(data.transactionId),
           },
         });
       } catch (error) {
-        console.error("[ViralStudio] Could not open Paddle Checkout:", error);
+        console.error("[ViralStudio] Could not open Paddle Sandbox Checkout:", error);
         if (!cancelled) {
-          window.alert("Unable to open secure Paddle Checkout. Please try again.");
+          window.alert("Secure checkout is temporarily unavailable. Please try again.");
           onClose?.();
         }
       }
     };
 
     void openOfficialCheckout();
-
     return () => {
       cancelled = true;
       openingRef.current = false;
     };
-  }, [isOpen, planId, billingCycle, user?.email]);
+  }, [isOpen, planId, onClose]);
 
   return null;
 }

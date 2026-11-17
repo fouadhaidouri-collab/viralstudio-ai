@@ -12,7 +12,7 @@ export async function GET(req) {
     if (!id) return Response.json({ error: "Missing transactionId" }, { status: 400 });
     const tx = await getTransaction(id);
     const userId = session.user.id || session.user.email;
-    if (!tx || tx.provider !== "paddle" || String(tx.user_id) !== String(userId)) {
+    if (!tx || !(tx.provider === "paddle" || tx.provider === "paddle_sandbox") || String(tx.user_id) !== String(userId)) {
       return Response.json({ error: "Transaction not found" }, { status: 404 });
     }
     return Response.json({ status: tx.status, success: tx.status === "completed", credits: tx.status === "completed" ? tx.credits : 0 });
