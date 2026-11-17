@@ -88,7 +88,7 @@ export default function PaddleCheckoutModal({ isOpen, onClose, planId, billingCy
           },
           settings: {
             displayMode: "overlay",
-            variant: "multi-page",
+            variant: "one-page",
             showAddDiscounts: true,
             successUrl: `${window.location.origin}/pricing?transactionId=${encodeURIComponent(data.transactionId)}`,
           },
