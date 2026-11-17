@@ -19,7 +19,8 @@ function validSignature(rawBody, header, secret) {
 
 export async function POST(req) {
   const rawBody = await req.text();
-  const secret = process.env.PADDLE_TEST_WEBHOOK_SECRET;
+  const secret = process.env.PADDLE_TEST_WEBHOOK_SECRET ||
+    (process.env.PADDLE_ENVIRONMENT === "sandbox" ? process.env.PADDLE_WEBHOOK_SECRET : null);
   if (!secret || !validSignature(rawBody, req.headers.get("paddle-signature"), secret)) {
     return Response.json({ error: "Invalid webhook signature" }, { status: 401 });
   }
