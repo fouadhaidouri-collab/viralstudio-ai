@@ -4,13 +4,22 @@ import { createTransaction } from "../../../../../lib/paymentTransactions";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PRICE_ENV = {
+const LIVE_PRICE_ENV = {
   beginner: "PADDLE_PRICE_ID_BEGINNER",
   builder: "PADDLE_PRICE_ID_BUILDER",
   creator: "PADDLE_PRICE_ID_CREATOR",
   pro: "PADDLE_PRICE_ID_PRO",
   elite: "PADDLE_PRICE_ID_ELITE",
   ultimate: "PADDLE_PRICE_ID_ULTIMATE",
+};
+
+const TEST_PRICE_ENV = {
+  beginner: "PADDLE_TEST_PRICE_ID_BEGINNER",
+  builder: "PADDLE_TEST_PRICE_ID_BUILDER",
+  creator: "PADDLE_TEST_PRICE_ID_CREATOR",
+  pro: "PADDLE_TEST_PRICE_ID_PRO",
+  elite: "PADDLE_TEST_PRICE_ID_ELITE",
+  ultimate: "PADDLE_TEST_PRICE_ID_ULTIMATE",
 };
 
 const PACKS = {
@@ -29,9 +38,12 @@ export async function POST(req) {
 
     const { planId, billingCycle = "one_time" } = await req.json();
     const pack = PACKS[planId];
-    const priceEnv = PRICE_ENV[planId];
+    const isSandbox = process.env.PADDLE_ENVIRONMENT === "sandbox";
+    const priceEnv = (isSandbox ? TEST_PRICE_ENV : LIVE_PRICE_ENV)[planId];
     const priceId = priceEnv ? process.env[priceEnv] : null;
-    const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+    const clientToken = isSandbox
+      ? process.env.NEXT_PUBLIC_PADDLE_TEST_CLIENT_TOKEN
+      : process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
 
     if (!pack || !priceEnv) return Response.json({ error: "Invalid credit pack" }, { status: 400 });
     if (!clientToken || !priceId) {
@@ -40,14 +52,14 @@ export async function POST(req) {
 
     const userId = session.user.id || session.user.email;
     const tx = await createTransaction({
-      userId, provider: "paddle", planId, billingCycle,
+      userId, provider: isSandbox ? "paddle_sandbox" : "paddle", planId, billingCycle,
       amount: pack.amount, currency: "USD", credits: pack.credits, status: "pending",
     });
 
     return Response.json({
       transactionId: tx.id, userId, planId, credits: pack.credits,
       priceId, clientToken,
-      environment: process.env.PADDLE_ENVIRONMENT === "sandbox" ? "sandbox" : "production",
+      environment: isSandbox ? "sandbox" : "production",
     });
   } catch (error) {
     console.error("Paddle checkout initialization failed:", error);
