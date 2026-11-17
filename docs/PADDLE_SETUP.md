@@ -4,12 +4,12 @@ ViralStudio uses Paddle's official hosted Paddle Checkout. The application check
 
 ## Vercel environment variables
 
-Set these for the Preview environment used by this test branch:
+Set these for the Preview environment used by this test branch. The existing Preview client token and six Sandbox price IDs are already configured; add the Sandbox API key and the new Preview webhook secret:
 
 - `PADDLE_ENVIRONMENT=sandbox`
 - `NEXT_PUBLIC_PADDLE_TEST_CLIENT_TOKEN`: Sandbox client-side token
 - `PADDLE_TEST_API_KEY`: Sandbox API key with `transaction.write` permission
-- `PADDLE_TEST_WEBHOOK_SECRET`: signing secret from the Sandbox notification destination
+- `PADDLE_TEST_WEBHOOK_SECRET`: signing secret from the new Sandbox notification destination created for this Preview branch
 - `PADDLE_TEST_PRICE_ID_BEGINNER`
 - `PADDLE_TEST_PRICE_ID_BUILDER`
 - `PADDLE_TEST_PRICE_ID_CREATOR`
@@ -25,7 +25,7 @@ The six prices must be active, one-time USD prices and match the credit pack cat
 2. Under Checkout settings, configure the Sandbox Default Payment Link to an HTTPS page on the test domain.
 3. Create a Sandbox notification destination pointing to:
 
-   `https://viralstudio-ai.com/api/webhooks/paddletest`
+   `https://viralstudio-ai-git-feat-p-203b7d-fouadhaidouri-collabs-projects.vercel.app/api/webhooks/paddletest`
 
 4. Subscribe to `transaction.completed`, `transaction.payment_failed`, and `transaction.canceled`.
 5. Copy the destination secret into `PADDLE_TEST_WEBHOOK_SECRET`.
